@@ -12,7 +12,7 @@ const Sentence: React.FC<SentenceProps> = ({ videoSource, sentence }) => {
         <video controls autoPlay loop key={videoSource}>
           <source src={videoSource} type="audio/mpeg" />
         </video>
-        <p className="mt-5 mb-5">{sentence}</p>
+        <p className="mt-5 mb-5 text-2xl">{sentence}</p>
       </div>
     </div>
   );
