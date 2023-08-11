@@ -57,10 +57,7 @@ const Sentence = () => {
         } catch (e) {
           console.error("Error adding sentence to subcollection in Firebase", e);
         }
-      };
-
-
-      
+      };      
   return (
     <main
       className='flex flex-col items-center min-h-screen p-24'
