@@ -10,15 +10,8 @@ export default function Home() {
   
   
   return (
-    <main
-      className={`flex mx-auto min-h-screen flex-col items-center justify-between p-24 `}
-    >
-      
+    <main className={`flex mx-auto min-h-screen flex-col items-center justify-between p-24 `}>
       <ShadowingSentence />
-
-      
-
-     
-    </main>
+      </main>
   )
 }

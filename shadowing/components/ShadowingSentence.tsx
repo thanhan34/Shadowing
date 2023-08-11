@@ -16,10 +16,19 @@ const ShadowingSentence: React.FC<{}> = () => {
     const [videoSource, setVideoSource] = useState("");    
     const [sentence, setSentence] = useState("");
     const handleModeChange = () => {
+      if (arraySen.length === 0) {
+        // You can display a message, show an alert, or take other actions here
+        console.log("No sentences available for this paragraph.");
+        return; // Exit the function early
+      }
       setMode(!mode);
       setCount(0)      
     };
-  
+    const handleBackClick = () => {
+      if (count > 0) {
+        setCount(count - 1);
+      }
+    };
     const handleNextClick = () => {     
       if (arraySen.length > 0 && count + 1 < arraySen.length) {
         setCount(count + 1);
@@ -106,6 +115,7 @@ const ShadowingSentence: React.FC<{}> = () => {
             </option>
         ))
       }
+      
       </select>
       {/* <p>Selected Shadowing Document ID: {shadowingDocumentID}</p> */}
       
@@ -116,11 +126,14 @@ const ShadowingSentence: React.FC<{}> = () => {
       )}
 
       {mode ? (
+        <div>
+        {arraySen.length === 0 && <p className="text-red-500">Chức năng 1 Sentence Mode chưa thể sử dụng được cho câu này.</p>}
         <button className="px-4 py-2 font-bold text-white bg-blue-500 rounded-full hover:bg-blue-700" onClick={handleModeChange}>1 Sentence Mode</button>
+        </div>
       ) : (
         <div className="flex flex-col mt-2 space-x-2 lg:flex-row">
           <button className="px-4 py-2 font-bold text-white bg-blue-500 rounded-full hover:bg-blue-700" onClick={handleModeChange}>Paragraph</button>
-          <button className="px-4 py-2 font-bold text-white bg-blue-500 rounded-full hover:bg-blue-700" onClick={handleNextClick}>Back</button>
+          <button className="px-4 py-2 font-bold text-white bg-blue-500 rounded-full hover:bg-blue-700" onClick={handleBackClick}>Back</button>
           <button className="px-4 py-2 font-bold text-white bg-blue-500 rounded-full hover:bg-blue-700" onClick={handleNextClick}>Next</button>
         </div>
       )}

@@ -5,7 +5,16 @@ const Sentence = () => {
   
   const [url, setUrl] = useState("");
   const [text, setText] = useState("");
-  
+  const arrayOfPairs = [
+    { url: "url1", text: "text1" },
+    { url: "url2", text: "text2" },
+    // ... more pairs
+  ];
+  useEffect(() => {
+    arrayOfPairs.forEach(pair => {
+      handleSubmitInBackground(pair.url, pair.text);
+    });
+  }, [ ]);
    const [arrayParagraph, setArrayParagraph] = useState<{ id: string; text:string, url:string, name:string}[]>([]);
   const [shadowingDocumentID, setShadowingDocumentID] = useState("")
   useEffect(() => {
@@ -20,9 +29,7 @@ const Sentence = () => {
         }))
         setArrayParagraph(paragraphData)
         if (paragraphData.length > 0) {
-          setShadowingDocumentID(paragraphData[0].id);
-        //   setSentence(paragraphData[0].text);
-        //   setVideoSource(paragraphData[0].url);
+          setShadowingDocumentID(paragraphData[0].id);     
         }
         
       } catch (error) {
@@ -44,6 +51,27 @@ const Sentence = () => {
       const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         
+        try {
+          if (url !== "" && text !== "" && shadowingDocumentID !== "") {
+            const docRef = collection(db, "shadowing", shadowingDocumentID, "sentence");
+      
+            await addDoc(docRef, {
+              url: url,
+              text: text,
+              timestamp: new Date().toISOString() // Generate timestamp
+            });
+      
+            console.log("Sentence added to subcollection in Firebase");
+          } else {
+            console.log("Please fill in all fields and select a shadowing document");
+          }
+        } catch (e) {
+          console.error("Error adding sentence to subcollection in Firebase", e);
+        }
+      };
+
+
+      const handleSubmitInBackground = async (url, text) => {
         try {
           if (url !== "" && text !== "" && shadowingDocumentID !== "") {
             const docRef = collection(db, "shadowing", shadowingDocumentID, "sentence");
