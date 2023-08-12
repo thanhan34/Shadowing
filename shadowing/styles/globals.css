@@ -25,3 +25,15 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+.ra-weak {
+  color: gray;
+}
+.ra-loss {
+  color: orange;
+}
+.ra-link {
+  color: rgb(35, 229, 255);
+}
+.ra-break {
+  color: red;
+}
