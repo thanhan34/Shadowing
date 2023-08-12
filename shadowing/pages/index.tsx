@@ -1,7 +1,6 @@
-import Image from 'next/image'
 import { Inter } from 'next/font/google'
 import ShadowingSentence from '@/components/ShadowingSentence'
-import React, {useState} from 'react'
+import React from 'react'
 
 const inter = Inter({ subsets: ['latin'] })
 

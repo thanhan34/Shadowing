@@ -7,7 +7,8 @@ import {db} from '../firebase'
 
 
 const ShadowingSentence: React.FC<{}> = () => {
-    const [shadowingDocumentID, setShadowingDocumentID] = useState("")    
+    const [shadowingDocumentID, setShadowingDocumentID] = useState("")
+    const [shadowingParagraphID, setShadowingParagraphID] = useState("")
     const [arraySen, setArraySen] = useState<{ id: string; text:string, url:string }[]>([]);   
     const [arrayParagraph, setArrayParagraph] = useState<{ id: string; text:string, url:string, name:string}[]>([]);    
     const [mode, setMode] = useState(true);
