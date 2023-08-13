@@ -36,6 +36,7 @@ const Sentence = () => {
         // Update the selected shadowing document ID state
         setShadowingDocumentID(selectedValue);
         
+        
       };
       const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -49,7 +50,8 @@ const Sentence = () => {
               text: text,
               timestamp: new Date().toISOString() // Generate timestamp
             });
-      
+            setText("")
+            setUrl("")
             console.log("Sentence added to subcollection in Firebase");
           } else {
             console.log("Please fill in all fields and select a shadowing document");

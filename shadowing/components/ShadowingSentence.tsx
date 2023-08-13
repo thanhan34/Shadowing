@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Paragraph from "./Paragraph";
 import Sentence from "./Sentence";
-import { collection, getDocs } from "firebase/firestore"; 
+import { collection, getDocs, query, orderBy } from "firebase/firestore"; 
 import {db} from '../firebase'
 
 
@@ -68,7 +68,8 @@ const ShadowingSentence: React.FC<{}> = () => {
           try {
             const shadowingRef = collection(db, 'shadowing');    
             const sentenceRef = collection(shadowingRef, shadowingDocumentID, 'sentence');
-            const sentenceSnapshot = await getDocs(sentenceRef);    
+            const q = query(sentenceRef, orderBy('timestamp'));
+            const sentenceSnapshot = await getDocs(q);    
             const data = sentenceSnapshot.docs.map((doc) => ({
               id: doc.id,
               text: doc.get('text'),
