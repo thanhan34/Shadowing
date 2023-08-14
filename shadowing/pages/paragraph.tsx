@@ -31,7 +31,14 @@ const Paragraph = () => {
       <h1>Download Links</h1>
       <ul>
         {downloadLinks.map((link,index) => (
-          <p key={index}>{link.name},{link.url}</p>
+          <div className="pt-5" key={index}>
+              <p >{link.name}</p>
+              <p className="text-xs">{link.url}</p>
+              <button className="p-2 bg-red-500 rounded-lg" onClick={()=>{
+                navigator.clipboard.writeText(link.url)
+              }}>Copy</button>
+          </div>
+          
           
         ))}
       </ul>
@@ -40,3 +47,4 @@ const Paragraph = () => {
 };
 
 export default Paragraph;
+

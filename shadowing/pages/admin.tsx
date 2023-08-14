@@ -15,6 +15,8 @@ const Admin = () => {
           url: url,
           text: text,
         });
+        setText("")
+        setUrl("")
         console.log("Document written to Firebase");
       } else {
         console.log("Please fill in all fields");
