@@ -30,7 +30,7 @@ const Admin = () => {
     <main
       className='flex flex-col items-center justify-between min-h-screen p-24'
     >
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="min-w-sm">
         <div className="mb-6">
           <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
             Name:
@@ -59,6 +59,8 @@ const Admin = () => {
             <textarea
               className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 w-full focus:border-blue-500 block  p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
               value={text}
+              rows={5}
+              cols={500}
               onChange={(e) => setText(e.target.value)}
               placeholder="Enter some text..."
             />

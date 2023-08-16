@@ -38,11 +38,11 @@ export default function Home() {
   }, []);
   return (
     <main
-      className={`flex mx-auto min-h-screen flex-col items-center justify-between p-24 space-y-5`}
+      className={"flex mx-auto min-h-screen flex-col items-center min-w-screen justify-between p-24 space-y-5 w-full"}
     >
       <h1 className="mb-2 text-2xl font-bold tracking-tight text-gray-600 dark:text-white">Read Aloud Shadowing</h1>
       {arrayParagraph.map((data) => (
-        <Link href={`/shadowing/${data.name}`} key={data.id} className="block w-full max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+        <Link href={`/shadowing/${data.name}`} key={data.id} className="block w-full p-6 bg-white border border-gray-200 rounded-lg shadow min-w-sm hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
         <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-600 dark:text-white">{data.name}</h5>  
         </Link>
       ))}
