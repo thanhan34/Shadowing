@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { addDoc, collection, getDocs} from "firebase/firestore";
+import { addDoc, collection, getDocs, orderBy, query} from "firebase/firestore";
 import { db } from "../firebase";
 const Sentence = () => {
   
@@ -10,7 +10,7 @@ const Sentence = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, 'shadowing'));
+        const querySnapshot = await getDocs(query(collection(db, 'shadowing'),orderBy('name')));
         const paragraphData = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           text: doc.get('text'),
