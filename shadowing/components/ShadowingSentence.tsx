@@ -4,6 +4,8 @@ import Sentence from "./Sentence";
 import { collection, getDocs, query, orderBy } from "firebase/firestore"; 
 import {db} from '../firebase'
 import { ShadowingData } from "@/pages/shadowing/[name]";
+import Image from 'next/image';
+import Link from 'next/link';
 interface Props {
   shadowingData: ShadowingData[];
 }
@@ -120,6 +122,16 @@ const ShadowingSentence: React.FC<Props> = ({shadowingData} ) => {
   
   return (
     <div className="z-10 items-center justify-between w-full max-w-5xl font-mono">
+      <Link href="/" className="flex justify-center">       
+        <Image
+        src="/logo1.png"
+        alt="Logo"
+        width={300} // Set the desired width
+        height={200} // Set the desired height
+      />
+        
+      </Link>
+      
       <h1 className="pt-2 mb-1 text-2xl font-bold lg:mb-0 lg:mr-4">Shadowing: {shadowingData[0].name}</h1>       
       {mode ? (
         <Paragraph videoSource={videoSource} sentence={sentence}/>

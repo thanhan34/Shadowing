@@ -15,6 +15,7 @@ const Admin = () => {
           url: url,
           text: text,
         });
+        setName("")
         setText("")
         setUrl("")
         console.log("Document written to Firebase");
