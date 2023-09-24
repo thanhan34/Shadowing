@@ -4,6 +4,7 @@ import {
   collection,
   getDocs,
   orderBy,
+  deleteDoc,
   query,
   doc,
   updateDoc,
@@ -13,6 +14,7 @@ import { db } from "../firebase";
 const Sentence = () => {
   const [url, setUrl] = useState("");
   const [text, setText] = useState("");
+  const [inputText, setInputText] = useState("");
   const [arrayParagraph, setArrayParagraph] = useState<
     { id: string; text: string; url: string; name: string }[]
   >([]);
@@ -24,7 +26,7 @@ const Sentence = () => {
   const [subSentences, setSubSentences] = useState<
     { id: string; text: string }[]
   >([]);
-  const toggleEditSubSentence = (subSentenceId: string) => {
+  const toggleEditSubSentence = async (subSentenceId: string) => {
     setEditingSubSentenceId(subSentenceId);
 
     // Find the sub-sentence by ID and populate the new text for editing
@@ -32,7 +34,15 @@ const Sentence = () => {
       (subSentence) => subSentence.id === subSentenceId
     );
     if (subSentenceToEdit) {
-      setNewSubSentenceText(subSentenceToEdit.text);
+      try {
+        // Read text from the clipboard
+        const clipboardText = await navigator.clipboard.readText();
+
+        // Update the state with the clipboard content
+        setNewSubSentenceText(clipboardText);
+      } catch (error) {
+        console.error("Error reading clipboard content:", error);
+      }
     }
   };
   const saveEditSubSentence = async (subSentenceId: string) => {
@@ -50,6 +60,20 @@ const Sentence = () => {
           text: newSubSentenceText,
         });
 
+        // Update the subSentences state with the modified sub-sentence
+        setSubSentences((prevSubSentences) => {
+          return prevSubSentences.map((subSentence) => {
+            if (subSentence.id === subSentenceId) {
+              return {
+                ...subSentence,
+                text: newSubSentenceText,
+              };
+            }
+            return subSentence;
+          });
+        });
+
+        // Reset editing state
         setEditingSubSentenceId(null);
         setNewSubSentenceText("");
         console.log("Sub-sentence updated in Firebase");
@@ -60,60 +84,8 @@ const Sentence = () => {
       console.error("Error updating sub-sentence in Firebase:", error);
     }
   };
-  const arrayOfObjects = [
-    {
-      text: "11 Drug Overdose Deaths.mp3",
-      url: "https://firebasestorage.googleapis.com/v0/b/pteshadowing.appspot.com/o/11%20Drug%20Overdose%20Deaths.mp3?alt=media&token=25de4a32-ae6a-417a-861c-4e947872a0c0",
-    },
-    {
-      text: "12 Drug Overdose Deaths.mp3",
-      url: "https://firebasestorage.googleapis.com/v0/b/pteshadowing.appspot.com/o/12%20Drug%20Overdose%20Deaths.mp3?alt=media&token=6d8dfae9-794f-4f73-b2fa-1f7d6db182d5",
-    },
-    {
-      text: "13 Drug Overdose Deaths.mp3",
-      url: "https://firebasestorage.googleapis.com/v0/b/pteshadowing.appspot.com/o/13%20Drug%20Overdose%20Deaths.mp3?alt=media&token=08031325-7a85-4fd7-9ea0-e72adc668178",
-    },
-    {
-      text: "14 Drug Overdose Deaths.mp3",
-      url: "https://firebasestorage.googleapis.com/v0/b/pteshadowing.appspot.com/o/14%20Drug%20Overdose%20Deaths.mp3?alt=media&token=fb17717f-037a-4f9a-aa7d-2c5c46b64641",
-    },
-    {
-      text: "15 Drug Overdose Deaths.mp3",
-      url: "https://firebasestorage.googleapis.com/v0/b/pteshadowing.appspot.com/o/15%20Drug%20Overdose%20Deaths.mp3?alt=media&token=ca536f2d-c91d-470f-93fb-c0a6b423be77",
-    },
-    {
-      text: "16 Drug Overdose Deaths.mp3",
-      url: "https://firebasestorage.googleapis.com/v0/b/pteshadowing.appspot.com/o/16%20Drug%20Overdose%20Deaths.mp3?alt=media&token=91242fea-0880-4e57-82e8-af32372c4848",
-    },
-    {
-      text: "17 Drug Overdose Deaths.mp3",
-      url: "https://firebasestorage.googleapis.com/v0/b/pteshadowing.appspot.com/o/17%20Drug%20Overdose%20Deaths.mp3?alt=media&token=8bfdc823-32c3-4995-a82f-b9daaafe73d3",
-    },
-    {
-      text: "18 Drug Overdose Deaths.mp3",
-      url: "https://firebasestorage.googleapis.com/v0/b/pteshadowing.appspot.com/o/18%20Drug%20Overdose%20Deaths.mp3?alt=media&token=4c39696e-9b1e-4e85-8908-ee1017632be9",
-    },
-    {
-      text: "19 Drug Overdose Deaths.mp3",
-      url: "https://firebasestorage.googleapis.com/v0/b/pteshadowing.appspot.com/o/19%20Drug%20Overdose%20Deaths.mp3?alt=media&token=52cdd5b5-df3b-4a57-8875-5ab22120b9d8",
-    },
-    {
-      text: "20 Drug Overdose Deaths.mp3",
-      url: "https://firebasestorage.googleapis.com/v0/b/pteshadowing.appspot.com/o/20%20Drug%20Overdose%20Deaths.mp3?alt=media&token=f26f5093-185f-4550-b066-a40556c7de4a",
-    },
-    {
-      text: "21 Drug Overdose Deaths.mp3",
-      url: "https://firebasestorage.googleapis.com/v0/b/pteshadowing.appspot.com/o/21%20Drug%20Overdose%20Deaths.mp3?alt=media&token=663eb5ae-dcd7-44ce-91e3-2046e6fc2ae9",
-    },
-    {
-      text: "22 Drug Overdose Deaths.mp3",
-      url: "https://firebasestorage.googleapis.com/v0/b/pteshadowing.appspot.com/o/22%20Drug%20Overdose%20Deaths.mp3?alt=media&token=db9ae082-e2a8-4612-a303-34b0776a06db",
-    },
-    {
-      text: "23 Drug Overdose Deaths.mp3",
-      url: "https://firebasestorage.googleapis.com/v0/b/pteshadowing.appspot.com/o/23%20Drug%20Overdose%20Deaths.mp3?alt=media&token=158b047d-5065-4aae-9eec-9b1e1f46c416",
-    },
-  ];
+  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -137,10 +109,12 @@ const Sentence = () => {
     fetchData();
     return () => {};
   }, []);
-  const handleSelectChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleSelectChange = async (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     const selectedValue = event.target.value;
     setShadowingDocumentID(selectedValue);
-  
+
     try {
       // Fetch sub-sentences for the selected sentence ordered by timestamp
       const subSentenceCollectionRef = collection(
@@ -149,81 +123,103 @@ const Sentence = () => {
         selectedValue,
         "sentence"
       );
-  
+
       const subSentenceQuerySnapshot = await getDocs(
         query(subSentenceCollectionRef, orderBy("timestamp"))
       );
-  
+
       const subSentenceData = subSentenceQuerySnapshot.docs.map((doc) => ({
         id: doc.id,
         text: doc.get("text"),
       }));
-  
+
       setSubSentences(subSentenceData);
-      console.log("Sub-sentences loaded for the selected sentence, ordered by timestamp.");
+      console.log(
+        "Sub-sentences loaded for the selected sentence, ordered by timestamp."
+      );
     } catch (error) {
       console.error("Error fetching sub-sentences:", error);
     }
-  };
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  };  
 
+  const handleSubmitAll = async () => {
     try {
-      if (url !== "" && text !== "" && shadowingDocumentID !== "") {
-        const docRef = collection(
-          db,
-          "shadowing",
-          shadowingDocumentID,
-          "sentence"
-        );
+      const parsedArray = JSON.parse(inputText); // Parse the input text as JSON
+      if (Array.isArray(parsedArray)) {
+        for (const item of parsedArray) {
+          const { url, text } = item;
 
-        await addDoc(docRef, {
-          url: url,
-          text: text,
-          timestamp: new Date().toISOString(), // Generate timestamp
-        });
-        setText("");
-        setUrl("");
-        console.log("Sentence added to subcollection in Firebase");
+          try {
+            if (url && text && shadowingDocumentID) {
+              const docRef = collection(
+                db,
+                "shadowing",
+                shadowingDocumentID,
+                "sentence"
+              );
+
+              const newSentence = {
+                url,
+                text,
+                timestamp: new Date().toISOString(),
+              };
+
+              // Add the new sentence to Firestore
+              await addDoc(docRef, newSentence);
+
+              // Update the subSentences state with the newly added sentence
+              setSubSentences((prevSubSentences) => [
+                ...prevSubSentences,
+                {
+                  id: "", // You should set the actual ID from Firestore if applicable
+                  text,
+                },
+              ]);
+
+              console.log(
+                `Sentence added to subcollection in Firestore: URL - ${url}, Text - ${text}`
+              );
+            } else {
+              console.log(
+                "Please fill in all fields and select a shadowing document"
+              );
+            }
+          } catch (e) {
+            console.error(
+              "Error adding sentence to subcollection in Firestore",
+              e
+            );
+          }
+        }
       } else {
-        console.log(
-          "Please fill in all fields and select a shadowing document"
-        );
+        console.log("Invalid input. Please provide a valid JSON array.");
       }
     } catch (e) {
-      console.error("Error adding sentence to subcollection in Firebase", e);
+      console.error("Error parsing input text:", e);
     }
   };
-  const handleSubmitAll = async () => {
-    for (const item of arrayOfObjects) {
-      const { url, text } = item;
-
-      try {
-        if (url && text && shadowingDocumentID) {
-          const docRef = collection(
-            db,
-            "shadowing",
-            shadowingDocumentID,
-            "sentence"
-          );
-
-          await addDoc(docRef, {
-            url,
-            text,
-            timestamp: new Date().toISOString(),
-          });
-
-          console.log(
-            `Sentence added to subcollection in Firebase: URL - ${url}, Text - ${text}`
-          );
-        } else {
-          console.log(
-            "Please fill in all fields and select a shadowing document"
-          );
-        }
-      } catch (e) {
-        console.error("Error adding sentence to subcollection in Firebase", e);
-      }
+  const deleteSubSentence = async (subSentenceId: string) => {
+    try {
+      // Reference to the sub-sentence document in Firestore
+      const sentenceDocRef = doc(
+        db,
+        "shadowing",
+        shadowingDocumentID,
+        "sentence",
+        subSentenceId
+      );
+  
+      // Delete the sub-sentence document from Firestore
+      await deleteDoc(sentenceDocRef);
+  
+      // Update the local state to remove the deleted sub-sentence
+      setSubSentences((prevSubSentences) =>
+        prevSubSentences.filter((subSentence) => subSentence.id !== subSentenceId)
+      );
+  
+      console.log("Sub-sentence deleted from Firebase");
+    } catch (error) {
+      console.error("Error deleting sub-sentence from Firebase:", error);
     }
   };
   return (
@@ -241,36 +237,49 @@ const Sentence = () => {
         ))}
       </select>
       <p>Selected Shadowing Document ID: {shadowingDocumentID}</p>
-
+      <textarea
+        placeholder="Paste or type your JSON array here"
+        value={inputText}
+        onChange={(e) => setInputText(e.target.value)}
+        rows={5}
+        cols={40}
+      />
       <button onClick={handleSubmitAll}>Submit</button>
       {/* Display sentences with edit and save options */}
       <div>
         <h2>Sentences:</h2>
         <div>
-        <h2>Sub-Sentences:</h2>
-        <ul>
-          {subSentences.map((subSentence, index) => (
-            <li key={subSentence.id}>
-              {editingSubSentenceId === subSentence.id ? (
-                <div>
-                  <input
-                    type="text"
-                    value={newSubSentenceText}
-                    onChange={(e) => setNewSubSentenceText(e.target.value)}
-                  />
-                  <button onClick={() => saveEditSubSentence(subSentence.id)}>Save</button>
-                </div>
-              ) : (
-                <div>
-                  <p>{subSentence.text}</p>
-                  <button onClick={() => toggleEditSubSentence(subSentence.id)}>Edit</button>
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      </div>
-        
+          <h2>Sub-Sentences:</h2>
+          <ul>
+            {subSentences.map((subSentence, index) => (
+              <li key={subSentence.id}>
+                {editingSubSentenceId === subSentence.id ? (
+                  <div>
+                    <input
+                      type="text"
+                      value={newSubSentenceText}
+                      onChange={(e) => setNewSubSentenceText(e.target.value)}
+                    />
+                    <button onClick={() => saveEditSubSentence(subSentence.id)}>
+                      Save
+                    </button>
+                    
+                  </div>
+                ) : (
+                  <div className="flex pt-5 space-x-5">
+                    <p>{subSentence.text}</p>
+                    <button
+                      onClick={() => toggleEditSubSentence(subSentence.id)}
+                    >
+                      Edit
+                    </button>
+                    <button onClick={() => deleteSubSentence(subSentence.id)}>Delete</button> 
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </main>
   );
