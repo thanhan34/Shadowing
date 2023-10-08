@@ -8,6 +8,7 @@ export interface ShadowingData {
     text: string;
     url: string;
     name: string;
+    practice: string;
   }
 const DynamicShadowingPage = ({ shadowingData }: { shadowingData: ShadowingData[] }) => {
   const router = useRouter();
@@ -31,6 +32,7 @@ export async function getServerSideProps(context: { params: { name: string } }) 
       text: doc.get('text'),
       url: doc.get('url'),
       name: doc.get('name'),
+      practice: doc.get('practice'),
     }));
 
     return {

@@ -5,7 +5,7 @@ const Admin = () => {
   const [name, setName] = useState("");
   const [url, setUrl] = useState("");
   const [text, setText] = useState("");
-
+  const [practice, setPractice] = useState("");
   const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
@@ -14,10 +14,12 @@ const Admin = () => {
           name: name,
           url: url,
           text: text,
+          practice: practice,
         });
         setName("")
         setText("")
         setUrl("")
+        setPractice("")
         console.log("Document written to Firebase");
       } else {
         console.log("Please fill in all fields");
@@ -67,7 +69,17 @@ const Admin = () => {
             />
           </label>
         </div>
-
+        <div className="mb-6">
+          <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+            Practice Link:
+            <input
+              className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 w-full focus:border-blue-500 block  p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
+              type="text"
+              value={practice}
+              onChange={(e) => setPractice(e.target.value)}
+            />
+          </label>
+        </div>
         <br />
         <button
           type="submit"
