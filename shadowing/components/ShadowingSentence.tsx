@@ -121,7 +121,7 @@ const ShadowingSentence: React.FC<Props> = ({ shadowingData }) => {
       )}
 
       {mode ? (
-        <div className="flex flex-col mt-2 space-x-2 lg:flex-row">
+        <div className="flex  mt-2 space-x-2 lg:flex-row">
           {arraySen.length === 0 && (
             <p className="text-red-500">
               Chức năng 1 Sentence Mode chưa thể sử dụng được cho câu này.
@@ -143,7 +143,7 @@ const ShadowingSentence: React.FC<Props> = ({ shadowingData }) => {
           </a>
         </div>
       ) : (
-        <div className="flex flex-col mt-2 space-x-2 lg:flex-row">
+        <div className="flex mt-2 space-x-2 lg:flex-row">
           <button
             className="px-4 py-2 font-bold text-white bg-blue-500 rounded-full hover:bg-blue-700"
             onClick={handleModeChange}

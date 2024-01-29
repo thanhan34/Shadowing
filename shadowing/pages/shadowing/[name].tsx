@@ -15,7 +15,7 @@ const DynamicShadowingPage = ({ shadowingData }: { shadowingData: ShadowingData[
   const { name } = router.query;
   // console.log(shadowingData)
   return (
-    <div className={`flex mx-auto min-h-screen flex-col items-center justify-between p-24 `}>          
+    <div className={`flex mx-auto min-h-screen flex-col items-center justify-between p-4 sm:p-6 md:p-8 lg:p-12 xl:p-24`}>          
       <ShadowingSentence shadowingData={shadowingData}/>
     </div>
   );

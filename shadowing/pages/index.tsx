@@ -1,5 +1,5 @@
 import { Inter } from "next/font/google";
-import ShadowingSentence from "@/components/ShadowingSentence";
+
 import React, { useState, useEffect } from "react";
 import { collection, getDocs, query, orderBy, startAfter, limit  } from "firebase/firestore";
 import { db } from "../firebase";
@@ -83,7 +83,7 @@ export default function Home() {
           src="/logo1.png"
           alt="Logo"
           width={300} // Set the desired width
-          height={200} // Set the desired height
+          height={200} // Set the desired height          
         />
       </Link>
       <h1 className="mb-2 text-2xl font-bold tracking-tight text-gray-600 dark:text-white">
@@ -109,7 +109,7 @@ export default function Home() {
         </Link>
       ))}
 
-      {/* <ShadowingSentence /> */}
+      
     </main>
   );
 }

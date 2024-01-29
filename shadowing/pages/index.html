@@ -1,0 +1,358 @@
+<header>
+    <a href="#" id="logo">PTE Intensive</a>
+  </header>
+  <div class="grid-wrapper">
+    <section id="hero1" class="hero">
+      <div class="inner">
+        <div class="copy">
+          <img src="https://drive.google.com/uc?export=view&id=1AW4QriczuOpfGR7diJgeriA2gzKYPu93" alt="logo" height="100px" width="100px" />
+          <h1>PTE Intensive</h1>
+          <p>Together we make it happen</p>
+        </div>
+      </div>
+    </section>
+  
+    <section class="content">
+      <div class="inner1">
+        <div class="copy">
+          <h1>PTE Write From Dictation High Frequency</h1>
+          <p>The must-have tool to beat PTE Exam</p>
+        </div>
+      </div>
+    </section>
+  
+    <section id="hero2" class="hero">
+      <div class="inner">
+        <div class="copy">
+          <div id="wrapper">
+  
+            <body onload="loadFunc()">
+              <p>Write From Diction - High Frequency</p>
+              <p>
+                Select Voices :
+                <select id="selectVoices"></select>
+              </p>
+              <p>
+                Answer : <br /><textarea disabled rows="3" cols="100" type="text" id="txtAnswer"></textarea>
+              </p>
+              <p>
+                Type Answer Here : <br /><textarea rows="3" cols="100" type="text" id="txtInput"></textarea>
+              </p>
+              <span id="divCount"> </span>
+              <p>
+                <select id="selectSentences"></select>
+                <input type="checkbox" onclick="loadSentences();" id="chkIgnoreGroupTitle" value="0" checked />
+                Ignore Group Title
+                <input type="checkbox" id="chkAlwaysShowAnswer" value="0" /> Alway
+                Show Answer
+              </p>
+              <button type="button" class="custom-btn btn-7" onclick="onStartPractice();">
+                <span>Restart</span>
+              </button>
+              <button type="button" class="custom-btn btn-7" onclick="onSpeakSentence();;">
+                <span>Repeat</span>
+              </button>
+              <button type="button" class="custom-btn btn-7" onclick="resetTextInput();">
+                <span>Reset</span>
+              </button>
+              <button type="button" class="custom-btn btn-7" onclick="showAnswer();">
+                <span>Answer</span>
+              </button>
+              <button type="button" class="custom-btn btn-7" onclick="onNext();">
+                <span>Next</span>
+              </button>
+              <button type="button" class="custom-btn btn-7" id="playall" value="false" onclick="onPlay();">
+                <span>All</span>
+              </button>
+              <div>
+                <span id="divCount"> </span>
+              </div>
+              <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
+              <script>
+                var sentences = ['','Students must wear protective clothing provided in the medical laboratory.', 'The plight of wildlife has been ignored by local developers.', 'The castle was designed to intimidate both local people and the enemies.', 'Academic libraries across the world are steadily incorporating social media.', 'The faculty staff are very approachable, helpful and extremely friendly.', 'It is a debate about the value of knowledge.', 'Clinical placement in nursing prepares students for professional practice.', 'Imported packages are likely to be used in many computers.', 'More graduate training is often needed after the university study is finished.', 'Education and training provide important skills for the labor force.', 'Most of the lectures begin promptly, so do not be late.', 'The history of the university is a long and interesting one.', "The author's early works are less philosophical and more experimental.", 'The disease that was serious has now been eradicated.', 'Climate change is now an acceptable phenomenon among a group of reputable scientists.', 'All students are expected to attend ten lab sessions per semester.', 'The student shop has a range of stationery.', 'Our professor is hosting the business development conference.', 'There is a pharmacy on campus near the bookstore.', 'Currently the growth of the company is unpredictable.', 'You need to hand in the essay next semester.', 'Late applications are not accepted under any circumstances.', "The earth's atmosphere is primarily composed of oxygen and nitrogen gases.", 'We study science to understand and appreciate the world around us.', 'Your ideas are discussed depending on your seminar or tutorial.', 'Journalism faces the crisis in the light of the digital revolution.', 'Mixture is defined as the compound of chemically separate parts.', 'There is a welcome party for all new students each term.', 'There are some doubts about whether these events actually occurred.', 'The course helps students to improve their pronunciation skills.', 'The posters are on display at the larger lecture theater.', 'Trees benefit the city by absorbing water running off-road.', 'Please note that the seminar has been cancelled now.', 'Students who attempted to go to the conference must register now.', 'When the roots of a plant failed, foliage suffers.', 'Sugar is a compound which consists of carbon, oxygen, and hydrogen.', 'Momentum is defined as the combination of mass and velocity.', 'Tribes vied with each other to build up monolithic statues.', 'The blue whale is the largest animal that ever lived.', 'Relying on natural ability will not get you far on science.', 'Nurses can specialize in clinical work and management.', 'I will come back to this in a moment.', "The other book isn't thorough but it's more insightful.", 'Students who study overseas can significantly improve work chances.', 'The qualification will be assessed by using a conference criterion approach.', 'The synopsis contains the most important information.', 'The article considers the leisure habits of teenagers in rural areas.', 'Foods containing overabundant calories supply little or no nutritional value.', 'Salt is produced from the seawater or extracted from the ground.', 'Consumer confidence tends to increase as the economy expands.', 'A celebrated theory is still the source of great controversy.', 'The garden behind the university is open to the public in summer.', "A person's educational level is closely related to his economic background.", 'The collapse of the housing market has triggered recessions throughout the world.', 'University fees are expected to increase next year.', 'The nation achieved prosperity by opening its ports for trade.', 'The chemistry building is located near the entrance of the campus.', 'The north campus car park could be closed on Sunday.', 'The student union hosts a variety of social events.', 'Lectures are the oldest and the most formal teaching method at university.', 'Speed is defined as how quickly an object or a person moves.', 'Nature is defined as specific chemical compounds.', 'Technology has changed the media we both used and studied.', 'Plants are the living things that can grow in land or in water.', 'The opening hours of the library are reduced during summer.', 'He was regarded as the foremost economist at that time.', 'Time and distance are used to calculate speed.', 'You are advised to submit all the dissertations.', 'The speaker began the outlines before the presentation.', 'I thought it was thrown in a small meeting room.', 'The most popular courses still have a few places left.', 'The commission of funds supported among authorities has raised an argument.', 'Please confirm that you have received the textbook.', 'You will be tested via continuous assessment and examinations.', 'Kindness is very important nowadays.', 'Gravity is the force that attracts two bodies toward one another.', 'The stock market cracked and had repercussions throughout the world.', 'The artists tied with the conservative politicians earned the roles of critics.', 'The lecture tomorrow will discuss the educational policy in the United States.', 'Although sustainable development is not easy, it is an unavoidable responsibility.', 'Americans have progressively defined the process of plant growth and reproductive development in quantitative terms.', 'Put the knife and fork next to the spoon near the edge of the table.', 'All students and staff have the access to printers and scanners.', 'The first assignment is due on the fourteenth of September.', 'The commissioner will apportion the funds among all the sovereignties.', "The integration of archeologists' studies with community projects is widely encouraged.", 'Astronauts are using light years to measure the distance in space.', 'Honey can be used as food and health product.', 'The new media has transcended the traditional national boundaries.', 'Important details from the argument are missing in the summary.', 'The introduction is an important component of a good presentation.', 'Students should leave their bags on the tables by the door.', 'The change of policy will have a great effect on society.', 'If finance is a cause of concern, scholarships may be available.', 'The aerial photographs were promptly registered for thorough evaluation.', 'Food that contains antibiotics provides little or no nutritional value.', 'Renovation work is currently being undertaken throughout the whole building.', 'The farmers need to adapt to the changes of the climate.', 'Manufacturing now brings more people in than agriculture and fishing combined.', 'Measures must be taken to prevent unemployment rate from increasing.', 'He wrote poetry and plays as well as scientific papers.', 'Students must observe lab safety regulations at all times.', 'Native speakers are exempted from the language tests in their own languages.', 'Being bilingual does not mean having the ability to analyze the language.', 'A new collection of articles has just been published.', 'Students find true or false questions harder than short answers.', 'Students are advised to use multiple methods for this project.', 'Audition of the university choir will be on hold until the next week.', 'You are required to complete the assignment by Monday.', 'Anatomy is the study of internal and external body structures.', 'The students should visit the lecture hall behind the building.', 'Listening is the key to succeeding in this course.', 'Accountancy students need to submit their dissertations this week.', 'The professor took a year off to work on her book.', 'The library holds a substantial collection of materials on economic history.', 'My technique is to understand the sentence while writing the first letter of each word.', 'The economic strength of early Roman Republic will be examined.', 'Before submitting your dissertation, your advisor must approve your application.', 'The field of journalism has been seeing job decline for decades.', 'A campus tour is beneficial at the beginning of each term.', 'There is no ideal debate on this topic.', 'Traffic is the main cause of air pollution in many cities.', 'Every student has both the right and the ability to succeed.', 'The ability to work with fellow students cannot be stressed enough.', 'Strangely, people are simultaneously impressed by and skeptical of statistics.', "Tomorrow's lecture has been canceled due to the power cut.", 'Students requiring an extension should apply sooner rather than later.', 'Visual aids can be really helpful when you are revising.', 'Student concession cards can be obtained by completing an application form.', 'The economic predictions turned out to be incorrect.', 'The marketing budget has doubled since the beginning of the year.', 'Calculators allow us to add numbers without making mistakes.', 'Practical experience is a vital part of legal training.', 'Before attending the lecture, you must register online or by post.', 'The year when the ship of artifacts was wrecked interested historians.', 'The lecturer is here to visit us from Canada.', 'Student representatives will be visiting classes with voting forms.', 'The dance department stages elaborated performances each semester.', 'The timetable for next term will be available next week.', 'The library is open only on Mondays and Fridays.', 'Students were instructed to submit their assignments by Friday.', 'He landed his job in a very prestigious law firm.', 'We cannot consider an increase in price at this stage.', 'Archeologists discovered tools and artifacts in ancient tombs.', "Australia's largest city, chief port and cultural center.", 'Some people are motivated by competition, while others prefer to collaborate.', 'Linguistics is the scientific study and analysis of language.', 'The course involves pure and applied mathematics.', 'The electric buses have an impact on air pollution.', 'This course mainly introduces statistics and data analysis.', 'The seminar provides an opportunity to exchange ideas with other students.', 'We need to answer security questions if we want to reset the password.', 'The ways in which people communicate are constantly changing.', 'The exam system has been upgraded due to professional exams.', 'Speak to your tutor if you need further assistance.', "This morning's lecture on economic policy has been canceled.", 'One student representative will be selected from each class.', 'Peer group pressure has a great effect on young people.', 'There was no correlation between drug used and cure rates.', 'Law is beneficial to investors by protecting their rights and avoiding any improper actions in the market.', 'There is a fitness center next to the student union.', 'The history department is very active in research.', 'Companies want to protect their brands from negative comments.', 'A number of students have volunteer jobs.', 'Participants are initially selected from a range of foundation subjects.', 'You must set a security question when resetting your password.', 'Packaging is very important to attract the attention of a buyer.', 'Members should make concentrated contributions to associated operating funds.', 'All of your assignments should be submitted by next Tuesday.', 'The university will seek a colossal renovation to the plain empty theater.', 'Some economists argue that the entire financial system is fatally flawed.', 'Contemporary critics dismissed his idea as eccentric.', 'The university will seek a colossal renovation to the faint empty theater.', 'Information technology has changed the way people study today.', 'International exchanges formed the important part of our study program.', 'Rivers provide habitats and migration pathways for numerous aquatic species.', 'Culture was seen as a demotion.', 'In this language course, we focus on fluency and accuracy.', 'They developed a unique approach to training their employees.', 'The department is organizing a trip to London in July.', 'Tutors should set a clear goal at the start of the class.', 'Optional tutorials are offered in the final week of a term.', 'Members can contribute to the association of operating firm.', 'An effective business manager is always open to new ideas.', 'The two sides have disagreed on how to solve the problem.', 'Studying history can help you better understand the present.', 'Good nutrition is crucial to the general health and vitality.', 'While some people regard it as reforming zeal, others regard it as recklessness.', 'We have sophisticated ways to study in brain action.', 'Many diseases on the list have been eradicated.', 'Farmers do not accept the prices for their agricultural goods.', 'Graduates from this course generally find jobs in insurance industry.', 'All the educational reforms have been inadequately implemented.', 'We are able to work in a team.', 'Human beings compete with other living things for resources and space.', 'Resources and materials are on hold at the library reference desk.', 'His analysis study appears to be based on the false premise.', 'It may not mean that it is possible to solve the problem easily.', 'Assignments should be submitted to the department office before the deadline.', 'There is no fixed career path for a qualified journalist.', 'Basketball was created in 1891 by a physician and physical education instructor.', 'Many birds migrate to warmer areas for the winter.', 'A series of lectures which were shown to us in economics have been recorded.', 'You should have an awareness of how business operates globally.']
+                var g_currentItem = 0;
+                var synthesisVoices;
+  
+                function getSentenceAt(i) {
+                  var sentence = sentences[i];
+                  var startIndex = 0;
+                  for (var i = 0; i < sentence.length; i++) {
+                    var c = sentence.charAt(i);
+                    if ((c >= "a" && c <= "z") || (c >= "A" && c <= "Z")) {
+                      startIndex = i;
+                      break;
+                    }
+                  }
+                  return sentence.substring(startIndex, sentence.length);
+                }
+  
+                function isIgnoreGroupTitle() {
+                  var el = document.getElementById("chkIgnoreGroupTitle");
+                  return el.checked;
+                }
+  
+                function isAlwaysShowAnswer() {
+                  var el = document.getElementById("chkAlwaysShowAnswer");
+                  return el.checked;
+                }
+  
+                function showAnswer() {
+                  var txt = document.getElementById("txtAnswer");
+                  var ans = getSentenceAt(g_currentItem);
+                  ans = ans.charAt(0).toUpperCase() + ans.substr(1);
+                  txt.value = ans;
+                  countIncorrect();
+                }
+  
+                function onStartPractice() {
+                  g_currentItem = 1;
+                  onNext();
+                }
+  
+                function clearTextField(id) {
+                  document.getElementById(id).value = "";
+                }
+  
+                function onSpeakSentence() {
+                  var sel = document.getElementById("selectSentences");
+                  var opts = sel.options;
+                  for (var opt, j = 0;
+                    (opt = opts[j]); j++) {
+                    if (
+                      opt.disabled == false &&
+                      parseInt(opt.value) >= g_currentItem
+                    ) {
+                      sel.selectedIndex = j;
+                      sel.onchange();
+                      if (isAlwaysShowAnswer()) showAnswer();
+                      break;
+                    }
+                  }
+                }
+  
+                function resetTextInput() {
+                  clearTextField("txtInput");
+                  clearTextField("txtAnswer");
+                }
+  
+                function onNext() {
+                  clearTextField("txtAnswer");
+                  clearTextField("txtInput");
+                  document.getElementById("divCount").innerHTML = "";
+                  g_currentItem++;
+                  onSpeakSentence();
+                }
+  
+                function intersect_arrays(x, y) {
+                  return x.filter((value) => -1 !== y.indexOf(value));
+                }
+  
+                function onPlay() {
+                  var playCondition = document.getElementById("playall");
+                  if (playCondition.value == "false") {
+                    document.getElementById("playall").innerHTML = "Stop";
+                    onNext();
+                    setTimeout(onPlay, 10000);
+                    document
+                      .getElementById("playall")
+                      .addEventListener("click", function() {
+                        document.getElementById("playall").innerHTML = "All";
+                        playCondition.value = "true";
+                      });
+                  } else {
+                    document
+                      .getElementById("playall")
+                      .addEventListener("click", function() {
+                        document.getElementById("playall").innerHTML = "Stop";
+                        playCondition.value = "false";
+                      });
+                  }
+                }
+  
+                function countIncorrect() {
+                  var ans = document.getElementById("txtAnswer").value;
+                  var input = document.getElementById("txtInput").value;
+                  // Split sentences into arrays of words
+                  var ansWords = ans.trim().split(/\s+/);
+                  var inputWords = input.trim().split(/\s+/);
+                  // Filter out any empty words
+                  ansWords = ansWords.filter(function(word) {
+                    return word !== "";
+                  });
+                  inputWords = inputWords.filter(function(word) {
+                    return word !== "";
+                  });
+                  var incorrectCount = 0;
+                  // Compare words in ansWords with inputWords
+                  for (var i = 0; i < ansWords.length; i++) {
+                    if (inputWords.indexOf(ansWords[i]) === -1) {
+                      incorrectCount++;
+                    }
+                  }
+                  document.getElementById("divCount").innerHTML =
+                    "Incorrect: " + incorrectCount;
+                }
+  
+                function getSynthesisVoices() {
+                  var voicelist = window.speechSynthesis.getVoices();
+                  return voicelist;
+                }
+  
+                function removeOptions(selectbox) {
+                  var i;
+                  for (i = selectbox.options.length - 1; i >= 0; i--) {
+                    selectbox.remove(i);
+                  }
+                }
+  
+                function loadSynthesisVoices(id) {
+                  var items = synthesisVoices;
+                  var select = document.getElementById(id);
+                  if (items.length > 0) removeOptions(select);
+                  for (var i = 0; i < items.length; ++i) {
+                    var option = document.createElement("option");
+                    option.innerText = items[i].name;
+                    option.value = items[i].name;
+                    select.add(option);
+                  }
+                  return select;
+                }
+  
+                function populateVoiceList() {
+                  loadSynthesisVoices("selectVoices");
+                }
+  
+                function playSynthesisVoices(text) {
+                  var utterThis = new SpeechSynthesisUtterance(text);
+                  var select = document.getElementById("selectVoices");
+                  var selectedOption = select[0].value;
+                  for (i = 0; i < synthesisVoices.length; i++) {
+                    if (synthesisVoices[i].name === selectedOption) {
+                      utterThis.voice = synthesisVoices[i];
+                    }
+                  }
+                  window.speechSynthesis.speak(utterThis);
+                }
+  
+                function supportsAudioType(type) {
+                  let audio;
+                  // Allow user to create shortcuts, i.e. just"mp3"
+                  let formats = {
+                    mp3: "audio/mpeg",
+                    mp4: "audio/mp4",
+                    aif: "audio/x-aiff",
+                  };
+                  if (!audio) {
+                    audio = document.createElement("audio");
+                  }
+                  if (audio.canPlayType)
+                    return audio.canPlayType(formats[type] || type);
+                  return true;
+                }
+  
+                function playAudio(i) {
+                  var text = getSentenceAt(i);
+                  var sel = document.getElementById("selectVoices");
+                  var voice = sel.options[sel.selectedIndex].value;
+                  playTextAudio(text, voice);
+                }
+  
+                function playTextAudio(text, voice) {
+                  responsiveVoice.cancel();
+                  try {
+                    responsiveVoice.speak(text, voice, {
+                      rate: 0.9,
+                    });
+                  } catch (err) {
+                    try {
+                      responsiveVoice.speak(text, voice, {
+                        rate: 0.9,
+                      });
+                    } catch (err) {
+                      try {
+                        responsiveVoice.speak(text, voice, {
+                          rate: 0.9,
+                        });
+                      } catch (err) {
+                        console.error(err);
+                      }
+                    }
+                  }
+                }
+  
+                function initializeSelectIndex(id, items) {
+                  var select = document.getElementById(id);
+                  removeOptions(select);
+                  for (var i = 0; i < items.length; ++i) {
+                    var option = document.createElement("option");
+                    option.innerText = i.toString();
+                    option.value = i.toString();
+                    if (
+                      getSentenceAt(i).startsWith("GROUP ") &&
+                      isIgnoreGroupTitle()
+                    )
+                      option.disabled = true;
+                    select.add(option);
+                  }
+                  return select;
+                }
+  
+                function initializeSelect(id, items) {
+                  var select = document.getElementById(id);
+                  for (var i = 0; i < items.length; ++i) {
+                    var option = document.createElement("option");
+                    option.innerText = items[i].name;
+                    option.value = items[i].name;
+                    select.add(option);
+                  }
+                  return select;
+                }
+  
+                function loadSentences() {
+                  return initializeSelectIndex("selectSentences", sentences);
+                }
+  
+                function loadFunc() {
+                  // Two first element is info
+                  var select = loadSentences();
+                  select.value = "1";
+                  select.onchange = function() {
+                    var index = parseInt(select.value);
+                    g_currentItem = index;
+                    playAudio(index);
+                    return false;
+                  };
+                  // get voices list
+                  var voicelist = responsiveVoice.getVoices();
+                  var selectVoices = initializeSelect("selectVoices", voicelist);
+                  synthesisVoices = getSynthesisVoices();
+                  if (!supportsAudioType("mp3")) {
+                    populateVoiceList();
+                    if (speechSynthesis.onvoiceschanged !== undefined) {
+                      speechSynthesis.onvoiceschanged = populateVoiceList;
+                    }
+                  }
+                }
+              </script>
+            </body>
+          </div>
+        </div>
+      </div>
+    </section>
+  
+    <section class="content">
+      <div class="inner1">
+        <div class="copy">
+          <h1>
+            “YOU DON’T HAVE TO BE GREAT TO START, BUT YOU HAVE TO START TO BE
+            GREAT."
+          </h1>
+          <p>ZIG ZIGLAR</p>
+        </div>
+      </div>
+    </section>
+    <div class="grid-wrapper">
+      <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:400,700" rel="stylesheet" type="text/css" />
+      <link href="https://fonts.googleapis.com/css?family=Noto+Sans" rel="stylesheet" type="text/css" />
+    </div>
+  </div>
