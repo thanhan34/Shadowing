@@ -96,5 +96,5 @@ const AudioPlayer = forwardRef<CustomAudioRef, AudioPlayerProps>(({
     </div>
   );
 });
-
+AudioPlayer.displayName = 'AudioPlayer';
 export default AudioPlayer;
