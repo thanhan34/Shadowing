@@ -91,6 +91,8 @@ const AddAudioSample: React.FC = () => {
               if (error instanceof Error) {
                 console.error("Error adding/updating audio sample in Firestore", error);
                 setMessage((prev) => `${prev}\nError adding/updating audio sample "${text}": ${error.message}`);
+              } else {
+                console.error("Unknown error", error);
               }
             }
           } else {
