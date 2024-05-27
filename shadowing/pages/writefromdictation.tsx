@@ -36,6 +36,7 @@ const WriteFromDictation: React.FC = () => {
   const [sortingOption, setSortingOption] = useState<string>("occurrence");
   const [playbackRate, setPlaybackRate] = useState<number>(1); // Initialize playback rate to 1
   const [loading, setLoading] = useState(true);
+  const [alwaysShowAnswer, setAlwaysShowAnswer] = useState(false); // Track the state of the checkbox
 
   useEffect(() => {
     const fetchData = async () => {
@@ -85,8 +86,10 @@ const WriteFromDictation: React.FC = () => {
     if (audioRef.current) {
       await audioRef.current.stop();
     }
+    setInputText("");
     setCurrentIndex((prevIndex) => (prevIndex + 1) % audioSamples.length);
-  }, [audioSamples.length]);
+    setShowAnswer(alwaysShowAnswer); // Set the answer visibility based on the checkbox state
+  }, [audioSamples.length, alwaysShowAnswer]);
 
   const handlePlayAll = useCallback(() => {
     setIsAutoplay((prev) => !prev);
@@ -116,10 +119,13 @@ const WriteFromDictation: React.FC = () => {
     if (audioRef.current) {
       await audioRef.current.play();
     }
+    setShowAnswer(alwaysShowAnswer); // Set the answer visibility based on the checkbox state
+    setInputText(""); // Clear the textarea
   };
 
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setShowAnswer(event.target.checked);
+    setAlwaysShowAnswer(event.target.checked);
+    setShowAnswer(event.target.checked); // Update the answer visibility immediately
   };
 
   const handleTextareaChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -168,6 +174,7 @@ const WriteFromDictation: React.FC = () => {
   };
 
   const handleAnswerButtonClick = () => {
+    setShowAnswer(true); // Show the answer when the button is clicked
     countIncorrect();
   };
 
@@ -265,7 +272,7 @@ const WriteFromDictation: React.FC = () => {
           <input
             type="checkbox"
             id="showAnswer"
-            checked={showAnswer}
+            checked={alwaysShowAnswer}
             onChange={handleCheckboxChange}
             className="mr-2"
           />
@@ -295,6 +302,7 @@ const WriteFromDictation: React.FC = () => {
             Answer
           </button>
         </div>
+       
       </div>
     </main>
   );
