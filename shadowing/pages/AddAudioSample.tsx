@@ -37,19 +37,19 @@ const AddAudioSample: React.FC = () => {
       if (Array.isArray(parsedArray)) {
         const audioSamplesRef = collection(db, "writefromdictation");
         const existingSamplesSnapshot = await getDocs(audioSamplesRef);
-  
+
         const existingSamples = existingSamplesSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...(doc.data() as AudioSample),
         }));
-  
+
         const existingTexts = new Set(existingSamples.map((sample) => sample.text));
         const newTexts = new Set(parsedArray.map((sample) => sample.text));
-  
+
         // Update or add new entries
         for (const item of parsedArray) {
           const { audio, text, occurrence } = item;
-  
+
           // Ensure that audio, text, and occurrence are correctly defined and valid
           if (
             audio &&
@@ -63,10 +63,10 @@ const AddAudioSample: React.FC = () => {
             try {
               const q = query(audioSamplesRef, where("text", "==", text));
               const querySnapshot = await getDocs(q);
-  
+
               const currentTime = Timestamp.now(); // Get current timestamp
               const isHidden = occurrence === 0; // Determine if the sample should be hidden
-  
+
               if (!querySnapshot.empty) {
                 // If the text already exists, update the occurrence, timestamp, and isHidden
                 const existingDoc = querySnapshot.docs[0];
@@ -97,7 +97,7 @@ const AddAudioSample: React.FC = () => {
             setMessage((prev) => `${prev}\nInvalid item format: ${JSON.stringify(item)}`);
           }
         }
-  
+
         // Set isHidden to true for all other existing samples not in the new batch
         for (const sample of existingSamples) {
           if (!newTexts.has(sample.text)) {
@@ -137,7 +137,7 @@ const AddAudioSample: React.FC = () => {
       >
         Submit
       </button>
-      {message && <p className="mt-4 text-white whitespace-pre-line">{message}</p>}
+      {message && <p className="mt-4 text-black whitespace-pre-line">{message}</p>}
     </main>
   );
 };
