@@ -87,7 +87,7 @@ const AddAudioSample: React.FC = () => {
                 });
                 setMessage((prev) => `${prev}\nNew audio sample "${text}" added.`);
               }
-            } catch (error) {
+            } catch (error: unknown) {
               if (error instanceof Error) {
                 console.error("Error adding/updating audio sample in Firestore", error);
                 setMessage((prev) => `${prev}\nError adding/updating audio sample "${text}": ${error.message}`);
@@ -112,10 +112,13 @@ const AddAudioSample: React.FC = () => {
       } else {
         setMessage("Invalid input. Please provide a valid JSON array.");
       }
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof Error) {
         console.error("Error parsing input text:", error);
         setMessage(`Error parsing input text: ${error.message}`);
+      } else {
+        console.error("Unknown error:", error);
+        setMessage("An unknown error occurred.");
       }
     }
   };
