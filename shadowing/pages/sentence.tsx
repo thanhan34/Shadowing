@@ -11,6 +11,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase";
 
+
 const Sentence = () => {
   const [url, setUrl] = useState("");
   const [text, setText] = useState("");

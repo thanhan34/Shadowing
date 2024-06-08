@@ -15,6 +15,7 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import Navigation from "@/components/Navigation";
+import { getNextImage } from "../utils/background";
 
 interface AudioSample {
   audio: { [key: string]: string };
@@ -37,6 +38,11 @@ const WriteFromDictation: React.FC = () => {
   const [playbackRate, setPlaybackRate] = useState<number>(1); // Initialize playback rate to 1
   const [loading, setLoading] = useState(true);
   const [alwaysShowAnswer, setAlwaysShowAnswer] = useState(false); // Track the state of the checkbox
+  const [backgroundImage, setBackgroundImage] = useState('');
+
+  useEffect(() => {
+    setBackgroundImage(getNextImage());
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,7 +50,7 @@ const WriteFromDictation: React.FC = () => {
         setLoading(true);
         const collectionRef: CollectionReference<DocumentData> = collection(db, "writefromdictation");
         const q: Query<DocumentData> = query(collectionRef, where("isHidden", "==", false));
-        
+
         const querySnapshot = await getDocs(q);
         let data: AudioSample[] = querySnapshot.docs.map((doc) => doc.data() as AudioSample);
 
@@ -178,12 +184,26 @@ const WriteFromDictation: React.FC = () => {
     countIncorrect();
   };
 
+  const handlePlay = useCallback(async () => {
+    if (audioRef.current) {
+      await audioRef.current.play();
+    }
+  }, []);
+
+  const handleRepeat = useCallback(async () => {
+    if (audioRef.current) {
+      await audioRef.current.stop();
+      setInputText(""); // Clear the textarea
+      await audioRef.current.play();
+    }
+  }, []);
+
   if (loading) {
     return <div>Loading...</div>;
   }
 
   return (
-    <main className="flex mx-auto min-h-screen flex-col items-center min-w-screen p-6 space-y-5 w-full bg-gradient-to-r from-green-200 via-pink-300 to-yellow-200 backdrop-blur-lg">
+    <main className="bg-cover bg-center flex mx-auto min-h-screen flex-col items-center min-w-screen p-6 space-y-5 w-full backdrop-blur-lg" style={{ backgroundImage: `url(${backgroundImage})` }}>
       <Navigation />
       <Link href="/" className="flex justify-center mb-4">
         <Image src="/logo1.png" alt="Logo" width={300} height={200} />
@@ -208,8 +228,7 @@ const WriteFromDictation: React.FC = () => {
           <textarea
             id="txtInput"
             rows={5}
-            className="w-full p-4 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-90 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
-            placeholder="Your notes here..."
+            className="w-full p-4 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
             value={inputText}
             onChange={handleTextareaChange}
           ></textarea>
@@ -223,7 +242,7 @@ const WriteFromDictation: React.FC = () => {
               id="audio-select"
               value={currentIndex}
               onChange={handleSelectChange}
-              className="w-full p-2 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-90 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+              className="w-full p-2 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
               disabled={audioSamples.length === 0}
             >
               {audioSamples.map((sample, index) => (
@@ -241,7 +260,7 @@ const WriteFromDictation: React.FC = () => {
               id="voice-select"
               value={selectedVoice}
               onChange={handleVoiceChange}
-              className="w-full p-2 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-90 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+              className="w-full p-2 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
             >
               {audioSamples.length > 0 &&
                 Object.keys(audioSamples[currentIndex]?.audio).map((voice, index) => (
@@ -259,7 +278,7 @@ const WriteFromDictation: React.FC = () => {
               id="sorting-select"
               value={sortingOption}
               onChange={handleSortingChange}
-              className="w-full p-2 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-90 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+              className="w-full p-2 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
             >
               <option value="alphabetical">Alphabetical</option>
               <option value="occurrence">Occurrence (Highest to Lowest)</option>
@@ -276,33 +295,45 @@ const WriteFromDictation: React.FC = () => {
             onChange={handleCheckboxChange}
             className="mr-2"
           />
-          <label htmlFor="showAnswer" className="text-gray-700">
+          <label htmlFor="showAnswer" className="text-white">
             Always show answer
           </label>
         </div>
-        <p className="mt-4 text-gray-700">Incorrect: {numberOfIncorrect}</p>
+        <p className="mt-4 text-white">Incorrect: {numberOfIncorrect}</p>
         <div className="flex flex-col md:flex-row justify-center items-center space-y-2 md:space-y-0 md:space-x-2">
+        <button
+            className="px-4 py-2 w-full md:w-auto bg-purple-500 text-white rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-purple-400/50 shadow-xl"
+            onClick={handlePlay}
+          >
+            Play
+          </button>
           <button
-            className="px-4 py-2 w-full md:w-auto bg-blue-500 text-white rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+            className="px-4 py-2 w-full md:w-auto bg-yellow-500 text-white rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-yellow-400/50 shadow-xl"
+            onClick={handleRepeat}
+          >
+            Repeat
+          </button>
+          <button
+            className="px-4 py-2 w-full md:w-auto bg-blue-500 text-white rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-blue-400/50 shadow-xl"
             onClick={handleNext}
             disabled={audioSamples.length === 0}
           >
             Next
           </button>
           <button
-            className="px-4 py-2 w-full md:w-auto bg-green-500 text-white rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+            className="px-4 py-2 w-full md:w-auto bg-green-500 text-white rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-green-400/50 shadow-xl"
             onClick={handlePlayAll}
           >
             {isAutoplay ? "Stop" : "Play All"}
           </button>
           <button
-            className="px-4 py-2 w-full md:w-auto bg-red-500 text-white rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+            className="px-4 py-2 w-full md:w-auto bg-red-500 text-white rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-red-400/50 shadow-xl"
             onClick={handleAnswerButtonClick}
           >
             Answer
           </button>
+          
         </div>
-       
       </div>
     </main>
   );

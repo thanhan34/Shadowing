@@ -6,6 +6,7 @@ import { db } from "../firebase";
 import { ShadowingData } from "@/pages/shadowing/[name]";
 import Image from "next/image";
 import Link from "next/link";
+
 interface Props {
   shadowingData: ShadowingData[];
 }
@@ -24,6 +25,7 @@ const ShadowingSentence: React.FC<Props> = ({ shadowingData }) => {
   const [count, setCount] = useState(0);
   const [videoSource, setVideoSource] = useState("");
   const [sentence, setSentence] = useState("");
+ 
 
   useEffect(() => {
     setVideoSource(shadowingData[0].url);
@@ -31,7 +33,7 @@ const ShadowingSentence: React.FC<Props> = ({ shadowingData }) => {
     setShadowingDocumentID(shadowingData[0].id);
     setPractice(shadowingData[0].practice);
   }, []);
-
+ 
   const handleModeChange = () => {
     if (arraySen.length === 0) {
       // You can display a message, show an alert, or take other actions here
@@ -98,7 +100,7 @@ const ShadowingSentence: React.FC<Props> = ({ shadowingData }) => {
   }, [shadowingDocumentID]);
 
   return (
-    <div className="z-10 items-center justify-between w-full max-w-5xl font-mono">
+    <div className="z-10 items-center justify-between w-full max-w-5xl font-mono" >
       <Link href="/" className="flex justify-center">
         <Image
           src="/logo1.png"

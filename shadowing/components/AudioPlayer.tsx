@@ -61,7 +61,7 @@ const AudioPlayer = forwardRef<CustomAudioRef, AudioPlayerProps>(({
   return (
     <div className="flex flex-col w-full max-w-2xl px-6 py-8 bg-white bg-opacity-30 backdrop-blur-lg rounded-xl shadow-lg border border-gray-200">
       <div className="mb-4">
-        <p className="text-xl font-semibold text-gray-800">Số lần xuất hiện: {occurrence}</p>
+        <p className="text-xl font-semibold text-black">Số lần xuất hiện: {occurrence}</p>
       </div>
       <div className="flex flex-col items-center justify-center mb-4 w-full">
         <audio
@@ -74,7 +74,7 @@ const AudioPlayer = forwardRef<CustomAudioRef, AudioPlayerProps>(({
       </div>
       <div className="flex flex-col md:flex-row justify-between items-center mb-4 w-full">
         <div className="mb-4 md:mb-0 md:mr-4 w-full">
-          <label className="block mb-1 font-medium text-gray-800">Playback Speed:</label>
+          <label className="block mb-1 font-medium text-black">Playback Speed:</label>
           <select
             className="w-full p-2 border border-gray-300 rounded-lg shadow-sm text-black focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             onChange={handlePlaybackRateChange}
@@ -90,7 +90,7 @@ const AudioPlayer = forwardRef<CustomAudioRef, AudioPlayerProps>(({
       </div>
       {showAnswer && (
         <div className="mb-4 w-full">
-          <p className="p-4 bg-blue-100 bg-opacity-50 border border-blue-300 rounded text-gray-800 text-lg">{text}</p>
+          <p className="p-4 bg-blue-100 bg-opacity-50 border border-blue-300 rounded text-black text-lg">{text}</p>
         </div>
       )}
     </div>

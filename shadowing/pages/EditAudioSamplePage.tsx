@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/router';
-import { db, storage } from '../firebase'; // Adjust the path according to your setup
+import { db, storage } from '../firebase';
 import { collection, doc, updateDoc, CollectionReference, query, orderBy, Query, DocumentData, Timestamp, onSnapshot } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
@@ -149,9 +149,20 @@ const EditAudioSamplePage: React.FC = () => {
   return (
     <div className="flex flex-col items-center">
       <h1 className="mb-4 text-2xl font-bold">Edit Audio Sample</h1>
-      <h2>{filteredSamples.length}</h2>
+      
+      {/* Display filtered samples' sentences */}
+      <div className="mb-4">
+        <h2 className="text-xl font-semibold">Filtered Samples:</h2>
+        <div className="list-disc pl-5 text-white">
+          {filteredSamples.map((sample, index) => (
+            <p key={sample.id} className="text-white">{sample.text}</p>
+          ))}
+        </div>
+      </div>
+
       {currentSample && (
         <div className="w-full max-w-md space-y-4">
+          <p>{filteredSamples.length}</p>
           {editing ? (
             <div>
               <label htmlFor="text" className="block mb-2">Text</label>
@@ -201,11 +212,21 @@ const EditAudioSamplePage: React.FC = () => {
                 ))}
               </div>
               <button className="px-4 py-2 bg-blue-500 text-white rounded" onClick={handleEditClick}>Edit</button>
-              <button className="px-4 py-2 bg-blue-500 text-white rounded" onClick={() => setCurrentIndex(currentIndex + 1)}>Next</button>
+              <button
+                className="px-4 py-2 bg-blue-500 text-white rounded"
+                onClick={() => {
+                  if (currentIndex + 1 < filteredSamples.length) {
+                    setCurrentIndex(currentIndex + 1);
+                  }
+                }}
+              >
+                Next
+              </button>
             </div>
           )}
         </div>
       )}
+
       <div className="mt-4 w-full max-w-md">
         <label htmlFor="audio-select" className="block mb-2">Select Audio Sample</label>
         <select

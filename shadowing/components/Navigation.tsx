@@ -13,6 +13,9 @@ const Navigation: React.FC = () => {
           <a className="text-black text-lg font-semibold">Home</a>
         </Link>
         <div className="hidden md:flex space-x-4 items-center">
+        <Link href="/shadow" legacyBehavior>
+            <a className="text-black hover:underline">Shadowing</a>
+          </Link>
           <Link href="/writefromdictation" legacyBehavior>
             <a className="text-black hover:underline">Write From Dictation</a>
           </Link>

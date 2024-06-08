@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../../firebase';
 import ShadowingSentence from '@/components/ShadowingSentence';
+import { useState, useEffect } from 'react';
 export interface ShadowingData {
     id: string;
     text: string;
@@ -13,9 +14,12 @@ export interface ShadowingData {
 const DynamicShadowingPage = ({ shadowingData }: { shadowingData: ShadowingData[] }) => {
   const router = useRouter();
   const { name } = router.query;
+  const [backgroundImage, setBackgroundImage] = useState("");
+
+
   // console.log(shadowingData)
   return (
-    <div className={`flex mx-auto min-h-screen flex-col items-center justify-between p-4 sm:p-6 md:p-8 lg:p-12 xl:p-24`}>          
+    <div className={`bg-cover bg-center flex mx-auto min-h-screen flex-col items-center justify-between p-4 sm:p-6 md:p-8 lg:p-12 xl:p-24`} style={{ backgroundImage: `url(${backgroundImage})` }}>          
       <ShadowingSentence shadowingData={shadowingData}/>
     </div>
   );
