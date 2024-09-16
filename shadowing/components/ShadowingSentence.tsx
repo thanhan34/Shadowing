@@ -101,11 +101,11 @@ const ShadowingSentence: React.FC<Props> = ({ shadowingData }) => {
 
   return (
     <div className="z-10 items-center justify-between w-full max-w-5xl font-mono" >
-      <Link href="/" className="flex justify-center">
+      <Link href="/shadow" className="flex justify-center">
         <Image
           src="/logo1.png"
           alt="Logo"
-          width={300} // Set the desired width
+          width={200} // Set the desired width
           height={200} // Set the desired height
         />
       </Link>

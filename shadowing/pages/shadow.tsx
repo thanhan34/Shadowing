@@ -73,7 +73,7 @@ const Shadow: React.FC<ShadowProps> = ({ initialData, pageCount }) => {
     >
       <Navigation />
       <Link href="/" className="flex justify-center">
-        <Image src="/logo1.png" alt="Logo" width={300} height={200} />
+        <Image src="/logo1.png" alt="Logo" width={200} height={200} />
       </Link>
       <h1 className="mb-2 text-2xl font-bold tracking-tight text-gray-600 dark:text-white">
         SHADOWING

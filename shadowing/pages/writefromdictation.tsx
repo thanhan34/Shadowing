@@ -1,21 +1,13 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import AudioPlayer from "@/components/AudioPlayer";
 import { CustomAudioRef } from "@/types";
 import { db } from "../firebase";
-import {
-  collection,
-  getDocs,
-  CollectionReference,
-  query,
-  where,
-  Query,
-  DocumentData,
-  Timestamp,
-} from "firebase/firestore";
+import { collection, getDocs, CollectionReference, query, where, Query, DocumentData, Timestamp } from "firebase/firestore";
 import Navigation from "@/components/Navigation";
 import { getNextImage } from "../utils/background";
+import { parse } from 'json2csv';
 
 interface AudioSample {
   audio: { [key: string]: string };
@@ -23,6 +15,7 @@ interface AudioSample {
   occurrence: number;
   createdAt: Timestamp;
   isHidden: boolean;
+  questionType: string;
 }
 
 const WriteFromDictation: React.FC = () => {
@@ -35,9 +28,9 @@ const WriteFromDictation: React.FC = () => {
   const [numberOfIncorrect, setNumberOfIncorrect] = useState(0);
   const [selectedVoice, setSelectedVoice] = useState<string>("Brian");
   const [sortingOption, setSortingOption] = useState<string>("occurrence");
-  const [playbackRate, setPlaybackRate] = useState<number>(1); // Initialize playback rate to 1
+  const [playbackRate, setPlaybackRate] = useState<number>(1);
   const [loading, setLoading] = useState(true);
-  const [alwaysShowAnswer, setAlwaysShowAnswer] = useState(false); // Track the state of the checkbox
+  const [alwaysShowAnswer, setAlwaysShowAnswer] = useState(false);
   const [backgroundImage, setBackgroundImage] = useState('');
 
   useEffect(() => {
@@ -52,23 +45,7 @@ const WriteFromDictation: React.FC = () => {
         const q: Query<DocumentData> = query(collectionRef, where("isHidden", "==", false));
 
         const querySnapshot = await getDocs(q);
-        let data: AudioSample[] = querySnapshot.docs.map((doc) => doc.data() as AudioSample);
-
-        // Sort the data based on the selected sorting option
-        data = data.sort((a, b) => {
-          switch (sortingOption) {
-            case "alphabetical":
-              return a.text.localeCompare(b.text);
-            case "occurrence":
-              return b.occurrence - a.occurrence;
-            case "newest":
-              return b.createdAt.seconds - a.createdAt.seconds;
-            case "easyToDifficult":
-              return a.text.length - b.text.length;
-            default:
-              return b.occurrence - a.occurrence;
-          }
-        });
+        const data: AudioSample[] = querySnapshot.docs.map((doc) => doc.data() as AudioSample);
 
         setAudioSamples(data);
         setCurrentIndex(0); // Reset the currentIndex to 0
@@ -80,22 +57,33 @@ const WriteFromDictation: React.FC = () => {
     };
 
     fetchData();
-  }, [sortingOption]);
+  }, []);
 
-  useEffect(() => {
-    if (audioSamples.length > 0 && audioRef.current) {
-      audioRef.current.play();
-    }
-  }, [audioSamples, currentIndex]);
+  const sortedAudioSamples = useMemo(() => {
+    return [...audioSamples].sort((a, b) => {
+      switch (sortingOption) {
+        case "alphabetical":
+          return a.text.localeCompare(b.text);
+        case "occurrence":
+          return b.occurrence - a.occurrence;
+        case "newest":
+          return b.createdAt.seconds - a.createdAt.seconds;
+        case "easyToDifficult":
+          return a.text.length - b.text.length;
+        default:
+          return b.occurrence - a.occurrence;
+      }
+    });
+  }, [audioSamples, sortingOption]);
 
   const handleNext = useCallback(async () => {
     if (audioRef.current) {
       await audioRef.current.stop();
     }
     setInputText("");
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % audioSamples.length);
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % sortedAudioSamples.length);
     setShowAnswer(alwaysShowAnswer); // Set the answer visibility based on the checkbox state
-  }, [audioSamples.length, alwaysShowAnswer]);
+  }, [sortedAudioSamples.length, alwaysShowAnswer]);
 
   const handlePlayAll = useCallback(() => {
     setIsAutoplay((prev) => !prev);
@@ -111,10 +99,10 @@ const WriteFromDictation: React.FC = () => {
   }, [isAutoplay, handleNext]);
 
   useEffect(() => {
-    if (isAutoplay && audioRef.current) {
+    if (sortedAudioSamples.length > 0 && audioRef.current) {
       audioRef.current.play();
     }
-  }, [currentIndex, isAutoplay]);
+  }, [sortedAudioSamples, currentIndex]);
 
   const handleSelectChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newIndex = parseInt(event.target.value, 10);
@@ -125,13 +113,13 @@ const WriteFromDictation: React.FC = () => {
     if (audioRef.current) {
       await audioRef.current.play();
     }
-    setShowAnswer(alwaysShowAnswer); // Set the answer visibility based on the checkbox state
-    setInputText(""); // Clear the textarea
+    setShowAnswer(alwaysShowAnswer);
+    setInputText("");
   };
 
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAlwaysShowAnswer(event.target.checked);
-    setShowAnswer(event.target.checked); // Update the answer visibility immediately
+    setShowAnswer(event.target.checked);
   };
 
   const handleTextareaChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -147,14 +135,13 @@ const WriteFromDictation: React.FC = () => {
   };
 
   const handlePlaybackRateChange = (newRate: number) => {
-    console.log("Changing playback rate to:", newRate); // Debug log
     setPlaybackRate(newRate);
   };
 
   const countIncorrect = () => {
-    if (audioSamples.length === 0) return;
+    if (sortedAudioSamples.length === 0) return;
 
-    const correctText = audioSamples[currentIndex]?.text.trim();
+    const correctText = sortedAudioSamples[currentIndex]?.text.trim();
     const inputTextTrimmed = inputText.trim();
 
     const correctWords = correctText.split(/\s+/);
@@ -180,7 +167,7 @@ const WriteFromDictation: React.FC = () => {
   };
 
   const handleAnswerButtonClick = () => {
-    setShowAnswer(true); // Show the answer when the button is clicked
+    setShowAnswer(true);
     countIncorrect();
   };
 
@@ -193,10 +180,32 @@ const WriteFromDictation: React.FC = () => {
   const handleRepeat = useCallback(async () => {
     if (audioRef.current) {
       await audioRef.current.stop();
-      setInputText(""); // Clear the textarea
+      setInputText("");
       await audioRef.current.play();
     }
   }, []);
+
+  const handleExportCSV = useCallback(() => {
+    if (sortedAudioSamples.length === 0) return;
+
+    const fields = ['text', 'occurrence', 'createdAt'];
+    const opts = { fields };
+
+    try {
+      const csv = parse(sortedAudioSamples, opts);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', 'audio_samples.csv');
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error('Error exporting CSV:', err);
+    }
+  }, [sortedAudioSamples]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -206,21 +215,22 @@ const WriteFromDictation: React.FC = () => {
     <main className="bg-cover bg-center flex mx-auto min-h-screen flex-col items-center min-w-screen p-6 space-y-5 w-full backdrop-blur-lg" style={{ backgroundImage: `url(${backgroundImage})` }}>
       <Navigation />
       <Link href="/" className="flex justify-center mb-4">
-        <Image src="/logo1.png" alt="Logo" width={300} height={200} />
+        <Image src="/logo1.png" alt="Logo" width={200} height={200} />
       </Link>
       <h1 className="mb-2 text-2xl font-bold tracking-tight text-gray-800 dark:text-white">
         Write From Dictation
       </h1>
       <div className="w-full max-w-2xl mx-auto">
-        {audioSamples.length > 0 && (
+        {sortedAudioSamples.length > 0 && (
           <AudioPlayer
             ref={audioRef}
-            occurrence={audioSamples[currentIndex]?.occurrence}
-            audio={audioSamples[currentIndex]?.audio[selectedVoice]}
-            text={audioSamples[currentIndex]?.text}
+            occurrence={sortedAudioSamples[currentIndex]?.occurrence}
+            questionType={sortedAudioSamples[currentIndex]?.questionType}
+            audio={sortedAudioSamples[currentIndex]?.audio[selectedVoice]}
+            text={sortedAudioSamples[currentIndex]?.text}
             onEnded={handleAudioEnd}
             showAnswer={showAnswer}
-            playbackRate={playbackRate} // Pass the playbackRate state here
+            playbackRate={playbackRate}
             onPlaybackRateChange={handlePlaybackRateChange}
           />
         )}
@@ -243,9 +253,9 @@ const WriteFromDictation: React.FC = () => {
               value={currentIndex}
               onChange={handleSelectChange}
               className="w-full p-2 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
-              disabled={audioSamples.length === 0}
+              disabled={sortedAudioSamples.length === 0}
             >
-              {audioSamples.map((sample, index) => (
+              {sortedAudioSamples.map((sample, index) => (
                 <option key={index} value={index}>
                   Audio {index + 1}
                 </option>
@@ -262,8 +272,8 @@ const WriteFromDictation: React.FC = () => {
               onChange={handleVoiceChange}
               className="w-full p-2 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
             >
-              {audioSamples.length > 0 &&
-                Object.keys(audioSamples[currentIndex]?.audio).map((voice, index) => (
+              {sortedAudioSamples.length > 0 &&
+                Object.keys(sortedAudioSamples[currentIndex]?.audio).map((voice, index) => (
                   <option key={index} value={voice}>
                     {voice}
                   </option>
@@ -301,7 +311,7 @@ const WriteFromDictation: React.FC = () => {
         </div>
         <p className="mt-4 text-white">Incorrect: {numberOfIncorrect}</p>
         <div className="flex flex-col md:flex-row justify-center items-center space-y-2 md:space-y-0 md:space-x-2">
-        <button
+          <button
             className="px-4 py-2 w-full md:w-auto bg-purple-500 text-white rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-purple-400/50 shadow-xl"
             onClick={handlePlay}
           >
@@ -316,7 +326,7 @@ const WriteFromDictation: React.FC = () => {
           <button
             className="px-4 py-2 w-full md:w-auto bg-blue-500 text-white rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-blue-400/50 shadow-xl"
             onClick={handleNext}
-            disabled={audioSamples.length === 0}
+            disabled={sortedAudioSamples.length === 0}
           >
             Next
           </button>
@@ -332,7 +342,12 @@ const WriteFromDictation: React.FC = () => {
           >
             Answer
           </button>
-          
+          {/* <button
+            className="px-4 py-2 w-full md:w-auto bg-orange-500 text-white rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-orange-400/50 shadow-xl"
+            onClick={handleExportCSV}
+          >
+            Export CSV
+          </button> */}
         </div>
       </div>
     </main>

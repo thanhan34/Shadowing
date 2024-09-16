@@ -40,14 +40,9 @@ const Navigation: React.FC = () => {
                 </Link>
                 <Link href="https://www.facebook.com/pteintensive" legacyBehavior>
                   <a target="_blank" className="block px-4 py-2 text-gray-800 hover:bg-gray-200">
-                    Facebook Fanpage SBS PTE Intensive
+                    Facebook Fanpage PTE Intensive
                   </a>
-                </Link>
-                <Link href="https://www.facebook.com/pteintensivesupport" legacyBehavior>
-                  <a target="_blank" className="block px-4 py-2 text-gray-800 hover:bg-gray-200">
-                    Facebook Fanpage SBS PTE Intensive - Hỗ trợ tư vấn
-                  </a>
-                </Link>
+                </Link>                
               </div>
             )}
           </div>
@@ -83,14 +78,10 @@ const Navigation: React.FC = () => {
               </Link>
               <Link href="https://www.facebook.com/pteintensive" legacyBehavior>
                 <a target="_blank" className="block px-4 py-2 text-gray-800 hover:bg-gray-200">
-                  Facebook Fanpage SBS PTE Intensive
+                  Facebook Fanpage PTE Intensive
                 </a>
               </Link>
-              <Link href="https://www.facebook.com/pteintensivesupport" legacyBehavior>
-                <a target="_blank" className="block px-4 py-2 text-gray-800 hover:bg-gray-200">
-                  Facebook Fanpage SBS PTE Intensive - Hỗ trợ tư vấn
-                </a>
-              </Link>
+              
             </div>
           )}
         </div>

@@ -10,6 +10,7 @@ interface AudioSample {
   text: string;
   occurrence: number;
   createdAt: Timestamp;
+  isHidden?: boolean;
 }
 
 const EditAudioSamplePage: React.FC = () => {
@@ -29,12 +30,26 @@ const EditAudioSamplePage: React.FC = () => {
 
   useEffect(() => {
     const collectionRef: CollectionReference<DocumentData> = collection(db, 'writefromdictation');
-    const q: Query<DocumentData> = query(collectionRef, orderBy('occurrence', 'desc'));
+    const q: Query<DocumentData> = query(collectionRef, orderBy('text'));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const data = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as AudioSample));
       const sortedData = data.sort((a, b) => a.text.localeCompare(b.text)); // Sort by text alphabetically
       setAudioSamples(sortedData);
       setLoading(false);
+
+      // Print all texts in the collection
+      console.log('All texts in the collection:');
+      data.forEach(sample => console.log(sample.text));
+
+      // Find and log duplicate samples
+      const textCount: { [text: string]: number } = {};
+      data.forEach(sample => {
+        textCount[sample.text] = (textCount[sample.text] || 0) + 1;
+      });
+      const duplicates = Object.keys(textCount).filter(text => textCount[text] > 1);
+      if (duplicates.length > 0) {
+        console.log('Duplicate texts:', duplicates);
+      }
     }, (error) => {
       console.error('Error fetching data:', error);
       setLoading(false);
@@ -155,7 +170,9 @@ const EditAudioSamplePage: React.FC = () => {
         <h2 className="text-xl font-semibold">Filtered Samples:</h2>
         <div className="list-disc pl-5 text-white">
           {filteredSamples.map((sample, index) => (
-            <p key={sample.id} className="text-white">{sample.text}</p>
+            <p key={sample.id} className="text-white">
+              {sample.text}
+            </p>
           ))}
         </div>
       </div>
@@ -181,7 +198,7 @@ const EditAudioSamplePage: React.FC = () => {
                 onChange={(e) => handleChange(e, 'occurrence')}
               />
               <label htmlFor="audio" className="block mb-2">Audio URLs</label>
-              {['Brian', 'Olivia', 'Joanna'].map(renderAudioField)}
+              {['Brian', 'Joanna', 'Olivia'].map(renderAudioField)}
               {uploadingFor && (
                 <input
                   type="file"

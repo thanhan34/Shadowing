@@ -23,6 +23,7 @@
     "eslint-config-next": "13.4.12",
     "firebase": "^10.1.0",
     "html-react-parser": "^4.2.1",
+    "json2csv": "^6.0.0-alpha.2",
     "next": "13.4.12",
     "postcss": "8.4.27",
     "react": "18.2.0",

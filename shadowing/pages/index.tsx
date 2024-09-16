@@ -27,7 +27,7 @@ const Home: React.FC = () => {
           className="flex flex-col items-center justify-center h-screen text-center"
         >
           <Link href="/" className="flex justify-center">
-            <Image src="/logo1.png" alt="Logo" width={300} height={200} />
+            <Image src="/logo1.png" alt="Logo" width={200} height={200} />
           </Link>
           <div className="bg-white bg-opacity-10 backdrop-blur-md p-6 rounded-lg shadow-lg">
           <h1 className="text-6xl font-bold">SBS PTE INTENSIVE</h1>

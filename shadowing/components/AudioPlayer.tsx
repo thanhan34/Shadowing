@@ -9,6 +9,7 @@ interface AudioPlayerProps {
   showAnswer: boolean;
   playbackRate: number;
   onPlaybackRateChange: (newRate: number) => void;
+  questionType: string;
 }
 
 const AudioPlayer = forwardRef<CustomAudioRef, AudioPlayerProps>(({
@@ -18,7 +19,8 @@ const AudioPlayer = forwardRef<CustomAudioRef, AudioPlayerProps>(({
   onEnded,
   showAnswer,
   playbackRate,
-  onPlaybackRateChange
+  onPlaybackRateChange, 
+  questionType,
 }, ref) => {
   const audioElementRef = useRef<HTMLAudioElement>(null);
 
@@ -61,7 +63,7 @@ const AudioPlayer = forwardRef<CustomAudioRef, AudioPlayerProps>(({
   return (
     <div className="flex flex-col w-full max-w-2xl px-6 py-8 bg-white bg-opacity-30 backdrop-blur-lg rounded-xl shadow-lg border border-gray-200">
       <div className="mb-4">
-        <p className="text-xl font-semibold text-black">Số lần xuất hiện: {occurrence}</p>
+        <p className="text-xl font-semibold text-black">Số lần xuất hiện: {occurrence} | {questionType}</p>
       </div>
       <div className="flex flex-col items-center justify-center mb-4 w-full">
         <audio
