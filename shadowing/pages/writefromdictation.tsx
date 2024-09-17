@@ -8,6 +8,7 @@ import { collection, getDocs, CollectionReference, query, where, Query, Document
 import Navigation from "@/components/Navigation";
 import { getNextImage } from "../utils/background";
 import { parse } from 'json2csv';
+import Head from "next/head";
 
 interface AudioSample {
   audio: { [key: string]: string };
@@ -213,6 +214,19 @@ const WriteFromDictation: React.FC = () => {
 
   return (
     <main className="bg-cover bg-center flex mx-auto min-h-screen flex-col items-center min-w-screen p-6 space-y-5 w-full backdrop-blur-lg" style={{ backgroundImage: `url(${backgroundImage})` }}>
+      <Head>
+  <title>Write From Dictation - PTE Intensive</title>
+  <meta
+    name="description"
+    content="Sử dụng bộ công cụ luyện tập PTE hiệu quả nhất, với các bài tập đa dạng, tài liệu cập nhật và lộ trình cá nhân hóa. Nâng cao kỹ năng nghe, nói, đọc, viết và đạt điểm số mơ ước với PTE Intensive."
+  />
+  <meta
+    name="keywords"
+    content="bộ công cụ PTE, luyện tập PTE, công cụ PTE, luyện thi PTE, bài tập PTE, tài liệu PTE, luyện PTE hiệu quả, nâng cao kỹ năng PTE, thi PTE đạt điểm cao"
+  />
+  <meta name="author" content="PTE Intensive" />
+  <link rel="icon" href="/favicon.ico" />
+</Head>
       <Navigation />
       <Link href="/" className="flex justify-center mb-4">
         <Image src="/logo1.png" alt="Logo" width={200} height={200} />

@@ -14,13 +14,18 @@ const Home: React.FC = () => {
       style={{ backgroundImage: `url(${backgroundImage})` }}
     >
       <Head>
-        <title>PTE Intensive</title>
-        <meta
-          name="description"
-          content="A 3D portfolio website created with Next.js and Three.js"
-        />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+  <title>Bộ Công Cụ Luyện Tập PTE - Nâng Cao Kỹ Năng, Đạt Điểm Số Mơ Ước</title>
+  <meta
+    name="description"
+    content="Sử dụng bộ công cụ luyện tập PTE hiệu quả nhất, với các bài tập đa dạng, tài liệu cập nhật và lộ trình cá nhân hóa. Nâng cao kỹ năng nghe, nói, đọc, viết và đạt điểm số mơ ước với PTE Intensive."
+  />
+  <meta
+    name="keywords"
+    content="bộ công cụ PTE, luyện tập PTE, công cụ PTE, luyện thi PTE, bài tập PTE, tài liệu PTE, luyện PTE hiệu quả, nâng cao kỹ năng PTE, thi PTE đạt điểm cao"
+  />
+  <meta name="author" content="PTE Intensive" />
+  <link rel="icon" href="/favicon.ico" />
+</Head>
       <main className="relative z-10 text-white flex flex-col items-center justify-center h-screen">
         <section
           id="home"

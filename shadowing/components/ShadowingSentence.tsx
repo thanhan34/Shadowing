@@ -6,6 +6,7 @@ import { db } from "../firebase";
 import { ShadowingData } from "@/pages/shadowing/[name]";
 import Image from "next/image";
 import Link from "next/link";
+import Head from "next/head";
 
 interface Props {
   shadowingData: ShadowingData[];
@@ -101,6 +102,19 @@ const ShadowingSentence: React.FC<Props> = ({ shadowingData }) => {
 
   return (
     <div className="z-10 items-center justify-between w-full max-w-5xl font-mono" >
+      <Head>
+  <title>{shadowingData[0].name} - Shadowing</title>
+  <meta
+    name="description"
+    content="Sử dụng bộ công cụ luyện tập PTE hiệu quả nhất, với các bài tập đa dạng, tài liệu cập nhật và lộ trình cá nhân hóa. Nâng cao kỹ năng nghe, nói, đọc, viết và đạt điểm số mơ ước với PTE Intensive."
+  />
+  <meta
+    name="keywords"
+    content="bộ công cụ PTE, luyện tập PTE, công cụ PTE, luyện thi PTE, bài tập PTE, tài liệu PTE, luyện PTE hiệu quả, nâng cao kỹ năng PTE, thi PTE đạt điểm cao"
+  />
+  <meta name="author" content="PTE Intensive" />
+  <link rel="icon" href="/favicon.ico" />
+</Head>
       <Link href="/shadow" className="flex justify-center">
         <Image
           src="/logo1.png"
