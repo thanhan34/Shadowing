@@ -27,7 +27,6 @@ const ShadowingSentence: React.FC<Props> = ({ shadowingData }) => {
   const [videoSource, setVideoSource] = useState("");
   const [sentence, setSentence] = useState("");
  
-
   useEffect(() => {
     setVideoSource(shadowingData[0].url);
     setSentence(shadowingData[0].text);
@@ -37,18 +36,19 @@ const ShadowingSentence: React.FC<Props> = ({ shadowingData }) => {
  
   const handleModeChange = () => {
     if (arraySen.length === 0) {
-      // You can display a message, show an alert, or take other actions here
       console.log("No sentences available for this paragraph.");
-      return; // Exit the function early
+      return;
     }
     setMode(!mode);
     setCount(0);
   };
+
   const handleBackClick = () => {
     if (count > 0) {
       setCount(count - 1);
     }
   };
+
   const handleNextClick = () => {
     if (arraySen.length > 0 && count + 1 < arraySen.length) {
       setCount(count + 1);
@@ -80,10 +80,7 @@ const ShadowingSentence: React.FC<Props> = ({ shadowingData }) => {
   }, [shadowingDocumentID]);
 
   const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    // Get the selected option value (shadowing document ID)
     const selectedValue = event.target.value;
-
-    // Update the selected shadowing document ID state
     setShadowingDocumentID(selectedValue);
     setMode(true);
   };
@@ -93,7 +90,6 @@ const ShadowingSentence: React.FC<Props> = ({ shadowingData }) => {
       (data) => data.id === shadowingDocumentID
     );
 
-    // Update the states with the text and video url from the matching object
     if (selectedParagraphData) {
       setSentence(selectedParagraphData.text);
       setVideoSource(selectedParagraphData.url);
@@ -101,32 +97,37 @@ const ShadowingSentence: React.FC<Props> = ({ shadowingData }) => {
   }, [shadowingDocumentID]);
 
   return (
-    <div className="z-10 items-center justify-between w-full max-w-5xl font-mono" >
+    <div className="z-10 items-center justify-between w-full max-w-5xl font-mono px-4 md:px-6 lg:px-8 py-4">
       <Head>
-  <title>{shadowingData[0].name} - Shadowing</title>
-  <meta
-    name="description"
-    content="Sử dụng bộ công cụ luyện tập PTE hiệu quả nhất, với các bài tập đa dạng, tài liệu cập nhật và lộ trình cá nhân hóa. Nâng cao kỹ năng nghe, nói, đọc, viết và đạt điểm số mơ ước với PTE Intensive."
-  />
-  <meta
-    name="keywords"
-    content="bộ công cụ PTE, luyện tập PTE, công cụ PTE, luyện thi PTE, bài tập PTE, tài liệu PTE, luyện PTE hiệu quả, nâng cao kỹ năng PTE, thi PTE đạt điểm cao"
-  />
-  <meta name="author" content="PTE Intensive" />
-  <link rel="icon" href="/favicon.ico" />
-</Head>
-      <Link href="/shadow" className="flex justify-center">
-        <Image
-          src="/logo1.png"
-          alt="Logo"
-          width={200} // Set the desired width
-          height={200} // Set the desired height
+        <title>{shadowingData[0].name} - Shadowing</title>
+        <meta
+          name="description"
+          content="Sử dụng bộ công cụ luyện tập PTE hiệu quả nhất, với các bài tập đa dạng, tài liệu cập nhật và lộ trình cá nhân hóa. Nâng cao kỹ năng nghe, nói, đọc, viết và đạt điểm số mơ ước với PTE Intensive."
         />
-      </Link>
+        <meta
+          name="keywords"
+          content="bộ công cụ PTE, luyện tập PTE, công cụ PTE, luyện thi PTE, bài tập PTE, tài liệu PTE, luyện PTE hiệu quả, nâng cao kỹ năng PTE, thi PTE đạt điểm cao"
+        />
+        <meta name="author" content="PTE Intensive" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      
+      <div className="flex justify-center mb-4">
+        <Link href="/shadow">
+          <Image
+            src="/logo1.png"
+            alt="Logo"
+            width={150} // Set smaller width for mobile
+            height={150} // Set smaller height for mobile
+            className="w-24 h-24 md:w-36 md:h-36 lg:w-48 lg:h-48" // Responsive classes
+          />
+        </Link>
+      </div>
 
-      <h1 className="pt-2 mb-1 text-2xl font-bold lg:mb-0 lg:mr-4">
+      <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-center mb-4">
         Shadowing: {shadowingData[0].name}
       </h1>
+
       {mode ? (
         <Paragraph videoSource={videoSource} sentence={sentence} />
       ) : (
@@ -137,7 +138,7 @@ const ShadowingSentence: React.FC<Props> = ({ shadowingData }) => {
       )}
 
       {mode ? (
-        <div className="flex  mt-2 space-x-2 lg:flex-row">
+        <div className="flex flex-col md:flex-row mt-4 space-y-2 md:space-y-0 md:space-x-4">
           {arraySen.length === 0 && (
             <p className="text-red-500">
               Chức năng 1 Sentence Mode chưa thể sử dụng được cho câu này.
@@ -151,15 +152,15 @@ const ShadowingSentence: React.FC<Props> = ({ shadowingData }) => {
           </button>
           <a
             href={practice}
-            className="px-4 py-2 font-bold text-white bg-blue-500 rounded-full hover:bg-blue-700"
-            target="_blank" // Opens the link in a new tab/window
-            rel="noopener noreferrer" // Recommended for security reasons
+            className="px-4 py-2 font-bold text-white bg-blue-500  rounded-full flex items-center justify-center hover:bg-blue-700"
+            target="_blank"
+            rel="noopener noreferrer"
           >
             Practice
           </a>
         </div>
       ) : (
-        <div className="flex mt-2 space-x-2 lg:flex-row">
+        <div className="flex flex-col md:flex-row mt-4 space-y-2 md:space-y-0 md:space-x-4">
           <button
             className="px-4 py-2 font-bold text-white bg-blue-500 rounded-full hover:bg-blue-700"
             onClick={handleModeChange}
@@ -178,7 +179,9 @@ const ShadowingSentence: React.FC<Props> = ({ shadowingData }) => {
           >
             Next
           </button>
-          <button className="px-4 py-2 font-bold text-white bg-blue-500 rounded-full " disabled>{count +1}/{arraySen.length}</button>
+          <button className="px-4 py-2 font-bold text-white bg-blue-500 rounded-full" disabled>
+            {count + 1}/{arraySen.length}
+          </button>
         </div>
       )}
     </div>

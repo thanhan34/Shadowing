@@ -63,51 +63,51 @@ const Shadow: React.FC<ShadowProps> = ({ initialData, pageCount }) => {
   };
 
   const handlePageChange = async (newPage: number) => {
-    setSearchQuery("")
+    setSearchQuery("");
     setPage(newPage);
   };
 
   return (
     <main
-      className="bg-cover bg-center bg-fixed flex mx-auto min-h-screen flex-col items-center min-w-screen p-6 space-y-5 w-full backdrop-blur-lg"
+      className="bg-cover bg-center bg-fixed flex mx-auto min-h-screen flex-col items-center w-full p-4 sm:p-6 space-y-5 backdrop-blur-lg"
       style={{ backgroundImage: `url(${backgroundImage})` }}
     >
       <Head>
-  <title>Shadowing - Bộ Công Cụ Luyện Tập PTE - Nâng Cao Kỹ Năng, Đạt Điểm Số Mơ Ước</title>
-  <meta
-    name="description"
-    content="Sử dụng bộ công cụ luyện tập PTE hiệu quả nhất, với các bài tập đa dạng, tài liệu cập nhật và lộ trình cá nhân hóa. Nâng cao kỹ năng nghe, nói, đọc, viết và đạt điểm số mơ ước với PTE Intensive."
-  />
-  <meta
-    name="keywords"
-    content="bộ công cụ PTE, luyện tập PTE, công cụ PTE, luyện thi PTE, bài tập PTE, tài liệu PTE, luyện PTE hiệu quả, nâng cao kỹ năng PTE, thi PTE đạt điểm cao"
-  />
-  <meta name="author" content="PTE Intensive" />
-  <link rel="icon" href="/favicon.ico" />
-</Head>
+        <title>Shadowing - Bộ Công Cụ Luyện Tập PTE - Nâng Cao Kỹ Năng, Đạt Điểm Số Mơ Ước</title>
+        <meta
+          name="description"
+          content="Sử dụng bộ công cụ luyện tập PTE hiệu quả nhất, với các bài tập đa dạng, tài liệu cập nhật và lộ trình cá nhân hóa. Nâng cao kỹ năng nghe, nói, đọc, viết và đạt điểm số mơ ước với PTE Intensive."
+        />
+        <meta
+          name="keywords"
+          content="bộ công cụ PTE, luyện tập PTE, công cụ PTE, luyện thi PTE, bài tập PTE, tài liệu PTE, luyện PTE hiệu quả, nâng cao kỹ năng PTE, thi PTE đạt điểm cao"
+        />
+        <meta name="author" content="PTE Intensive" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
       <Navigation />
       <Link href="/" className="flex justify-center">
-        <Image src="/logo1.png" alt="Logo" width={200} height={200} />
+        <Image src="/logo1.png" alt="Logo" width={150} height={150} className="sm:w-40 sm:h-40 lg:w-48 lg:h-48" />
       </Link>
-      <h1 className="mb-2 text-2xl font-bold tracking-tight text-gray-600 dark:text-white">
+      <h1 className="mb-2 text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-gray-600 dark:text-white">
         SHADOWING
       </h1>
       <input
-  type="text"
-  value={searchQuery}
-  onChange={handleSearchInputChange}
-  placeholder="Search..."
-  className="mb-4 p-2 border border-gray-300 rounded-lg text-white w-1/2 bg-blue-500 bg-opacity-20 backdrop-blur-lg placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-/>
+        type="text"
+        value={searchQuery}
+        onChange={handleSearchInputChange}
+        placeholder="Search..."
+        className="mb-4 p-2 w-full sm:w-1/2 border border-gray-300 rounded-lg text-white bg-blue-500 bg-opacity-20 backdrop-blur-lg placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
 
       {arrayParagraph.length > 0 ? (
         arrayParagraph.map((data) => (
           <Link
             href={`/shadowing/${data.name}`}
             key={data.id}
-            className="block w-1/2 p-6 bg-white bg-opacity-30 backdrop-blur-lg border border-gray-200 rounded-lg shadow-lg min-w-sm hover:bg-opacity-40 dark:bg-gray-800 dark:bg-opacity-30 dark:border-gray-700 dark:hover:bg-opacity-40 dark:hover:bg-gray-700"
+            className="block w-full sm:w-1/2 p-4 sm:p-6 bg-white bg-opacity-30 backdrop-blur-lg border border-gray-200 rounded-lg shadow-lg hover:bg-opacity-40 dark:bg-gray-800 dark:bg-opacity-30 dark:border-gray-700 dark:hover:bg-opacity-40 dark:hover:bg-gray-700"
           >
-            <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-600 dark:text-white">
+            <h5 className="mb-2 text-lg sm:text-2xl font-bold tracking-tight text-gray-600 dark:text-white">
               {data.name}
             </h5>
           </Link>
@@ -116,12 +116,12 @@ const Shadow: React.FC<ShadowProps> = ({ initialData, pageCount }) => {
         <p className="text-gray-600 dark:text-white">No results found</p>
       )}
 
-      <div className="flex space-x-2">
+      <div className="flex flex-wrap justify-center space-x-2">
         {Array.from({ length: pageCount }, (_, index) => index + 1).map((pageNumber) => (
           <button
             key={pageNumber}
             onClick={() => handlePageChange(pageNumber)}
-            className={`px-4 py-2 ${pageNumber === page ? 'bg-blue-500 text-white hover:shadow-yellow-400/50 bg-yellow-400 shadow-xl' : 'bg-gray-200 text-gray-700 hover:shadow-yellow-400/50 shadow-xl'} rounded-lg`}
+            className={`px-4 py-2 m-2 ${pageNumber === page ? 'bg-blue-500 text-white hover:shadow-yellow-400/50 bg-yellow-400 shadow-xl' : 'bg-gray-200 text-gray-700 hover:shadow-yellow-400/50 shadow-xl'} rounded-lg`}
           >
             {pageNumber}
           </button>

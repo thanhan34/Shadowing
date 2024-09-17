@@ -14,7 +14,7 @@ const Paragraph: React.FC<ParagraphProps> = ({ videoSource, sentence }) => {
           <source src={videoSource} type="audio/mpeg" />
         </audio>
         <p className="mt-5 mb-5 text-2xl text-center sm:text-left">{parse(sentence)}</p>
-        <div className="flex flex-row pt-5 pb-5 space-x-10">
+        <div className="flex flex-row pt-5 pb-5 space-x-5">
           <p className="p-3 border border-red-500 rounded-full ra-break">Pause</p>
           <p className="p-3 border border-orange-500 rounded-full ra-loss">Loss</p>
           <p className="p-3 border rounded-full border-cyan-400 ra-link">Linking</p>
