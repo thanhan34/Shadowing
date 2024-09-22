@@ -99,10 +99,10 @@ const ShadowingSentence: React.FC<Props> = ({ shadowingData }) => {
   return (
     <div className="z-10 items-center justify-between w-full max-w-5xl font-mono px-4 md:px-6 lg:px-8 py-4">
       <Head>
-        <title>{shadowingData[0].name} - Shadowing</title>
+        <title>{shadowingData[0].name?.replace(/<!--|-->/g, '')} - Shadowing</title>
         <meta
           name="description"
-          content="Sử dụng bộ công cụ luyện tập PTE hiệu quả nhất, với các bài tập đa dạng, tài liệu cập nhật và lộ trình cá nhân hóa. Nâng cao kỹ năng nghe, nói, đọc, viết và đạt điểm số mơ ước với PTE Intensive."
+          content="Công cụ Shadowing giúp bạn luyện tập hàng ngày nhằm cải thiện phát âm và phát triển thói quen đọc theo cụm từ. Sử dụng công cụ này để nâng cao kỹ năng nói và đạt được kết quả tối ưu với PTE Intensive."
         />
         <meta
           name="keywords"
