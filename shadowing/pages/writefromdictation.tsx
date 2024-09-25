@@ -62,10 +62,14 @@ const WriteFromDictation: React.FC = () => {
   }, []);
 
   const filteredAudioSamples = useMemo(() => {
-    if (filterOption === "New") {
-      return audioSamples.filter(sample => sample.questionType === "New");
+    switch (filterOption) {
+      case "New":
+        return audioSamples.filter(sample => sample.questionType === "New");
+      case "Still Important":
+        return audioSamples.filter(sample => sample.questionType === "Still Important");
+      default:
+        return audioSamples; // Show all items when filterOption is "All"
     }
-    return audioSamples; // Show all items when filterOption is "All"
   }, [audioSamples, filterOption]);
 
   const sortedAudioSamples = useMemo(() => {
@@ -330,6 +334,7 @@ const WriteFromDictation: React.FC = () => {
             >
               <option value="All">All</option>
               <option value="New">New</option>
+              <option value="Still Important">Still Important</option>
             </select>
           </div>
         </div>
