@@ -33,6 +33,7 @@ const WriteFromDictation: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [alwaysShowAnswer, setAlwaysShowAnswer] = useState(false);
   const [backgroundImage, setBackgroundImage] = useState('');
+  const [filterOption, setFilterOption] = useState<string>("All");
 
   useEffect(() => {
     setBackgroundImage(getNextImage());
@@ -60,8 +61,15 @@ const WriteFromDictation: React.FC = () => {
     fetchData();
   }, []);
 
+  const filteredAudioSamples = useMemo(() => {
+    if (filterOption === "New") {
+      return audioSamples.filter(sample => sample.questionType === "New");
+    }
+    return audioSamples; // Show all items when filterOption is "All"
+  }, [audioSamples, filterOption]);
+
   const sortedAudioSamples = useMemo(() => {
-    return [...audioSamples].sort((a, b) => {
+    return [...filteredAudioSamples].sort((a, b) => {
       switch (sortingOption) {
         case "alphabetical":
           return a.text.localeCompare(b.text);
@@ -75,7 +83,7 @@ const WriteFromDictation: React.FC = () => {
           return b.occurrence - a.occurrence;
       }
     });
-  }, [audioSamples, sortingOption]);
+  }, [filteredAudioSamples, sortingOption]);
 
   const handleNext = useCallback(async () => {
     if (audioRef.current) {
@@ -189,7 +197,7 @@ const WriteFromDictation: React.FC = () => {
   const handleExportCSV = useCallback(() => {
     if (sortedAudioSamples.length === 0) return;
 
-    const fields = ['text', 'occurrence', 'createdAt'];
+    const fields = ['text', 'occurrence', 'questionType'];
     const opts = { fields };
 
     try {
@@ -215,18 +223,18 @@ const WriteFromDictation: React.FC = () => {
   return (
     <main className="bg-cover bg-center flex mx-auto min-h-screen flex-col items-center min-w-screen p-6 space-y-5 w-full backdrop-blur-lg" style={{ backgroundImage: `url(${backgroundImage})` }}>
       <Head>
-  <title>Write From Dictation - PTE Intensive</title>
-  <meta
-    name="description"
-    content="Sử dụng bộ công cụ luyện tập PTE hiệu quả nhất, với các bài tập đa dạng, tài liệu cập nhật và lộ trình cá nhân hóa. Nâng cao kỹ năng nghe, nói, đọc, viết và đạt điểm số mơ ước với PTE Intensive."
-  />
-  <meta
-    name="keywords"
-    content="bộ công cụ PTE, luyện tập PTE, công cụ PTE, luyện thi PTE, bài tập PTE, tài liệu PTE, luyện PTE hiệu quả, nâng cao kỹ năng PTE, thi PTE đạt điểm cao"
-  />
-  <meta name="author" content="PTE Intensive" />
-  <link rel="icon" href="/favicon.ico" />
-</Head>
+        <title>Write From Dictation - PTE Intensive</title>
+        <meta
+          name="description"
+          content="Sử dụng bộ công cụ luyện tập PTE hiệu quả nhất, với các bài tập đa dạng, tài liệu cập nhật và lộ trình cá nhân hóa. Nâng cao kỹ năng nghe, nói, đọc, viết và đạt điểm số mơ ước với PTE Intensive."
+        />
+        <meta
+          name="keywords"
+          content="bộ công cụ PTE, luyện tập PTE, công cụ PTE, luyện thi PTE, bài tập PTE, tài liệu PTE, luyện PTE hiệu quả, nâng cao kỹ năng PTE, thi PTE đạt điểm cao"
+        />
+        <meta name="author" content="PTE Intensive" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
       <Navigation />
       <Link href="/" className="flex justify-center mb-4">
         <Image src="/logo1.png" alt="Logo" width={200} height={200} />
@@ -308,6 +316,20 @@ const WriteFromDictation: React.FC = () => {
               <option value="occurrence">Occurrence (Highest to Lowest)</option>
               <option value="newest">Newest</option>
               <option value="easyToDifficult">Easy to Difficult (Shortest to Longest Text)</option>
+            </select>
+          </div>
+          <div className="mb-4 md:mb-0 md:mr-4 w-full">
+            <label htmlFor="filter-select" className="block mb-1 font-medium text-gray-700">
+              Filter:
+            </label>
+            <select
+              id="filter-select"
+              value={filterOption}
+              onChange={(e) => setFilterOption(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+            >
+              <option value="All">All</option>
+              <option value="New">New</option>
             </select>
           </div>
         </div>

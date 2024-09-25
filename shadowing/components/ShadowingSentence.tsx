@@ -95,7 +95,7 @@ const ShadowingSentence: React.FC<Props> = ({ shadowingData }) => {
       setVideoSource(selectedParagraphData.url);
     }
   }, [shadowingDocumentID]);
-
+ 
   return (
     <div className="z-10 items-center justify-between w-full max-w-5xl font-mono px-4 md:px-6 lg:px-8 py-4">
       <Head>
