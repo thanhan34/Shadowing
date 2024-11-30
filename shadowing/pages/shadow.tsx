@@ -1,16 +1,13 @@
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
-import { Inter } from "next/font/google";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import Navigation from "@/components/Navigation";
+import Navigation from "../components/Navigation";
 import { getNextImage } from "../utils/background";
 import { useRouter } from 'next/router';
 import { collection, getDocs, query, orderBy, startAfter, where } from "firebase/firestore";
 import { db } from "../firebase";
 import Head from 'next/head';
-
-const inter = Inter({ subsets: ["latin"] });
 
 interface Paragraph {
   id: string;
@@ -84,6 +81,10 @@ const Shadow: React.FC<ShadowProps> = ({ initialData, pageCount }) => {
         />
         <meta name="author" content="PTE Intensive" />
         <link rel="icon" href="/favicon.ico" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
       </Head>
       <Navigation />
       <Link href="/" className="flex justify-center">
@@ -144,7 +145,7 @@ export const getServerSideProps: GetServerSideProps = async (context: GetServerS
   const res = await fetch(`${baseUrl}/api/shadowing?page=${normalizedPage}&search=${normalizedSearch}`);
   const data: Paragraph[] = await res.json();
 
-  const totalItems = await getTotalItems(normalizedSearch); // Replace with your logic
+  const totalItems = await getTotalItems(normalizedSearch);
   const pageCount = Math.ceil(totalItems / itemsPerPage);
 
   return {

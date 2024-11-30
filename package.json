@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.699.0",
+    "@aws-sdk/client-transcribe": "^3.699.0",
+    "microsoft-cognitiveservices-speech-sdk": "^1.41.0"
+  }
+}
