@@ -69,7 +69,8 @@ const ReadAloudQuestion: React.FC<ReadAloudQuestionProps> = ({
               <div className="text-3xl font-bold text-gray-800 mb-2">
                 Recording Phase
               </div>
-              <div className="text-4xl font-bold text-red-500">
+                {recordTimer} seconds
+                <div className="text-4xl font-bold text-red-500">
                 {recordTimer} seconds
               </div>
               <div className="animate-pulse text-red-500 mt-2">

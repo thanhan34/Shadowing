@@ -138,7 +138,7 @@ const PlacementTest: React.FC = () => {
       }
 
       if (currentQuestion.type === 'readAloud') {
-        setPrepTimer(10);
+        setPrepTimer(35);
         setIsPrepping(true);
       }
     }
