@@ -18,6 +18,13 @@ interface AudioUrls {
   [key: string]: string;
 }
 
+interface Question {
+  type: string;
+  content: string;
+  correctAnswers?: string[] | Record<string, string>;
+  options?: string[] | Record<string, string[]>;
+}
+
 export default function Submissions() {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [filteredSubmissions, setFilteredSubmissions] = useState<Submission[]>([]);
@@ -25,12 +32,13 @@ export default function Submissions() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editingNotes, setEditingNotes] = useState<string | null>(null);
-  const [tempNotes, setTempNotes] = useState<string>('');
+  const [tempNotes, setTempNotes] = useState('');
   const [deleting, setDeleting] = useState<string | null>(null);
   const [audioUrls, setAudioUrls] = useState<AudioUrls>({});
   const [loadingAudio, setLoadingAudio] = useState<Record<string, boolean>>({});
   const [audioErrors, setAudioErrors] = useState<Record<string, string>>({});
   const [searchTerm, setSearchTerm] = useState('');
+  const [questions, setQuestions] = useState<Record<string, Question>>({});
 
   useEffect(() => {
     const filtered = submissions.filter(submission => {
@@ -106,7 +114,7 @@ export default function Submissions() {
     return (
       <div className="mb-4 p-4 rounded-lg">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-[#fc5d01]">Audio Response</span>
+          
           {isLoading ? (
             <span className="text-sm text-[#fd7f33]">Loading...</span>
           ) : error ? (
@@ -136,32 +144,106 @@ export default function Submissions() {
     );
   };
 
-  const highlightAnswersInText = (text: string, answer: string, type: string) => {
+  const highlightAnswersInText = (text: string, answer: string, correctAnswers: string[] | Record<string, string> | undefined, type: string) => {
     if (!text || !answer || (type !== 'RFIB' && type !== 'RWFIB')) {
       return text;
     }
 
-    const answers = answer.split(',').map(a => a.trim());
     let highlightedText = text;
+    const blanks = text.split('_____').length - 1;
 
-    answers.forEach(ans => {
-      const regex = new RegExp(`(\\b${ans}\\b)`, 'gi');
-      highlightedText = highlightedText.replace(regex, '<span class="bg-[#ffac7b] px-1 rounded">$1</span>');
+    // For debugging
+    console.log('Highlighting text:', {
+      type,
+      correctAnswers,
+      answer,
+      text,
+      blanks
     });
 
+    for (let i = 0; i < blanks; i++) {
+      let correctAnswer;
+      if (type.toUpperCase() === 'RWFIB' && correctAnswers && typeof correctAnswers === 'object' && !Array.isArray(correctAnswers)) {
+        correctAnswer = correctAnswers[i.toString()];
+        console.log(`Blank ${i} correct answer:`, correctAnswer); // Debug log
+      } else if (Array.isArray(correctAnswers)) {
+        correctAnswer = correctAnswers[i];
+        console.log(`Blank ${i} correct answer:`, correctAnswer); // Debug log
+      }
+
+      if (correctAnswer) {
+        const regex = new RegExp(`_____`);
+        highlightedText = highlightedText.replace(regex, correctAnswer);
+      }
+    }
+
     return (
-      <div dangerouslySetInnerHTML={{ __html: highlightedText }} />
+      <div className="text-[#fc5d01]" dangerouslySetInnerHTML={{ __html: highlightedText }} />
+    );
+  };
+
+  const renderChoices = (answer: Answer, question: Question) => {
+    if (answer.questionType.toUpperCase() !== 'RWFIB' || !question?.options) return null;
+
+    const options = question.options as Record<string, string[]>;
+    const correctAnswers = question.correctAnswers as Record<string, string>;
+    const userAnswers = answer.answer.split(',').map(a => a.trim());
+    const blanksCount = Object.keys(options).length;
+
+    return (
+      <div className="mt-4 p-4 bg-[#2b2b2b] rounded-lg">
+        <div className="font-medium text-[#A0A0A0] mb-4">Correct Answer:</div>
+        {Array.from({ length: blanksCount }).map((_, index) => {
+          const blankOptions = options[index.toString()] || [];
+          const correctAnswer = correctAnswers[index.toString()];
+          return (
+            <div key={index} className="mb-4">
+              <div className="text-sm text-[#A0A0A0] mb-2">{index + 1}.</div>
+              <div className="flex flex-wrap gap-2">
+                {blankOptions.map((option, optionIndex) => (
+                  <span
+                    key={optionIndex}
+                    className={`px-3 py-1.5 rounded ${
+                      option === correctAnswer
+                        ? 'bg-[#FC5D01] font-medium'
+                        : 'bg-[#232323]'
+                    }`}
+                  >
+                    {option}
+                  </span>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+        <div className="mt-6 border-t pt-4">
+          <div className="font-medium text-[#A0A0A0] mb-2">Your Answer:</div>
+          <div className="px-3 py-2 bg-[#232323] rounded">
+            {userAnswers.join(', ')}
+          </div>
+        </div>
+      </div>
     );
   };
 
   const renderAnswer = (questionId: string, answer: Answer) => {
+    const question = questions[answer.questionId];
+    
+    // Debug logs
+    console.log('Rendering answer:', {
+      questionId,
+      answer,
+      question,
+      correctAnswers: question?.correctAnswers
+    });
+
     return (
       <div
         key={questionId}
-        className="border border-gray-300 rounded-lg p-4 mb-4 bg-white shadow-md"
+        className="border border-gray-300 rounded-lg p-4 mb-4 bg-[#242424] shadow-md"
       >
         <div className="flex justify-between items-center mb-4">
-          <h4 className="text-lg font-medium text-[#fc5d01]">Question {questionId}</h4>
+          <h4 className="text-lg font-medium text-white">Question {questionId}</h4>
           <span className="text-sm text-white bg-orange-500 px-3 py-1 rounded-full">
             {answer.questionType}
           </span>
@@ -169,20 +251,22 @@ export default function Submissions() {
 
         {answer.text && (
           <div className="mb-4">
-            <p className="text-orange-600 font-semibold mb-2">Question Text:</p>
-            <div className="p-3 text-black">
-              {highlightAnswersInText(answer.text, answer.answer, answer.questionType)}
+            {/* <p className="text-white font-semibold mb-2">Question Text:</p> */}
+            <div className="p-3 text-white">
+              {highlightAnswersInText(answer.text, answer.answer, question?.correctAnswers, answer.questionType)}
             </div>
           </div>
         )}
 
+        {answer.questionType.toUpperCase() === 'RWFIB' && question && renderChoices(answer, question)}
+
         {isFirebaseStorageUrl(answer.answer) ? (
           renderAudioPlayer(answer.answer)
         ) : (
-          answer.answer && (
+          answer.answer && answer.questionType.toUpperCase() !== 'RWFIB' && (
             <div className="mb-4">
-              <p className="text-orange-600 font-semibold mb-2">Text Response:</p>
-              <p className="p-3 text-black">
+              <p className="text-white font-semibold mb-2">Text Response:</p>
+              <p className="p-3 text-white">
                 {answer.answer}
               </p>
             </div>
@@ -211,75 +295,6 @@ export default function Submissions() {
       alert('Failed to save notes. Please try again.');
     }
   };
-
-  useEffect(() => {
-    const fetchSubmissions = async () => {
-      try {
-        setError(null);
-        
-        const submissionsQuery = query(
-          collection(db, 'submissions'),
-          orderBy('timestamp', 'desc')
-        );
-        
-        const submissionsSnapshot = await getDocs(submissionsQuery);
-        
-        const submissionsWithAnswers = await Promise.all(
-          submissionsSnapshot.docs.map(async (submissionDoc) => {
-            const submissionData = submissionDoc.data();
-            
-            const answersQuery = collection(doc(db, 'submissions', submissionDoc.id), 'answers');
-            const answersSnapshot = await getDocs(answersQuery);
-            
-            const answers = answersSnapshot.docs.reduce((acc, answerDoc) => {
-              const answerData = answerDoc.data() as Answer;
-              acc[answerData.questionNumber.toString()] = answerData;
-              return acc;
-            }, {} as Record<string, Answer>);
-
-            return {
-              id: submissionDoc.id,
-              personalInfo: submissionData.personalInfo,
-              answers,
-              notes: submissionData.notes,
-              timestamp: submissionData.timestamp,
-              status: submissionData.status
-            } as Submission;
-          })
-        );
-
-        const urls: AudioUrls = {};
-        for (const submission of submissionsWithAnswers) {
-          for (const answer of Object.values(submission.answers)) {
-            if (answer.answer && isFirebaseStorageUrl(answer.answer)) {
-              try {
-                const path = getStoragePath(answer.answer);
-                if (path) {
-                  const audioRef = ref(storage, path);
-                  const url = await getDownloadURL(audioRef);
-                  urls[answer.answer] = url;
-                }
-              } catch (error) {
-                console.error('Error getting download URL for answer:', error);
-                setAudioErrors(prev => ({ ...prev, [answer.answer]: 'Failed to load audio' }));
-              }
-            }
-          }
-        }
-
-        setAudioUrls(urls);
-        setSubmissions(submissionsWithAnswers);
-        setFilteredSubmissions(submissionsWithAnswers);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching submissions:', error);
-        setError('Error loading submissions. Please try refreshing the page.');
-        setLoading(false);
-      }
-    };
-
-    fetchSubmissions();
-  }, []);
 
   const deleteSubmission = async (submissionId: string) => {
     if (!window.confirm('Are you sure you want to delete this submission? This action cannot be undone.')) {
@@ -319,27 +334,87 @@ export default function Submissions() {
     }).format(timestamp.toDate());
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#1e1e2e] flex flex-col items-center justify-center">
-        <div className="mb-8">
-          <Image src="/logo1.png" alt="Logo" width={150} height={150} priority />
-        </div>
-        <div className="text-[#fc5d01]">Loading submissions...</div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    const fetchSubmissions = async () => {
+      try {
+        setError(null);
+        
+        const submissionsQuery = query(
+          collection(db, 'submissions'),
+          orderBy('timestamp', 'desc')
+        );
+        
+        const submissionsSnapshot = await getDocs(submissionsQuery);
+        
+        const submissionsWithAnswers = await Promise.all(
+          submissionsSnapshot.docs.map(async (submissionDoc) => {
+            const submissionData = submissionDoc.data();
+            
+            const answersQuery = collection(doc(db, 'submissions', submissionDoc.id), 'answers');
+            const answersSnapshot = await getDocs(answersQuery);
+            
+            const answers = answersSnapshot.docs.reduce((acc, answerDoc) => {
+              const answerData = answerDoc.data() as Answer;
+              acc[answerData.questionNumber.toString()] = answerData;
+              return acc;
+            }, {} as Record<string, Answer>);
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-[#1e1e2e] flex flex-col items-center justify-center">
-        <div className="mb-8">
-          <Image src="/logo1.png" alt="Logo" width={150} height={150} priority />
-        </div>
-        <div className="text-red-600">{error}</div>
-      </div>
-    );
-  }
+            return {
+              id: submissionDoc.id,
+              personalInfo: submissionData.personalInfo,
+              answers,
+              notes: submissionData.notes,
+              timestamp: submissionData.timestamp,
+              status: submissionData.status
+            } as Submission;
+          })
+        );
+
+        // Fetch all questions
+        const questionsSnapshot = await getDocs(collection(db, 'questions'));
+        const questionsData: Record<string, Question> = {};
+        questionsSnapshot.docs.forEach(doc => {
+          const data = doc.data() as Question;
+          console.log('Question data:', { id: doc.id, ...data }); // Debug log
+          questionsData[doc.id] = data;
+        });
+        setQuestions(questionsData);
+
+        // Debug log
+        console.log('All questions:', questionsData);
+
+        const urls: AudioUrls = {};
+        for (const submission of submissionsWithAnswers) {
+          for (const answer of Object.values(submission.answers)) {
+            if (answer.answer && isFirebaseStorageUrl(answer.answer)) {
+              try {
+                const path = getStoragePath(answer.answer);
+                if (path) {
+                  const audioRef = ref(storage, path);
+                  const url = await getDownloadURL(audioRef);
+                  urls[answer.answer] = url;
+                }
+              } catch (error) {
+                console.error('Error getting download URL for answer:', error);
+                setAudioErrors(prev => ({ ...prev, [answer.answer]: 'Failed to load audio' }));
+              }
+            }
+          }
+        }
+
+        setAudioUrls(urls);
+        setSubmissions(submissionsWithAnswers);
+        setFilteredSubmissions(submissionsWithAnswers);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching submissions:', error);
+        setError('Error loading submissions. Please try refreshing the page.');
+        setLoading(false);
+      }
+    };
+
+    fetchSubmissions();
+  }, []);
 
   const renderSubmissionsList = () => (
     <div className="w-full lg:w-1/6 pr-4">
@@ -349,7 +424,7 @@ export default function Submissions() {
           placeholder="Search submissions..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full p-2 border rounded bg-[#1e1e2e] text-white border-[#fc5d01] focus:outline-none focus:ring-2 focus:ring-[#fc5d01]"
+          className="w-full p-2 border rounded bg-[#232323] text-white border-[#fc5d01] focus:outline-none focus:ring-2 focus:ring-[#fc5d01]"
         />
       </div>
       <div className="space-y-2 max-h-[calc(100vh-200px)] overflow-y-auto">
@@ -360,7 +435,7 @@ export default function Submissions() {
             className={`p-4 rounded-lg cursor-pointer transition-colors ${
               selectedSubmission?.id === submission.id
                 ? 'bg-[#fc5d01] text-white'
-                : 'bg-[#2e2e4f] text-[#e0e0e0] hover:bg-[#3e3e5f]'
+                : 'bg-[#2b2b2b] text-[#FFFFFF] hover:bg-[#3e3e5f]'
             }`}
           >
             <p className="font-semibold truncate">{submission.personalInfo.fullName}</p>
@@ -375,33 +450,33 @@ export default function Submissions() {
   const renderSubmissionDetail = () => {
     if (!selectedSubmission) {
       return (
-        <div className="w-full lg:w-5/6 p-4 bg-[#2e2e4f] rounded-lg text-[#e0e0e0]">
+        <div className="w-full lg:w-5/6 p-4 bg-[#2b2b2b] rounded-lg text-[#FFFFFF]">
           Select a submission to view details
         </div>
       );
     }
 
     return (
-      <div className="w-full lg:w-5/6 bg-[#2e2e4f] rounded-lg p-6 max-h-[calc(100vh-100px)] overflow-y-auto">
-        <div className="flex justify-between items-start mb-6">
+      <div className="w-full lg:w-5/6  rounded-lg p-6 max-h-[calc(100vh-100px)] overflow-y-auto bg-[#2b2b2b]">
+        <div className="flex justify-between items-start mb-6 ">
           <div>
-            <h2 className="text-xl font-semibold mb-4 text-[#fc5d01]">Submission Details</h2>
+            <h2 className="text-xl font-bold mb-4 text-[#fc5d01]">Submission Details</h2>
             <div className="space-y-2">
               <p>
-                <span className="font-medium text-[#e0e0e0]">Name: </span>
-                <span className="text-[#e0e0e0]">{selectedSubmission.personalInfo.fullName}</span>
+                <span className="font-medium text-[#FFFFFF]">Name: </span>
+                <span className="text-[#FFFFFF]">{selectedSubmission.personalInfo.fullName}</span>
               </p>
               <p>
-                <span className="font-medium text-[#e0e0e0]">Email: </span>
-                <span className="text-[#e0e0e0]">{selectedSubmission.personalInfo.email}</span>
+                <span className="font-medium text-[#FFFFFF]">Email: </span>
+                <span className="text-[#FFFFFF]">{selectedSubmission.personalInfo.email}</span>
               </p>
               <p>
-                <span className="font-medium text-[#e0e0e0]">Phone: </span>
-                <span className="text-[#e0e0e0]">{selectedSubmission.personalInfo.phone}</span>
+                <span className="font-medium text-[#FFFFFF]">Phone: </span>
+                <span className="text-[#FFFFFF]">{selectedSubmission.personalInfo.phone}</span>
               </p>
               <p>
-                <span className="font-medium text-[#e0e0e0]">Target Score: </span>
-                <span className="text-[#e0e0e0]">{selectedSubmission.personalInfo.target}</span>
+                <span className="font-medium text-[#FFFFFF]">Target Score: </span>
+                <span className="text-[#FFFFFF]">{selectedSubmission.personalInfo.target}</span>
               </p>
             </div>
           </div>
@@ -428,7 +503,7 @@ export default function Submissions() {
               <textarea
                 value={tempNotes}
                 onChange={(e) => setTempNotes(e.target.value)}
-                className="w-full p-2 border rounded bg-[#1e1e2e] text-white"
+                className="w-full p-2 border rounded bg-[#232323] text-white"
                 rows={4}
                 placeholder="Enter notes here..."
               />
@@ -454,7 +529,7 @@ export default function Submissions() {
             <div className="mt-4">
               {selectedSubmission.notes ? (
                 <>
-                  <p className="text-[#e0e0e0] mb-2">{selectedSubmission.notes}</p>
+                  <p className="text-[#FFFFFF] mb-2">{selectedSubmission.notes}</p>
                   <button
                     onClick={() => {
                       setEditingNotes(selectedSubmission.id);
@@ -481,7 +556,7 @@ export default function Submissions() {
         </div>
 
         <div className="border-t border-[#fdbc94] pt-6">
-          <h3 className="text-lg font-semibold mb-4 text-[#fc5d01]">Test Answers</h3>
+          <h3 className="text-lg font-semibold mb-4 text-white">Test Answers</h3>
           {Object.entries(selectedSubmission.answers).map(([questionId, answer]) => 
             renderAnswer(questionId, answer)
           )}
@@ -490,8 +565,30 @@ export default function Submissions() {
     );
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#232323] flex flex-col items-center justify-center">
+        <div className="mb-8">
+          <Image src="/logo1.png" alt="Logo" width={150} height={150} priority />
+        </div>
+        <div className="text-[#fc5d01]">Loading submissions...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#232323] flex flex-col items-center justify-center">
+        <div className="mb-8">
+          <Image src="/logo1.png" alt="Logo" width={150} height={150} priority />
+        </div>
+        <div className="text-red-600">{error}</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-4 bg-[#1e1e2e] min-h-screen">
+    <div className="p-4 bg-[#232323] min-h-screen">
       <div className="flex justify-center mb-8">
         <Image src="/logo1.png" alt="Logo" width={150} height={150} priority />
       </div>

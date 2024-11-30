@@ -1,14 +1,20 @@
-import Link from 'next/link';
-import Image from 'next/image';
+import Link from "next/link";
+import Image from "next/image";
 
 export default function TestComplete() {
   return (
-    <div className="min-h-screen bg-[#ffffff] flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="mb-8">
-        <Image src="/logo1.png" alt="Logo" width={150} height={150} priority />
-      </div>
-      <div className="max-w-md w-full space-y-8 bg-[#fedac2] p-8 rounded-lg shadow-lg border border-[#fdbc94]">
+    <div className="min-h-screen bg-[#232323] flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 bg-[#2b2b2b] p-8 rounded-lg shadow-lg border border-[#fdbc94]">
         <div>
+          <div className="mb-8 flex flex-col justify-center items-center">
+            <Image
+              src="/logo1.png"
+              alt="Logo"
+              width={150}
+              height={150}
+              priority
+            />
+          </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-[#fc5d01]">
             Test Completed
           </h2>
@@ -30,17 +36,17 @@ export default function TestComplete() {
               </svg>
             </div>
           </div>
-          <p className="mt-6 text-center text-lg text-[#fc5d01]">
-            Thank you for completing the placement test. Your responses have been
-            recorded successfully.
+          <p className="mt-6 text-center text-lg text-white">
+            Thank you for completing the placement test. Your responses have
+            been recorded successfully.
           </p>
-          <p className="mt-2 text-center text-sm text-[#fd7f33]">
+          <p className="mt-2 text-center text-sm text-gray-500">
             We will review your test and get back to you with the results soon.
           </p>
-          
+
           <div className="mt-8 space-y-4">
             <div className="text-center">
-              <Link 
+              <Link
                 href="/placement-test"
                 className="inline-flex items-center px-4 py-2 border border-[#fdbc94] text-sm font-medium rounded-md text-white bg-[#fc5d01] hover:bg-[#fd7f33] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#fc5d01]"
               >

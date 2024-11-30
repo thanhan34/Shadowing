@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 
 export interface PersonalInfo {
   fullName: string;
@@ -22,7 +23,11 @@ const PersonalInfoForm: React.FC<PersonalInfoProps> = ({
 }) => {
   return (
     <div className="flex items-center justify-center min-h-screen">
-      <div className="space-y-6 bg-gray-800 p-8 rounded-lg shadow-lg w-96">
+      <div className="space-y-6 bg-[#2b2b2b] p-8 rounded-lg shadow-lg w-96">
+        <div className="flex justify-center mb-6">
+          <Image src="/logo1.png" alt="Logo" width={150} height={150} priority />
+        </div>
+        
         <h2 className="text-2xl font-bold text-[#fc5d01] mb-6">
           Personal Information
         </h2>
@@ -31,7 +36,7 @@ const PersonalInfoForm: React.FC<PersonalInfoProps> = ({
           <div>
             <label
               htmlFor="fullName"
-              className="block text-sm font-medium text-gray-300"
+              className="block text-sm font-medium text-white"
             >
               Full Name
             </label>
@@ -48,7 +53,7 @@ const PersonalInfoForm: React.FC<PersonalInfoProps> = ({
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-gray-300"
+              className="block text-sm font-medium text-white"
             >
               Email
             </label>
@@ -65,7 +70,7 @@ const PersonalInfoForm: React.FC<PersonalInfoProps> = ({
           <div>
             <label
               htmlFor="phone"
-              className="block text-sm font-medium text-gray-300"
+              className="block text-sm font-medium text-white"
             >
               Phone Number
             </label>
@@ -82,7 +87,7 @@ const PersonalInfoForm: React.FC<PersonalInfoProps> = ({
           <div>
             <label
               htmlFor="target"
-              className="block text-sm font-medium text-gray-300"
+              className="block text-sm font-medium text-white"
             >
               Target Score
             </label>

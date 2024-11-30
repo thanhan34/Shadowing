@@ -36,14 +36,13 @@ const ReadAloudQuestion: React.FC<ReadAloudQuestionProps> = ({
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-800">Read Aloud</h2>
+              <div className="text-gray-600 mb-6">
+                Look at the text below. In 40 seconds, you must read this text
+                aloud as naturally and clearly as possible.
+              </div>
             </div>
           </div>
-          <Timer time={timer} />
-        </div>
-
-        <div className="text-gray-600 mb-6">
-          Look at the text below. In 40 seconds, you must read this text aloud
-          as naturally and clearly as possible.
+          {/* <Timer time={timer} /> */}
         </div>
 
         <div className="bg-gray-50 p-4 rounded-lg mb-6">

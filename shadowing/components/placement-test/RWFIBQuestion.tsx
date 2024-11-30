@@ -42,25 +42,26 @@ const RWFIBQuestion: React.FC<RWFIBQuestionProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg p-6">
+      <div className="bg-[#2b2b2b] rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-4">
             <div className="bg-blue-500 text-white text-2xl font-bold rounded-lg p-4">
               FIB
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-800">
+              <h2 className="text-xl font-bold white">
                 Reading & Writing: Fill in the blanks
               </h2>
-            </div>
-          </div>
-          <Timer time={timer} />
-        </div>
-
-        <div className="text-gray-600 mb-6">
+              <div className="text-gray-100 mb-6">
           There are some words missing in the following text. Please select the
           correct word in the drop-down box.
         </div>
+            </div>
+          </div>
+          {/* <Timer time={timer} /> */}
+        </div>
+
+        
 
         <div className="bg-gray-50 p-4 rounded-lg mb-6">
           <div className="text-lg text-gray-800 leading-relaxed">

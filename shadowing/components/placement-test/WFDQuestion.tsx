@@ -70,6 +70,9 @@ const WFDQuestion: React.FC<WFDQuestionProps> = ({
               <h2 className="text-xl font-bold text-gray-800">
                 Write From Dictation
               </h2>
+              <div className="text-gray-600 mb-6">
+              You will hear a sentence. Type the sentence in the box below exactly as you hear it. Write as much of the sentence as you can. You will hear the sentence only once.
+        </div>
             </div>
           </div>
           <Timer time={timer} />

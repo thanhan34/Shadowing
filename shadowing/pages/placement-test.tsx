@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
-import Image from 'next/image';
 import { db, storage } from '../firebase';
 import { collection, addDoc, getDocs, doc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -496,10 +495,7 @@ const PlacementTest: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#ffffff] flex flex-col items-center justify-center">
-        <div className="mb-8">
-          <Image src="/logo1.png" alt="Logo" width={150} height={150} priority />
-        </div>
+      <div className="min-h-screen bg-[#232323] flex flex-col items-center justify-center">
         <div className="text-[#fc5d01] text-xl mb-4">Loading questions...</div>
         <div className="w-16 h-16 border-t-4 border-[#fc5d01] border-solid rounded-full animate-spin"></div>
       </div>
@@ -508,10 +504,7 @@ const PlacementTest: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#12172b] flex flex-col items-center justify-center">
-        <div className="mb-8">
-          <Image src="/logo1.png" alt="Logo" width={150} height={150} priority />
-        </div>
+      <div className="min-h-screen bg-[#232323] flex flex-col items-center justify-center">
         <div className="text-[#fc5d01] text-xl mb-4">Error loading questions:</div>
         <div className="text-[#fd7f33]">{error}</div>
         <button 
@@ -526,20 +519,14 @@ const PlacementTest: React.FC = () => {
 
   if (questions.length === 0) {
     return (
-      <div className="min-h-screen bg-[#12172b] flex items-center justify-center">
-        <div className="mb-8">
-          <Image src="/logo1.png" alt="Logo" width={150} height={150} priority />
-        </div>
+      <div className="min-h-screen bg-[#232323] flex items-center justify-center">
         <div className="text-[#fc5d01] text-xl">No questions available. Please add questions in the manage questions page.</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white py-12 px-4 sm:px-6 lg:px-8">
-      <div className="flex justify-center mb-8">
-        <Image src="/logo1.png" alt="Logo" width={150} height={150} priority />
-      </div>
+    <div className="min-h-screen bg-[#232323] py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-8xl mx-auto">
         {currentQuestionIndex === -1 ? (
           <PersonalInfoForm
@@ -548,7 +535,7 @@ const PlacementTest: React.FC = () => {
             onStartTest={handleStartTest}
           />
         ) : (
-          <div className="bg-[#fedac2] rounded-lg shadow-lg p-6 border border-[#fdbc94]">
+          <div className="bg-red rounded-lg shadow-lg p-6">
             <QuestionProgress
               currentQuestionIndex={currentQuestionIndex}
               totalQuestions={questions.length}

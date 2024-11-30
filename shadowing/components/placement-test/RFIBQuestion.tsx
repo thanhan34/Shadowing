@@ -62,14 +62,15 @@ const RFIBQuestion: React.FC<RFIBQuestionProps> = ({
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-800">Reading: Fill in the Blanks</h2>
-            </div>
-          </div>
-          <Timer time={timer} />
-        </div>
-
-        <div className="text-gray-600 mb-6">
+              <div className="text-gray-600 mb-6">
           In the text below some words are missing. Drag words from the box below to the appropriate place in the text.
         </div>
+            </div>
+          </div>
+          {/* <Timer time={timer} /> */}
+        </div>
+
+       
 
         <div className="bg-white p-4 rounded-lg mb-6">
   <div className="text-lg text-gray-800 leading-relaxed">
