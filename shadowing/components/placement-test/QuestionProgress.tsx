@@ -16,7 +16,7 @@ const QuestionProgress: React.FC<QuestionProgressProps> = ({
       {/* Header Section */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-primary">Placement Test</h1>
-        <span className="text-gray-600">
+        <span className="text-white">
           Question {currentQuestionIndex + 1} of {totalQuestions}
         </span>
       </div>
@@ -32,7 +32,7 @@ const QuestionProgress: React.FC<QuestionProgressProps> = ({
       </div>
 
       {/* Percentage Display */}
-      <div className="mt-2 text-sm text-gray-600 text-right">
+      <div className="mt-2 text-sm text-white text-right">
         {Math.round(progressPercentage)}%
       </div>
     </div>

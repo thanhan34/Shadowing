@@ -1,9 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
-
+import Head from "next/head";
 export default function TestComplete() {
   return (
     <div className="min-h-screen bg-[#232323] flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
+      <Head>
+        <title>Test Complete</title>
+      </Head>
       <div className="max-w-md w-full space-y-8 bg-[#2b2b2b] p-8 rounded-lg shadow-lg border border-[#fdbc94]">
         <div>
           <div className="mb-8 flex flex-col justify-center items-center">

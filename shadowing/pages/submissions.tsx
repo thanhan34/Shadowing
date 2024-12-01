@@ -4,7 +4,7 @@ import { db, storage } from '../firebase';
 import { collection, getDocs, query, orderBy, doc, updateDoc, deleteDoc, Timestamp } from 'firebase/firestore';
 import { ref, getDownloadURL } from 'firebase/storage';
 import { PersonalInfo, Answer } from '../types/placement-test';
-
+import Head from 'next/head';
 interface Submission {
   id: string;
   personalInfo: PersonalInfo;
@@ -418,6 +418,9 @@ export default function Submissions() {
 
   const renderSubmissionsList = () => (
     <div className="w-full lg:w-1/6 pr-4">
+      <Head>
+        <title>PTE Intensive Placement Test Submissions</title>
+      </Head>
       <div className="mb-4">
         <input
           type="text"

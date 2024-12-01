@@ -11,6 +11,7 @@ import RWFIBQuestion from '../components/placement-test/RWFIBQuestion';
 import RFIBQuestion from '../components/placement-test/RFIBQuestion';
 import WFDQuestion from '../components/placement-test/WFDQuestion';
 import { getRandomItems } from '../utils/questionUtils';
+import Head from "next/head"
 
 const QUESTIONS_PER_TYPE = 3;
 
@@ -527,6 +528,9 @@ const PlacementTest: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#232323] py-12 px-4 sm:px-6 lg:px-8">
+      <Head>
+        <title>PTE Intensive Placement Test</title>
+      </Head>
       <div className="max-w-8xl mx-auto">
         {currentQuestionIndex === -1 ? (
           <PersonalInfoForm
