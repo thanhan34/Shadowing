@@ -45,7 +45,7 @@ export default async function handler(
         name: 'PTE Intensive Admin'
       },
       replyTo: process.env.EMAIL_USER || 'admin@pteintensive.com',
-      subject: `New Placement Test Submission | ${personalInfo.fullName} | ${personalInfo.target}`,
+      subject: 'New Placement Test Submission',
       text: `
 New Placement Test Submission
 
@@ -56,15 +56,14 @@ Target Score: ${personalInfo.target}
 Submission Time: ${new Date(submission.timestamp.toDate()).toLocaleString()}
       `,
       html: `
-        <div style="font-family: Arial, sans-serif; padding: 20px;">          
+        <div style="font-family: Arial, sans-serif; padding: 20px;">
+          <h2 style="color: #333;">New Placement Test Submission</h2>
           <div style="margin-top: 20px;">
-          <p>Hệ thống đã nhận được bài Placement Test của học sinh:</p>
             <p><strong>Student Name:</strong> ${personalInfo.fullName}</p>
             <p><strong>Email:</strong> ${personalInfo.email}</p>
             <p><strong>Phone:</strong> ${personalInfo.phone}</p>
             <p><strong>Target Score:</strong> ${personalInfo.target}</p>
             <p><strong>Submission Time:</strong> ${new Date(submission.timestamp.toDate()).toLocaleString()}</p>
-            <p>Truy cập vào đường link này: https://study.pteintensive.com/submissions</p>
           </div>
         </div>
       `
@@ -81,8 +80,7 @@ Submission Time: ${new Date(submission.timestamp.toDate()).toLocaleString()}
       console.log('SendGrid Response:', response);
       
       return res.status(200).json({ 
-        message: 'Email sent successfully to all admins',
-        recipients: adminEmails
+        message: 'Email sent successfully'
       });
     } catch (sendError: any) {
       console.error('SendGrid Error Details:', {
