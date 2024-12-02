@@ -45,7 +45,7 @@ export default async function handler(
         name: 'PTE Intensive Admin'
       },
       replyTo: process.env.EMAIL_USER || 'admin@pteintensive.com',
-      subject: `New Placement Test Submission | ${personalInfo.fullName} | ${personalInfo.target},
+      subject: `New Placement Test Submission | ${personalInfo.fullName} | ${personalInfo.target}`,
       text: `
 New Placement Test Submission
 
@@ -57,13 +57,15 @@ Submission Time: ${new Date(submission.timestamp.toDate()).toLocaleString()}
       `,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px;">
-          <h2 style="color: #333;">New Placement Test Submission</h2>
+          <h2 style="color: #333;">Hệ thống đã nhận được bài Placement Test của học sinh</h2>
           <div style="margin-top: 20px;">
             <p><strong>Student Name:</strong> ${personalInfo.fullName}</p>
             <p><strong>Email:</strong> ${personalInfo.email}</p>
             <p><strong>Phone:</strong> ${personalInfo.phone}</p>
             <p><strong>Target Score:</strong> ${personalInfo.target}</p>
             <p><strong>Submission Time:</strong> ${new Date(submission.timestamp.toDate()).toLocaleString()}</p>
+            <p>Truy cập vào đường link sau để xem chi tiết: https://study.pteintensive.com/submissions</p>
+            <P>PTE Intensive Team</P>
           </div>
         </div>
       `
