@@ -1,7 +1,42 @@
 import Link from "next/link";
 import Image from "next/image";
 import Head from "next/head";
+import { useEffect, useState } from "react";
+
 export default function TestComplete() {
+  const [emailStatus, setEmailStatus] = useState<string>('');
+
+  useEffect(() => {
+    // Send email notification when page loads
+    const sendEmailNotification = async () => {
+      try {
+        console.log('Sending email notification...');
+        const response = await fetch('/api/send-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          console.error('Failed to send email notification:', data);
+          setEmailStatus('Failed to send email notification');
+          throw new Error(data.message || 'Failed to send email');
+        }
+
+        console.log('Email notification sent successfully:', data);
+        setEmailStatus('Email notification sent successfully');
+      } catch (error: any) {
+        console.error('Error sending email notification:', error);
+        setEmailStatus(`Error: ${error?.message || 'Unknown error occurred'}`);
+      }
+    };
+
+    sendEmailNotification();
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#232323] flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
       <Head>
@@ -46,6 +81,11 @@ export default function TestComplete() {
           <p className="mt-2 text-center text-sm text-gray-500">
             We will review your test and get back to you with the results soon.
           </p>
+          {emailStatus && (
+            <p className={`mt-2 text-center text-sm ${emailStatus.includes('Error') ? 'text-red-500' : 'text-green-500'}`}>
+              {emailStatus}
+            </p>
+          )}
 
           <div className="mt-8 space-y-4">
             <div className="text-center">
