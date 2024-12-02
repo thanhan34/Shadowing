@@ -66,7 +66,7 @@ const AudioPlayer = forwardRef<CustomAudioRef, AudioPlayerProps>(({
     <div className="flex flex-col w-full max-w-2xl px-6 py-8 bg-white bg-opacity-30 backdrop-blur-lg rounded-xl shadow-lg border border-gray-200">
       {questionType && (
         <div className="mb-4">
-          <p className="text-lg font-medium text-gray-800">{questionType}</p>
+          <p className="text-lg font-medium text-gray-800">Số lần xuất hiện: {occurrence} | {questionType}</p>
         </div>
       )}
       <div className="flex flex-col items-center justify-center mb-4 w-full">
