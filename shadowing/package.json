@@ -14,6 +14,7 @@
     "@ffmpeg/ffmpeg": "^0.12.10",
     "@react-three/drei": "^9.106.0",
     "@react-three/fiber": "^8.16.8",
+    "@sendgrid/mail": "^8.1.4",
     "@splinetool/react-spline": "^3.0.3",
     "@splinetool/runtime": "^1.4.9",
     "@types/react-dom": "18.2.7",

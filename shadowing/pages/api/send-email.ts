@@ -45,7 +45,7 @@ export default async function handler(
         name: 'PTE Intensive Admin'
       },
       replyTo: process.env.EMAIL_USER || 'admin@pteintensive.com',
-      subject: `New Placement Test Submission | ${personalInfo.fullName} | ${personalInfo.target}`,
+      subject: `${personalInfo.fullName} | ${personalInfo.target} - New Placement Test Submission`,
       text: `
 New Placement Test Submission
 
