@@ -116,26 +116,27 @@ const SubmissionDetail: React.FC<SubmissionDetailProps> = ({
           <div className="space-y-2">
             <div className="text-[#FFFFFF] space-y-2">
               <ScoreSummary 
-                label="RWFIB" 
+                label="Reading Writing Fill In The Blank" 
                 score={calculateRWFIBScore(submission, questions)} 
               />
               <ScoreSummary 
-                label="RFIB" 
+                label="Reading Fill In The Blank" 
                 score={calculateRFIBScore(submission, questions)} 
               />
               <ScoreSummary 
-                label="WFD" 
+                label="Write From Dictation" 
                 score={calculateWFDScore(submission, questions)} 
               />
               {(() => {
                 const rwfibScore = calculateRWFIBScore(submission, questions);
                 const rfibScore = calculateRFIBScore(submission, questions);
+                const wfdScore = calculateWFDScore(submission, questions);
                 return (
                   <ScoreSummary 
                     label="Total" 
                     score={{
-                      correct: rwfibScore.correct + rfibScore.correct,
-                      total: rwfibScore.total + rfibScore.total
+                      correct: rwfibScore.correct + rfibScore.correct + wfdScore.correct,
+                      total: rwfibScore.total + rfibScore.total + wfdScore.total
                     }}
                   />
                 );
