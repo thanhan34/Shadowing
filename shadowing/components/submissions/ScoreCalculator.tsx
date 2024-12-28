@@ -20,8 +20,9 @@ export const calculateRWFIBScore = (
     const questionNum = parseInt(questionId);
     if (questionNum >= 4 && questionNum <= 6) {
       if (!answer?.answer || answer.answer.trim() === '') {
-        totalPossible += questions[questionId]?.options ? 
-          Object.keys(questions[questionId].options).length : 0;
+        const options = questions[questionId]?.options;
+        totalPossible += options ? 
+          (Array.isArray(options) ? options.length : Object.keys(options).length) : 0;
         return;
       }
       console.log('RWFIB Question Processing:', {
@@ -36,7 +37,8 @@ export const calculateRWFIBScore = (
         return;
       }
       
-      const totalBlanks = Object.keys(question.options).length;
+      const options = question.options;
+      const totalBlanks = Array.isArray(options) ? options.length : Object.keys(options).length;
       const userAnswers = answer.answer.split(',').map(a => a.trim());
       const correctAnswers = question.correctAnswers || [];
       
