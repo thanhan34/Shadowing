@@ -18,14 +18,12 @@ interface Paragraph {
 
 interface ShadowProps {
   initialData: Paragraph[];
-  pageCount: number;
 }
 
-const Shadow: React.FC<ShadowProps> = ({ initialData, pageCount }) => {
+const Shadow: React.FC<ShadowProps> = ({ initialData }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [arrayParagraph, setArrayParagraph] = useState<Paragraph[]>(initialData);
   const [backgroundImage, setBackgroundImage] = useState("");
-  const [page, setPage] = useState(1);
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
   const router = useRouter();
 
@@ -45,23 +43,27 @@ const Shadow: React.FC<ShadowProps> = ({ initialData, pageCount }) => {
 
   useEffect(() => {
     const fetchFilteredData = async () => {
-      const res = await fetch(`/api/shadowing?page=${page}&search=${debouncedSearchQuery}`);
+      const res = await fetch(`/api/shadowing`);
       const data: Paragraph[] = await res.json();
-      setArrayParagraph(data);
+      // Filter data locally based on search query
+      const filteredData = debouncedSearchQuery
+        ? data.filter(item => item.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()))
+        : data;
+      setArrayParagraph(filteredData);
+      
+      // Log all shadowing page URLs
+      console.log('All Shadowing Page URLs:');
+      data.forEach(item => {
+        console.log(`http://localhost:3000/shadowing/${encodeURIComponent(item.name)}`);
+      });
     };
 
     fetchFilteredData();
-  }, [debouncedSearchQuery, page]);
+  }, [debouncedSearchQuery]);
 
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newSearchQuery = e.target.value;
     setSearchQuery(newSearchQuery);
-    setPage(1); // Reset to the first page on new search
-  };
-
-  const handlePageChange = async (newPage: number) => {
-    setSearchQuery("");
-    setPage(newPage);
   };
 
   return (
@@ -117,54 +119,19 @@ const Shadow: React.FC<ShadowProps> = ({ initialData, pageCount }) => {
         <p className="text-gray-600 dark:text-white">No results found</p>
       )}
 
-      <div className="flex flex-wrap justify-center space-x-2">
-        {Array.from({ length: pageCount }, (_, index) => index + 1).map((pageNumber) => (
-          <button
-            key={pageNumber}
-            onClick={() => handlePageChange(pageNumber)}
-            className={`px-4 py-2 m-2 ${pageNumber === page ? 'bg-blue-500 text-white hover:shadow-yellow-400/50 bg-yellow-400 shadow-xl' : 'bg-gray-200 text-gray-700 hover:shadow-yellow-400/50 shadow-xl'} rounded-lg`}
-          >
-            {pageNumber}
-          </button>
-        ))}
-      </div>
     </main>
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
-  const { page = '1', search = '' } = context.query;
-
-  const normalizedPage = Array.isArray(page) ? page[0] : page;
-  const normalizedSearch = Array.isArray(search) ? search[0] : search;
-
-  const itemsPerPage = 10;
-
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-
-  const res = await fetch(`${baseUrl}/api/shadowing?page=${normalizedPage}&search=${normalizedSearch}`);
+export const getServerSideProps: GetServerSideProps = async () => {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/shadowing`);
   const data: Paragraph[] = await res.json();
-
-  const totalItems = await getTotalItems(normalizedSearch);
-  const pageCount = Math.ceil(totalItems / itemsPerPage);
 
   return {
     props: {
       initialData: data,
-      pageCount,
     },
   };
 };
-
-async function getTotalItems(search: string) {
-  let querySnapshot;
-  if (search) {
-    const q = query(collection(db, "shadowing"), where("name", ">=", search), where("name", "<=", search + '\uf8ff'), orderBy("name"));
-    querySnapshot = await getDocs(q);
-  } else {
-    querySnapshot = await getDocs(collection(db, "shadowing"));
-  }
-  return querySnapshot.size;
-}
 
 export default Shadow;

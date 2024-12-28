@@ -38,6 +38,8 @@ export interface WFDQuestion {
   text: string;
 }
 
+import { Timestamp } from 'firebase/firestore';
+
 export interface Answer {
   questionNumber: number;
   questionId: string;
@@ -48,7 +50,7 @@ export interface Answer {
   timer?: number;
   options?: string[] | Record<string, string[]>;
   allOptions?: string[];
-  timestamp: Date;
+  timestamp: Timestamp;
 }
 
 export interface Submission {
@@ -56,6 +58,6 @@ export interface Submission {
   personalInfo: PersonalInfo;
   answers: Record<string, Answer>;
   notes?: string;
-  timestamp: Date;
+  timestamp: Timestamp;
   status: string;
 }

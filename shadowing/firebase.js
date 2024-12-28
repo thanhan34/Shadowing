@@ -17,5 +17,14 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
+// Add initialization logging
+console.log('Firebase initialized with config:', {
+  projectId: firebaseConfig.projectId,
+  authDomain: firebaseConfig.authDomain
+});
+
 export const db = getFirestore(app)
+console.log('Firestore initialized');
+
 export const storage = getStorage(app);
+console.log('Firebase Storage initialized');
