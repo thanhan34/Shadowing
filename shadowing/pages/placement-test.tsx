@@ -1,17 +1,28 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { useRouter } from 'next/router';
 import { db, storage } from '../firebase';
-import { collection, addDoc, getDocs, doc } from 'firebase/firestore';
+import { collection, addDoc, doc } from 'firebase/firestore';
+import { fetchQuestions } from '../services/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Question, PersonalInfo, WFDQuestion as WFDQuestionType, Answer } from '../types/placement-test';
 import PersonalInfoForm from '../components/placement-test/PersonalInfo';
 import QuestionProgress from '../components/placement-test/QuestionProgress';
-import ReadAloudQuestion from '../components/placement-test/ReadAloudQuestion';
-import RWFIBQuestion from '../components/placement-test/RWFIBQuestion';
-import RFIBQuestion from '../components/placement-test/RFIBQuestion';
-import WFDQuestion from '../components/placement-test/WFDQuestion';
 import { getRandomItems } from '../utils/questionUtils';
-import Head from "next/head"
+import Head from "next/head";
+import ErrorBoundary from '../components/ErrorBoundary';
+
+// Lazy load question components
+const ReadAloudQuestion = lazy(() => import('../components/placement-test/ReadAloudQuestion'));
+const RWFIBQuestion = lazy(() => import('../components/placement-test/RWFIBQuestion'));
+const RFIBQuestion = lazy(() => import('../components/placement-test/RFIBQuestion'));
+const WFDQuestion = lazy(() => import('../components/placement-test/WFDQuestion'));
+
+// Loading component for suspense fallback
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center p-8">
+    <div className="w-8 h-8 border-t-2 border-[#fc5d01] border-solid rounded-full animate-spin"></div>
+  </div>
+);
 
 const QUESTIONS_PER_TYPE = 3;
 
@@ -46,79 +57,54 @@ const PlacementTest: React.FC = () => {
   useEffect(() => {
     let isMounted = true;
 
-    const fetchQuestions = async () => {
+    const loadQuestions = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        const questionsRef = collection(db, 'questions');
-        const questionsSnapshot = await getDocs(questionsRef);
+        const { readAloudQuestions: raQuestions, rwfibQuestions: rwQuestions, rfibQuestions: rfQuestions, wfdQuestions: wfQuestions } = await fetchQuestions();
         if (!isMounted) return;
-        
-        const fetchedQuestions = questionsSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Question[];
 
-        const wfdRef = collection(db, 'writefromdictation');
-        const wfdSnapshot = await getDocs(wfdRef);
-        if (!isMounted) return;
-        
-        const wfdQuestions = wfdSnapshot.docs
-          .filter(doc => {
-            const data = doc.data() as WFDQuestionType;
-            return !data.isHidden;
-          })
-          .map(doc => {
-            const data = doc.data() as WFDQuestionType;
-            return {
-              id: doc.id,
-              type: 'wfd' as const,
-              content: data.text,
-              answer: data.text,
-              audio: data.audio
-            };
-          });
-
+        // Select and organize questions
         const readAloudQuestions = getRandomItems(
-          fetchedQuestions.filter(q => q.type === 'readAloud'),
+          raQuestions,
           QUESTIONS_PER_TYPE
-        ).map((q, index) => ({ ...q, questionNumber: index + 1, text: q.content }));
+        ).map((q: Question, index) => ({ ...q, questionNumber: index + 1, text: q.content }));
 
         const rwfibQuestions = getRandomItems(
-          fetchedQuestions.filter(q => q.type === 'rwfib'),
+          rwQuestions,
           QUESTIONS_PER_TYPE
-        ).map((q, index) => ({ ...q, questionNumber: index + 4 }));
+        ).map((q: Question, index) => ({ ...q, questionNumber: index + 4 }));
 
         const rfibQuestions = getRandomItems(
-          fetchedQuestions.filter(q => q.type === 'rfib'),
+          rfQuestions,
           QUESTIONS_PER_TYPE
-        ).map((q, index) => ({ ...q, questionNumber: index + 7 }));
+        ).map((q: Question, index) => ({ ...q, questionNumber: index + 7 }));
 
-        const randomWfdQuestions = getRandomItems(wfdQuestions, QUESTIONS_PER_TYPE)
-          .map((q, index) => ({ ...q, questionNumber: index + 10 }));
-
-        if (!isMounted) return;
+        const wfdQuestions = getRandomItems(
+          wfQuestions,
+          QUESTIONS_PER_TYPE
+        ).map((q: Question, index) => ({ ...q, questionNumber: index + 10 }));
 
         const sortedQuestions = [
           ...readAloudQuestions,
           ...rwfibQuestions,
           ...rfibQuestions,
-          ...randomWfdQuestions
+          ...wfdQuestions
         ];
 
         setQuestions(sortedQuestions);
         setLoading(false);
       } catch (error) {
-        console.error('Error in fetchQuestions:', error);
         if (isMounted) {
-          setError(error instanceof Error ? error.message : 'Failed to fetch questions');
+          const errorMessage = error instanceof Error ? error.message : 'Failed to fetch questions';
+          setError(errorMessage);
           setLoading(false);
         }
       }
     };
 
-    fetchQuestions();
+    loadQuestions();
 
     return () => {
       isMounted = false;
@@ -494,116 +480,128 @@ const PlacementTest: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#232323] flex flex-col items-center justify-center">
-        <div className="text-[#fc5d01] text-xl mb-4">Loading questions...</div>
-        <div className="w-16 h-16 border-t-4 border-[#fc5d01] border-solid rounded-full animate-spin"></div>
-      </div>
-    );
-  }
+  const renderQuestion = () => {
+    if (!currentQuestion) return null;
 
-  if (error) {
     return (
-      <div className="min-h-screen bg-[#232323] flex flex-col items-center justify-center">
-        <div className="text-[#fc5d01] text-xl mb-4">Error loading questions:</div>
-        <div className="text-[#fd7f33]">{error}</div>
-        <button 
-          onClick={() => window.location.reload()}
-          className="mt-4 px-4 py-2 bg-[#fc5d01] text-white rounded hover:bg-[#fd7f33]"
-        >
-          Try Again
-        </button>
-      </div>
-    );
-  }
+      <Suspense fallback={<LoadingSpinner />}>
+        {currentQuestion.type === 'readAloud' && (
+          <ReadAloudQuestion
+            content={currentQuestion.content}
+            timer={timer}
+            isPrepping={isPrepping}
+            prepTimer={prepTimer}
+            isRecordingPhase={isRecordingPhase}
+            recordTimer={recordTimer}
+            isRecording={isRecording}
+            userAnswer={userAnswers[`preview_${currentQuestion.id}`]}
+            onNext={handleNextQuestion}
+            isLastQuestion={currentQuestionIndex === questions.length - 1}
+          />
+        )}
 
-  if (questions.length === 0) {
-    return (
-      <div className="min-h-screen bg-[#232323] flex items-center justify-center">
-        <div className="text-[#fc5d01] text-xl">No questions available. Please add questions in the manage questions page.</div>
-      </div>
+        {currentQuestion.type === 'rwfib' && (
+          <RWFIBQuestion
+            content={currentQuestion.content}
+            timer={timer}
+            availableOptions={availableOptions}
+            userAnswers={userAnswers}
+            onAnswerChange={handleRFIBAnswerChange}
+            onNext={handleNextQuestion}
+            isLastQuestion={currentQuestionIndex === questions.length - 1}
+            questionId={currentQuestion.id}
+          />
+        )}
+
+        {currentQuestion.type === 'rfib' && (
+          <RFIBQuestion
+            content={currentQuestion.content}
+            timer={timer}
+            availableOptions={availableOptions}
+            userAnswers={getCurrentQuestionAnswers()}
+            onDrop={handleRFIBAnswerChange}
+            onNext={handleNextQuestion}
+            isLastQuestion={currentQuestionIndex === questions.length - 1}
+          />
+        )}
+
+        {currentQuestion.type === 'wfd' && currentQuestion.audio && (
+          <WFDQuestion
+            audio={currentQuestion.audio}
+            timer={timer}
+            userAnswer={userAnswers[currentQuestion.id] || ''}
+            onAnswerChange={handleAnswerChange}
+            onNext={handleNextQuestion}
+            isLastQuestion={currentQuestionIndex === questions.length - 1}
+            questionKey={currentQuestion.id}
+          />
+        )}
+      </Suspense>
     );
-  }
+  };
 
   return (
-    <div className="min-h-screen bg-[#232323] py-12 px-4 sm:px-6 lg:px-8">
-      <Head>
-        <title>PTE Intensive Placement Test</title>
-      </Head>
-      <div className="max-w-8xl mx-auto">
-        {currentQuestionIndex === -1 ? (
-          <PersonalInfoForm
-            personalInfo={personalInfo}
-            onInfoChange={handlePersonalInfoChange}
-            onStartTest={handleStartTest}
-          />
-        ) : (
-          <div className="bg-red rounded-lg shadow-lg p-6">
-            <QuestionProgress
-              currentQuestionIndex={currentQuestionIndex}
-              totalQuestions={questions.length}
-            />
-
-            {currentQuestion && (
-              <>
-                {currentQuestion.type === 'readAloud' && (
-                  <ReadAloudQuestion
-                    content={currentQuestion.content}
-                    timer={timer}
-                    isPrepping={isPrepping}
-                    prepTimer={prepTimer}
-                    isRecordingPhase={isRecordingPhase}
-                    recordTimer={recordTimer}
-                    isRecording={isRecording}
-                    userAnswer={userAnswers[`preview_${currentQuestion.id}`]}
-                    onNext={handleNextQuestion}
-                    isLastQuestion={currentQuestionIndex === questions.length - 1}
-                  />
-                )}
-
-                {currentQuestion.type === 'rwfib' && (
-                  <RWFIBQuestion
-                    content={currentQuestion.content}
-                    timer={timer}
-                    availableOptions={availableOptions}
-                    userAnswers={userAnswers}
-                    onAnswerChange={handleRFIBAnswerChange}
-                    onNext={handleNextQuestion}
-                    isLastQuestion={currentQuestionIndex === questions.length - 1}
-                    questionId={currentQuestion.id}
-                  />
-                )}
-
-                {currentQuestion.type === 'rfib' && (
-                  <RFIBQuestion
-                    content={currentQuestion.content}
-                    timer={timer}
-                    availableOptions={availableOptions}
-                    userAnswers={getCurrentQuestionAnswers()}
-                    onDrop={handleRFIBAnswerChange}
-                    onNext={handleNextQuestion}
-                    isLastQuestion={currentQuestionIndex === questions.length - 1}
-                  />
-                )}
-
-                {currentQuestion.type === 'wfd' && currentQuestion.audio && (
-                  <WFDQuestion
-                    audio={currentQuestion.audio}
-                    timer={timer}
-                    userAnswer={userAnswers[currentQuestion.id] || ''}
-                    onAnswerChange={handleAnswerChange}
-                    onNext={handleNextQuestion}
-                    isLastQuestion={currentQuestionIndex === questions.length - 1}
-                    questionKey={currentQuestion.id}
-                  />
-                )}
-              </>
-            )}
-          </div>
-        )}
+    <ErrorBoundary>
+      <div className="min-h-screen bg-[#232323] py-12 px-4 sm:px-6 lg:px-8">
+        <Head>
+          <title>PTE Intensive Placement Test</title>
+        </Head>
+        <div className="max-w-8xl mx-auto">
+          {currentQuestionIndex === -1 ? (
+            <>
+              <PersonalInfoForm
+                personalInfo={personalInfo}
+                onInfoChange={handlePersonalInfoChange}
+                onStartTest={() => {
+                  if (loading) {
+                    alert('Please wait while questions are being loaded...');
+                    return;
+                  }
+                  if (error) {
+                    alert('Failed to load questions. Please refresh the page and try again.');
+                    return;
+                  }
+                  if (questions.length === 0) {
+                    alert('No questions available. Please try again later.');
+                    return;
+                  }
+                  handleStartTest();
+                }}
+              />
+              {loading && (
+                <div className="fixed bottom-4 right-4 bg-[#2b2b2b] p-4 rounded-lg shadow-lg flex items-center space-x-3">
+                  <div className="w-5 h-5 border-t-2 border-[#fc5d01] border-solid rounded-full animate-spin"></div>
+                  <span className="text-[#fc5d01] text-sm">Loading questions...</span>
+                </div>
+              )}
+              {error && (
+                <div className="fixed bottom-4 right-4 bg-[#2b2b2b] p-4 rounded-lg shadow-lg">
+                  <div className="text-red-500 text-sm">Error: {error}</div>
+                  <button 
+                    onClick={() => window.location.reload()}
+                    className="mt-2 px-3 py-1 bg-[#fc5d01] text-white text-sm rounded hover:bg-[#fd7f33]"
+                  >
+                    Retry
+                  </button>
+                </div>
+              )}
+            </>
+          ) : questions.length > 0 ? (
+            <div className="bg-red rounded-lg shadow-lg p-6">
+              <QuestionProgress
+                currentQuestionIndex={currentQuestionIndex}
+                totalQuestions={questions.length}
+              />
+              {currentQuestion && renderQuestion()}
+            </div>
+          ) : (
+            <div className="min-h-screen bg-[#232323] flex items-center justify-center">
+              <div className="text-[#fc5d01] text-xl">No questions available. Please try again later.</div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </ErrorBoundary>
   );
 };
 
