@@ -613,7 +613,7 @@ const EditAudioSamplePage: React.FC = () => {
         }
       }
     }
-  }, [currentSample, uploadingFor]);
+  }, [currentSample, uploadingFor, db]);
 
   const handleUploadClick = useCallback((voice: string) => {
     setUploadingFor(voice);
@@ -691,37 +691,6 @@ const EditAudioSamplePage: React.FC = () => {
                   {sample.text}
                 </p>
               </div>
-              {/* <div className="grid grid-cols-3 gap-2">
-                {['Brian', 'Joanna', 'Olivia'].map(voice => (
-                  <div key={voice} className="text-sm">
-                    <div className={`px-2 py-1 rounded text-xs mb-1 ${
-                      sample.audio[voice] 
-                        ? 'bg-green-900 text-green-100' 
-                        : 'bg-red-900 text-red-100'
-                    }`}>
-                      {voice}
-                    </div>
-                    {sample.audio[voice] ? (
-                      <a 
-                        href={sample.audio[voice]} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-xs text-blue-400 hover:text-blue-300 break-all"
-                      >
-                        Audio URL
-                      </a>
-                    ) : (
-                      <p className="text-xs text-gray-400">
-                        {`${index + 1}_${voice}_${sample.text
-                          .replace(/^(brian|joanna|olivia)\s+/i, '')
-                          .replace(/[.,!?]/g, '')
-                          .replace(/\s+/g, '_')
-                          .slice(0, 50)}.mp3`}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div> */}
             </div>
           ))}
         </div>
@@ -768,13 +737,13 @@ const EditAudioSamplePage: React.FC = () => {
             </div>
           ) : (
             <div>
-              <p className='text-black'><strong>Text:</strong> {currentSample.text}</p>
-              <p className='text-black'><strong>Occurrence:</strong> {currentSample.occurrence}</p>
+              <p className="text-black"><strong>Text:</strong> {currentSample.text}</p>
+              <p className="text-black"><strong>Occurrence:</strong> {currentSample.occurrence}</p>
               <div>
                 <strong>Audio URLs:</strong>
                 {Object.entries(currentSample.audio).map(([voice, url]) => (
                   <div key={voice}>
-                    <p className='text-black'>{voice}: <a href={url} target="_blank" rel="noopener noreferrer">{url}</a></p>
+                    <p className="text-black">{voice}: <a href={url} target="_blank" rel="noopener noreferrer">{url}</a></p>
                   </div>
                 ))}
               </div>
@@ -827,7 +796,7 @@ const EditAudioSamplePage: React.FC = () => {
               ))}
             </div>
           )}
-          <p className="text-sm mb-2">Select multiple audio files to upload. Files should be named like: "number_Voice_Text.mp3"</p>
+          <p className="text-sm mb-2">Select multiple audio files to upload. Files should be named like: &quot;number_Voice_Text.mp3&quot;</p>
           
           {/* Status and progress section */}
           <div className="mb-4">
@@ -878,7 +847,7 @@ const EditAudioSamplePage: React.FC = () => {
           className="w-full p-2 border border-gray-300 rounded"
         >
           {filteredSamples.map((sample, index) => (
-            <option className='text-black' key={sample.id} value={index}>
+            <option className="text-black" key={sample.id} value={index}>
               {sample.text}
             </option>
           ))}

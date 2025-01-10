@@ -17,8 +17,6 @@ const Paragraph = () => {
         });
         const links = await Promise.all(downloadPromises);
         setDownloadLinks(links);
-        
-        console.log(downloadLinks)
       } catch (error) {
         console.error("Error fetching download links:", error);
       }
@@ -64,4 +62,3 @@ useEffect(() => {
 };
 
 export default Paragraph;
-

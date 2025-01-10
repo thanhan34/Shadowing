@@ -95,8 +95,8 @@ const WriteFromDictation: React.FC = () => {
     }
     setInputText("");
     setCurrentIndex((prevIndex) => (prevIndex + 1) % sortedAudioSamples.length);
-    setShowAnswer(alwaysShowAnswer); // Set the answer visibility based on the checkbox state
-  }, [sortedAudioSamples.length, alwaysShowAnswer]);
+    setShowAnswer(alwaysShowAnswer);
+  }, [sortedAudioSamples.length, alwaysShowAnswer, audioRef]);
 
   const handlePlayAll = useCallback(() => {
     setIsAutoplay((prev) => !prev);
@@ -115,7 +115,7 @@ const WriteFromDictation: React.FC = () => {
     if (sortedAudioSamples.length > 0 && audioRef.current) {
       audioRef.current.play();
     }
-  }, [sortedAudioSamples, currentIndex]);
+  }, [sortedAudioSamples, currentIndex, audioRef]);
 
   const handleSelectChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newIndex = parseInt(event.target.value, 10);
@@ -188,7 +188,7 @@ const WriteFromDictation: React.FC = () => {
     if (audioRef.current) {
       await audioRef.current.play();
     }
-  }, []);
+  }, [audioRef]);
 
   const handleRepeat = useCallback(async () => {
     if (audioRef.current) {
@@ -196,7 +196,7 @@ const WriteFromDictation: React.FC = () => {
       setInputText("");
       await audioRef.current.play();
     }
-  }, []);
+  }, [audioRef]);
 
   const handleExportCSV = useCallback(() => {
     if (sortedAudioSamples.length === 0) return;

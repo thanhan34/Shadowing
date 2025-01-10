@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useRef, Suspense, lazy, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import { db, storage } from '../firebase';
 import { collection, addDoc, doc } from 'firebase/firestore';
@@ -131,6 +131,97 @@ const PlacementTest: React.FC = () => {
     }
   }, [currentQuestion]);
 
+  const startRecording = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      
+      const mimeType = [
+        'audio/webm',
+        'audio/webm;codecs=opus',
+        'audio/ogg;codecs=opus',
+        'audio/mp4'
+      ].find(type => MediaRecorder.isTypeSupported(type)) || 'audio/webm';
+      
+      const recorder = new MediaRecorder(stream, {
+        mimeType: mimeType,
+        bitsPerSecond: 128000
+      });
+
+      audioChunksRef.current = [];
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      recorder.onstop = async () => {
+        try {
+          if (audioChunksRef.current.length === 0) {
+            console.error('No audio data collected');
+            return;
+          }
+
+          const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+
+          const previewUrl = URL.createObjectURL(audioBlob);
+          if (currentQuestion) {
+            const previewKey = `preview_${currentQuestion.id}`;
+            setUserAnswers(prev => ({
+              ...prev,
+              [previewKey]: previewUrl,
+            }));
+          }
+
+          if (!currentQuestion) {
+            console.error('No current question found');
+            return;
+          }
+
+          const timestamp = Date.now();
+          const filename = `placement_test_ra_${currentQuestion.questionNumber}_${timestamp}${mimeType.includes('webm') ? '.webm' : mimeType.includes('mp4') ? '.mp4' : '.ogg'}`;
+          const storageRef = ref(storage, `placement_test_recordings/${filename}`);
+          
+          const uploadTask = await uploadBytes(storageRef, audioBlob);
+          const downloadUrl = await getDownloadURL(storageRef);
+
+          setUserAnswers(prev => ({
+            ...prev,
+            [currentQuestion.id]: downloadUrl
+          }));
+          
+          stream.getTracks().forEach(track => track.stop());
+        } catch (error) {
+          console.error('Error in recorder.onstop:', error);
+          alert('Error saving recording. Please try again.');
+        }
+      };
+
+      recorder.start(1000);
+      setMediaRecorder(recorder);
+      setIsRecording(true);
+    } catch (error) {
+      console.error('Error in startRecording:', error);
+      alert('Error accessing microphone. Please ensure microphone permissions are granted and try again.');
+    }
+  }, [currentQuestion]);
+
+  const stopRecording = useCallback(() => {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop();
+      setIsRecording(false);
+      setIsRecordingPhase(false);
+    }
+  }, [mediaRecorder]);
+
+  const startRecordingPhase = useCallback(() => {
+    setIsPrepping(false);
+    setPrepTimer(null);
+    setRecordTimer(40);
+    setIsRecordingPhase(true);
+    startRecording();
+  }, [startRecording]);
+
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
@@ -155,7 +246,7 @@ const PlacementTest: React.FC = () => {
         clearInterval(interval);
       }
     };
-  }, [isPrepping, prepTimer, isRecordingPhase, recordTimer]);
+  }, [isPrepping, prepTimer, isRecordingPhase, recordTimer, startRecordingPhase, stopRecording]);
 
   const handlePersonalInfoChange = (field: keyof PersonalInfo) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -386,97 +477,6 @@ const PlacementTest: React.FC = () => {
     } catch (error) {
       console.error('Error in handleNextQuestion:', error);
       alert('Error processing recording. Please try again.');
-    }
-  };
-
-  const startRecordingPhase = () => {
-    setIsPrepping(false);
-    setPrepTimer(null);
-    setRecordTimer(40);
-    setIsRecordingPhase(true);
-    startRecording();
-  };
-
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      
-      const mimeType = [
-        'audio/webm',
-        'audio/webm;codecs=opus',
-        'audio/ogg;codecs=opus',
-        'audio/mp4'
-      ].find(type => MediaRecorder.isTypeSupported(type)) || 'audio/webm';
-      
-      const recorder = new MediaRecorder(stream, {
-        mimeType: mimeType,
-        bitsPerSecond: 128000
-      });
-
-      audioChunksRef.current = [];
-
-      recorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
-      };
-
-      recorder.onstop = async () => {
-        try {
-          if (audioChunksRef.current.length === 0) {
-            console.error('No audio data collected');
-            return;
-          }
-
-          const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
-
-          const previewUrl = URL.createObjectURL(audioBlob);
-          if (currentQuestion) {
-            const previewKey = `preview_${currentQuestion.id}`;
-            setUserAnswers(prev => ({
-              ...prev,
-              [previewKey]: previewUrl,
-            }));
-          }
-
-          if (!currentQuestion) {
-            console.error('No current question found');
-            return;
-          }
-
-          const timestamp = Date.now();
-          const filename = `placement_test_ra_${currentQuestion.questionNumber}_${timestamp}${mimeType.includes('webm') ? '.webm' : mimeType.includes('mp4') ? '.mp4' : '.ogg'}`;
-          const storageRef = ref(storage, `placement_test_recordings/${filename}`);
-          
-          const uploadTask = await uploadBytes(storageRef, audioBlob);
-          const downloadUrl = await getDownloadURL(storageRef);
-
-          setUserAnswers(prev => ({
-            ...prev,
-            [currentQuestion.id]: downloadUrl
-          }));
-          
-          stream.getTracks().forEach(track => track.stop());
-        } catch (error) {
-          console.error('Error in recorder.onstop:', error);
-          alert('Error saving recording. Please try again.');
-        }
-      };
-
-      recorder.start(1000);
-      setMediaRecorder(recorder);
-      setIsRecording(true);
-    } catch (error) {
-      console.error('Error in startRecording:', error);
-      alert('Error accessing microphone. Please ensure microphone permissions are granted and try again.');
-    }
-  };
-
-  const stopRecording = () => {
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-      mediaRecorder.stop();
-      setIsRecording(false);
-      setIsRecordingPhase(false);
     }
   };
 

@@ -316,10 +316,47 @@ const IPAComparison = () => {
   };
 
   useEffect(() => {
+    const checkInitialMicrophonePermission = async () => {
+      // Skip if we've already checked permissions
+      if (hasRequestedPermission.current) {
+        console.log('Permission already checked');
+        return permissionStatus === 'granted';
+      }
+
+      hasRequestedPermission.current = true;
+
+      try {
+        // Check if permission is already granted
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const audioDevice = devices.find(device => device.kind === 'audioinput');
+        
+        if (audioDevice?.label) {
+          // If we can see the label, permission was already granted
+          console.log('Microphone permission already granted');
+          setPermissionStatus('granted');
+          return true;
+        }
+
+        // Request permission if not already granted
+        console.log('Requesting microphone permission...');
+        setPermissionStatus('requesting');
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach(track => track.stop());
+        console.log('Microphone permission granted');
+        setPermissionStatus('granted');
+        return true;
+      } catch (err) {
+        console.error('Error checking/requesting microphone permission:', err);
+        setPermissionStatus('denied');
+        setError('Please allow microphone access to use voice recording.');
+        return false;
+      }
+    };
+
     // Check microphone permission on mount
     if (typeof navigator !== 'undefined' && navigator.mediaDevices) {
       console.log('Checking initial microphone permission...');
-      checkMicrophonePermission();
+      checkInitialMicrophonePermission();
     }
 
     return () => {
@@ -334,7 +371,7 @@ const IPAComparison = () => {
         recognitionRef.current.stop();
       }
     };
-  }, []);
+  }, [permissionStatus]);
 
   const getRecordButtonText = () => {
     switch (recordingStatus) {
