@@ -50,12 +50,6 @@ const Shadow: React.FC<ShadowProps> = ({ initialData }) => {
         ? data.filter(item => item.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()))
         : data;
       setArrayParagraph(filteredData);
-      
-      // Log all shadowing page URLs
-      console.log('All Shadowing Page URLs:');
-      data.forEach(item => {
-        console.log(`http://localhost:3000/shadowing/${encodeURIComponent(item.name)}`);
-      });
     };
 
     fetchFilteredData();
@@ -124,7 +118,10 @@ const Shadow: React.FC<ShadowProps> = ({ initialData }) => {
 };
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const echv.Xawa_ hfe/cd(`${aragraph[] =NaXT_PUBLIa_BASi res.jsonhttp://();
+  const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
+  const host = process.env.VERCEL_URL || process.env.NEXT_PUBLIC_BASE_URL || 'localhost:3000';
+  const res = await fetch(`${protocol}://${host}/api/shadowing`);
+  const data: Paragraph[] = await res.json();
   return {
     props: {
       initialData: data,
