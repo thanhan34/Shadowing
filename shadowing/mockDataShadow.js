@@ -1,43 +1,454 @@
-export const mockParagraphs = [
-    { id: "1", text: "Sample text 1", url: "http://example.com/1", name: "Sample Name 1" },
-    { id: "2", text: "Sample text 2", url: "http://example.com/2", name: "Sample Name 2" },
-    { id: "3", text: "Sample text 3", url: "http://example.com/3", name: "Sample Name 3" },
-    { id: "4", text: "Sample text 4", url: "http://example.com/4", name: "Sample Name 4" },
-    { id: "5", text: "Sample text 5", url: "http://example.com/5", name: "Sample Name 5" },
-    { id: "6", text: "Sample text 6", url: "http://example.com/6", name: "Sample Name 6" },
-    { id: "7", text: "Sample text 7", url: "http://example.com/7", name: "Sample Name 7" },
-    { id: "8", text: "Sample text 8", url: "http://example.com/8", name: "Sample Name 8" },
-    { id: "9", text: "Sample text 9", url: "http://example.com/9", name: "Sample Name 9" },
-    { id: "10", text: "Sample text 10", url: "http://example.com/10", name: "Sample Name 10" },
-    { id: "11", text: "Sample text 11", url: "http://example.com/11", name: "Sample Name 11" },
-    { id: "12", text: "Sample text 12", url: "http://example.com/12", name: "Sample Name 12" },
-    { id: "13", text: "Sample text 13", url: "http://example.com/13", name: "Sample Name 13" },
-    { id: "14", text: "Sample text 14", url: "http://example.com/14", name: "Sample Name 14" },
-    { id: "15", text: "Sample text 15", url: "http://example.com/15", name: "Sample Name 15" },
-    { id: "16", text: "Sample text 16", url: "http://example.com/16", name: "Sample Name 16" },
-    { id: "17", text: "Sample text 17", url: "http://example.com/17", name: "Sample Name 17" },
-    { id: "18", text: "Sample text 18", url: "http://example.com/18", name: "Sample Name 18" },
-    { id: "19", text: "Sample text 19", url: "http://example.com/19", name: "Sample Name 19" },
-    { id: "20", text: "Sample text 20", url: "http://example.com/20", name: "Sample Name 20" },
-    { id: "21", text: "Sample text 21", url: "http://example.com/21", name: "Sample Name 21" },
-    { id: "22", text: "Sample text 22", url: "http://example.com/22", name: "Sample Name 22" },
-    { id: "23", text: "Sample text 23", url: "http://example.com/23", name: "Sample Name 23" },
-    { id: "24", text: "Sample text 24", url: "http://example.com/24", name: "Sample Name 24" },
-    { id: "25", text: "Sample text 25", url: "http://example.com/25", name: "Sample Name 25" },
-    { id: "26", text: "Sample text 26", url: "http://example.com/26", name: "Sample Name 26" },
-    { id: "27", text: "Sample text 27", url: "http://example.com/27", name: "Sample Name 27" },
-    { id: "28", text: "Sample text 28", url: "http://example.com/28", name: "Sample Name 28" },
-    { id: "29", text: "Sample text 29", url: "http://example.com/29", name: "Sample Name 29" },
-    { id: "30", text: "Sample text 30", url: "http://example.com/30", name: "Sample Name 30" },
-    { id: "31", text: "Sample text 31", url: "http://example.com/31", name: "Sample Name 31" },
-    { id: "32", text: "Sample text 32", url: "http://example.com/32", name: "Sample Name 32" },
-    { id: "33", text: "Sample text 33", url: "http://example.com/33", name: "Sample Name 33" },
-    { id: "34", text: "Sample text 34", url: "http://example.com/34", name: "Sample Name 34" },
-    { id: "35", text: "Sample text 35", url: "http://example.com/35", name: "Sample Name 35" },
-    { id: "36", text: "Sample text 36", url: "http://example.com/36", name: "Sample Name 36" },
-    { id: "37", text: "Sample text 37", url: "http://example.com/37", name: "Sample Name 37" },
-    { id: "38", text: "Sample text 38", url: "http://example.com/38", name: "Sample Name 38" },
-    { id: "39", text: "Sample text 39", url: "http://example.com/39", name: "Sample Name 39" },
-    { id: "40", text: "Sample text 40", url: "http://example.com/40", name: "Sample Name 40" },
-  ];
-  
+export const mockDataShadow = [
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "University graduates lose their time finding jobs.",
+        "occurrence": 4
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "We can all meet at my office after the lecture.",
+        "occurrence": 10
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "Medical books and journals have been moved to the second floor.",
+        "occurrence": 8
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "The degree is taught by using a mixture of lectures and seminars.",
+        "occurrence": 3
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+          "text": "There is a list of dedicated librarians available during teaching time each term.",
+        "occurrence": 3
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "All of your assignments should be submitted by next Tuesday.",
+        "occurrence": 9
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "There are many different styles of business management.",
+        "occurrence": 4
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "Writing history needs a careful selection process of diverse sources.",
+        "occurrence": 5
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "The project is divided into four main sections.",
+        "occurrence": 1
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "Studying history can help you better understand the present.",
+        "occurrence": 4
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "Reading histories involves a process of careful selections.",
+        "occurrence": 7
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "Timetables for the new term will be available next week.",
+        "occurrence": 3
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "A surprisingly large number of students applied for that course.",
+        "occurrence": 2
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "Information technology has changed the way people study today.",
+        "occurrence": 6
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "The student union hosts a variety of social events.",
+        "occurrence": 1
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "The theme of the course is to encourage students to develop their creativity.",
+        "occurrence": 2
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "Sound waves are unable to travel through the vacuum.",
+        "occurrence": 4
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "Our professor is hosting the business development conference.",
+        "occurrence": 7
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "The skills of great stage actors cannot be taught.",
+        "occurrence": 4
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "Many important policies need to be made.",
+        "occurrence": 5
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "It helps you to rationally assess your arguments.",
+        "occurrence": 3
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "Organizational failure is considered from various perspectives in academic literature.",
+        "occurrence": 2
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "The library holds a substantial collection of materials on economic history.",
+        "occurrence": 1
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "Even simple techniques need to be practiced to become perfect.",
+        "occurrence": 4
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "Globalization has been an overwhelming urbanization phenomenon.",
+        "occurrence": 10
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "The essay will argue that the technology does more harm than good.",
+        "occurrence": 3
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "The history department is very active in research.",
+        "occurrence": 2
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "Too much information may be avoided by good research design.",
+        "occurrence": 3
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "Students are encouraged to read new books recommended by Professor Jones.",
+        "occurrence": 3
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "Students are advised to use multiple methods for this project.",
+        "occurrence": 4
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "It would be extremely beneficial to work together.",
+        "occurrence": 9
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "All students have their own styles of learning.",
+        "occurrence": 2
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "The other book isn't thorough but it's more insightful.",
+        "occurrence": 6
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "The new media has transcended the traditional national boundaries.",
+        "occurrence": 9
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "Business practices must obey contemporary general regulations.",
+        "occurrence": 4
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "It takes a long time to walk to the university.",
+        "occurrence": 9
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "We help students to develop their individualities and follow their interests.",
+        "occurrence": 1
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "Businesses must adapt to the general data protection regulations.",
+        "occurrence": 9
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "The night sky has always involved mystery and wonder.",
+        "occurrence": 4
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "Our laboratory equipment is provided free of charge.",
+        "occurrence": 5
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "Social media is criticized for causing Internet addiction.",
+        "occurrence": 6
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "The visiting speaker used to be a lecturer in this department.",
+        "occurrence": 9
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "Formal conclusions could be established through rigorous experiments.",
+        "occurrence": 1
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "Nurses can specialize in clinical work and management.",
+        "occurrence": 9
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "Our company must have independent financial auditing.",
+        "occurrence": 5
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "More research is required in the field of food science.",
+        "occurrence": 1
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "Textile manufacturing plays a large role in some economies.",
+        "occurrence": 8
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "Students may only park their cars in authorized university parking spaces.",
+        "occurrence": 4
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "The extent of advertising for children is open to much debate.",
+        "occurrence": 5
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",
+            "Joanna": ""
+        },
+        "text": "Gold is a metal that occurs naturally in a pure state.",
+        "occurrence": 8
+    },
+    {
+        "audio": {
+            "Brian": "",
+            "Olivia": "",

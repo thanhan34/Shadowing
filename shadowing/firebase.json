@@ -1,0 +1,14 @@
+{
+  "storage": {
+    "rules": "storage.rules",
+    "cors": {
+      "origin": ["http://localhost:3000"],
+      "method": ["GET", "POST", "PUT", "DELETE", "HEAD"],
+      "maxAgeSeconds": 3600,
+      "responseHeader": ["Content-Type"]
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  }
+}

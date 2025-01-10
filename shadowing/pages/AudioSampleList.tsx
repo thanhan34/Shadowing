@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { db } from "../firebase";
+import React, { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/router";
+import { db, storage } from "../firebase";
 import {
   collection,
   updateDoc,
@@ -8,13 +9,14 @@ import {
   onSnapshot,
   query,
 } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+
+type VoiceType = 'Brian' | 'Joanna' | 'Olivia';
 
 interface AudioSample {
   id: string;
   audio: {
-    Brian: string;
-    Olivia: string;
-    Joanna: string;
+    [K in VoiceType]: string;
   };
   text: string;
   occurrence: number;
@@ -23,9 +25,12 @@ interface AudioSample {
 }
 
 const AudioSampleList: React.FC = () => {
+  const router = useRouter();
   const [samples, setSamples] = useState<AudioSample[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [uploadingFor, setUploadingFor] = useState<{id: string, voice: VoiceType} | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const audioSamplesRef = collection(db, "writefromdictation");
@@ -51,13 +56,63 @@ const AudioSampleList: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
-  const handleEdit = async (id: string, newText: string, newIsHidden: boolean) => {
+  const handleEdit = async (id: string, newText: string, newIsHidden: boolean, newAudio?: { [K in VoiceType]: string }) => {
     try {
       const sampleRef = doc(db, "writefromdictation", id);
-      await updateDoc(sampleRef, { text: newText, isHidden: newIsHidden });
+      const updateData: any = { text: newText, isHidden: newIsHidden };
+      if (newAudio) {
+        updateData.audio = newAudio;
+      }
+      await updateDoc(sampleRef, updateData);
       setMessage(`Audio sample "${newText}" updated.`);
     } catch (error) {
       setMessage(`Error updating sample: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !e.target.files[0] || !uploadingFor) return;
+
+    try {
+      const file = e.target.files[0];
+      const { id, voice } = uploadingFor;
+      const storageRef = ref(storage, `audio/${id}/${voice}/${file.name}`);
+      
+      const metadata = {
+        contentType: 'audio/mp3',
+        cacheControl: 'public, max-age=31536000',
+        customMetadata: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS'
+        }
+      };
+
+      const snapshot = await uploadBytes(storageRef, file, metadata);
+      const url = await getDownloadURL(snapshot.ref);
+
+      const sample = samples.find(s => s.id === id);
+      if (sample) {
+        const updatedAudio = {
+          ...sample.audio,
+          [voice]: url
+        };
+        await handleEdit(id, sample.text, sample.isHidden ?? false, updatedAudio);
+      }
+
+      setUploadingFor(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error) {
+      setMessage(`Error uploading file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setUploadingFor(null);
+    }
+  };
+
+  const handleUploadClick = (id: string, voice: VoiceType) => {
+    setUploadingFor({ id, voice });
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
     }
   };
 
@@ -71,7 +126,7 @@ const AudioSampleList: React.FC = () => {
     }
   };
 
-  const hasEmptyAudioLink = (audio: { Brian: string; Olivia: string; Joanna: string }) => {
+  const hasEmptyAudioLink = (audio: { [K in VoiceType]: string }) => {
     return !audio.Brian || !audio.Olivia || !audio.Joanna;
   };
 
@@ -118,17 +173,44 @@ const AudioSampleList: React.FC = () => {
                   }
                 />
               </div>
-              <div className={`mb-2 ${hasEmptyAudioLink(sample.audio) ? 'text-red-500' : 'text-white'}`}>
-                <strong>Audio Links:</strong> {hasEmptyAudioLink(sample.audio) ? "Some links are empty" : "All links are filled"}
+              <div className="mb-4 space-y-2">
+                <strong className="text-white">Audio Links:</strong>
+                {(['Brian', 'Joanna', 'Olivia'] as const).map((voice) => (
+                  <div key={voice} className="flex items-center space-x-2">
+                    <span className="text-white w-16">{voice}:</span>
+                    <input
+                      type="text"
+                      value={sample.audio[voice] || ''}
+                      onChange={(e) => {
+                        const updatedAudio = {
+                          ...sample.audio,
+                          [voice]: e.target.value
+                        };
+                        setSamples((prevSamples) =>
+                          prevSamples.map((s) =>
+                            s.id === sample.id ? { ...s, audio: updatedAudio } : s
+                          )
+                        );
+                      }}
+                      className="flex-1 border border-gray-300 rounded p-1 text-black"
+                    />
+                    <button
+                      onClick={() => handleUploadClick(sample.id, voice)}
+                      className="px-3 py-1 bg-[#fc5d01] text-white rounded hover:bg-[#fd7f33]"
+                    >
+                      Upload
+                    </button>
+                  </div>
+                ))}
               </div>
               <button
-                className="mr-2 px-4 py-2 bg-blue-500 text-white rounded"
+                className="mr-2 px-4 py-2 bg-[#fc5d01] text-white rounded hover:bg-[#fd7f33]"
                 onClick={() => handleEdit(sample.id, sample.text, sample.isHidden ?? false)}
               >
                 Save
               </button>
               <button
-                className="px-4 py-2 bg-red-500 text-white rounded"
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
                 onClick={() => handleDelete(sample.id)}
               >
                 Delete
@@ -138,6 +220,15 @@ const AudioSampleList: React.FC = () => {
         </ul>
       )}
       {message && <p className="mt-4 text-black whitespace-pre-line">{message}</p>}
+      {uploadingFor && (
+        <input
+          type="file"
+          accept="audio/mp3"
+          onChange={handleFileUpload}
+          ref={fileInputRef}
+          className="hidden"
+        />
+      )}
     </main>
   );
 };

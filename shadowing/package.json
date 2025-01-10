@@ -2,12 +2,14 @@
   "name": "shadowing",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "update-docs": "ts-node updateDocuments.ts"
+    "update-docs": "ts-node updateDocuments.ts",
+    "test-import": "node testBulkImport.js"
   },
   "dependencies": {
     "@babel/runtime": "^7.26.0",
