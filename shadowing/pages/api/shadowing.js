@@ -12,14 +12,12 @@ export default async function handler(req, res) {
       name: doc.get("name"),
     }));
 
-    // Print all shadowing page URLs
-    console.log('All Shadowing Page URLs:');
-    paragraphData.forEach(item => {
-      console.log(`http://localhost:3000/shadowing/${encodeURIComponent(item.name)}`);
-    });
     res.status(200).json(paragraphData);
   } catch (error) {
-    console.error("Error fetching data:", error);
-    res.status(500).json({ error: "Error fetching data" });
+    console.error("Error fetching data:", error.message);
+    res.status(500).json({ 
+      error: "Error fetching data",
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined 
+    });
   }
 }

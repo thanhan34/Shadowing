@@ -124,9 +124,7 @@ const Shadow: React.FC<ShadowProps> = ({ initialData }) => {
 };
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/shadowing`);
-  const data: Paragraph[] = await res.json();
-
+  const echv.Xawa_ hfe/cd(`${aragraph[] =NaXT_PUBLIa_BASi res.jsonhttp://();
   return {
     props: {
       initialData: data,

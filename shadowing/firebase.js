@@ -14,17 +14,18 @@ const firebaseConfig = {
   appId: "1:1030709369202:web:f5c029e87f836c013ba5eb"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase only once
+import { getApp } from 'firebase/app';
 
-// Add initialization logging
-console.log('Firebase initialized with config:', {
-  projectId: firebaseConfig.projectId,
-  authDomain: firebaseConfig.authDomain
-});
+let app;
+try {
+  app = initializeApp(firebaseConfig);
+} catch (error) {
+  if (!/already exists/.test(error.message)) {
+    console.error('Firebase initialization error:', error.message);
+  }
+  app = getApp(); // If already initialized, use that one
+}
 
-export const db = getFirestore(app)
-console.log('Firestore initialized');
-
+export const db = getFirestore(app);
 export const storage = getStorage(app);
-console.log('Firebase Storage initialized');
