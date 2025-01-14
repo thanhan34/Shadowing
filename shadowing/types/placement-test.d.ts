@@ -50,6 +50,7 @@ export interface Answer {
   timer?: number;
   options?: string[] | Record<string, string[]>;
   allOptions?: string[];
+  correctAnswers?: string[];
   timestamp: Timestamp;
 }
 

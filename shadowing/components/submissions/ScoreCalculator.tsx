@@ -17,20 +17,15 @@ export const calculateRWFIBScore = (
     const questionNum = parseInt(questionId);
     if (questionNum >= 4 && questionNum <= 6) {
       const userAnswers = answer.answer.split(',').map(a => a.trim());
-      const blanks = answer.content.split('_____').slice(0, -1);
+      const correctAnswers = answer.correctAnswers || [];
       
-      blanks.forEach((_, index) => {
-        const userAnswer = userAnswers[index];
-        const options = Array.isArray(answer.options) ? 
-          answer.options.slice(index * 4, (index + 1) * 4) : 
-          answer.allOptions?.slice(index * 4, (index + 1) * 4) || [];
-        
-        if (options.includes(userAnswer)) {
+      userAnswers.forEach((userAnswer, index) => {
+        if (userAnswer === correctAnswers[index]) {
           totalCorrect++;
         }
       });
       
-      total += blanks.length;
+      total += correctAnswers.length || answer.content.split('_____').length - 1;
     }
   });
 
@@ -48,16 +43,15 @@ export const calculateRFIBScore = (
     const questionNum = parseInt(questionId);
     if (questionNum >= 7 && questionNum <= 9) {
       const userAnswers = answer.answer.split(',').map(a => a.trim());
-      const options = Array.isArray(answer.options) ? answer.options : 
-        Array.isArray(answer.allOptions) ? answer.allOptions : [];
+      const correctAnswers = answer.correctAnswers || [];
 
-      userAnswers.forEach(userAnswer => {
-        if (options.includes(userAnswer)) {
+      userAnswers.forEach((userAnswer, index) => {
+        if (userAnswer === correctAnswers[index]) {
           totalCorrect++;
         }
       });
 
-      total += answer.content.split('_____').length - 1;
+      total += correctAnswers.length || answer.content.split('_____').length - 1;
     }
   });
 

@@ -403,6 +403,7 @@ const PlacementTest: React.FC = () => {
           content: question.content || '',
           answer: formattedAnswer,
           text: text,
+          correctAnswers: question.correctAnswers || [],
           timer: question.type === 'readAloud' ? 40 : timer,
         };
 
