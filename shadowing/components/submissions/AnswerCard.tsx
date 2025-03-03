@@ -22,7 +22,7 @@ const AnswerCard: React.FC<AnswerCardProps> = ({
 }) => {
   const renderAudioPlayer = (url: string) => {
     return (
-      <div className="mb-4 p-4 rounded-lg">
+      <div className="mb-4 p-3 sm:p-4 rounded-lg">
         <div className="flex items-center justify-between mb-2">
           {isLoadingAudio ? (
             <span className="text-sm text-[#fd7f33]">Loading...</span>
@@ -68,22 +68,22 @@ const AnswerCard: React.FC<AnswerCardProps> = ({
   if (isWFD) {
     // WFD format
     return (
-      <div className="mb-8 bg-[#242424] p-6 rounded">
-        <div className="mb-6">
-          <h4 className="text-2xl font-medium text-[#fc5d01]">Question {questionId}</h4>
+      <div className="mb-8 bg-[#242424] p-4 sm:p-6 rounded">
+        <div className="mb-4 sm:mb-6">
+          <h4 className="text-xl sm:text-2xl font-medium text-[#fc5d01]">Question {questionId}</h4>
         </div>
 
         <div className="space-y-4">
           <div>
             <p className="text-[#fc5d01] font-medium mb-2">Correct Text:</p>
-            <div className="text-white bg-[#2a2a2a] p-4 rounded">
+            <div className="text-white bg-[#2a2a2a] p-3 sm:p-4 rounded">
               {question?.text || answer.text || answer.content}
             </div>
           </div>
 
           <div>
             <p className="text-[#fc5d01] font-medium mb-2">Your Answer:</p>
-            <div className="text-white bg-[#2a2a2a] p-4 rounded">
+            <div className="text-white bg-[#2a2a2a] p-3 sm:p-4 rounded break-words">
               {answer.answer}
             </div>
           </div>
@@ -143,15 +143,15 @@ const AnswerCard: React.FC<AnswerCardProps> = ({
 
   if (isRWFIB || isRFIB) {
     return (
-      <div className="mb-8 bg-[#242424] p-6 rounded">
-        <div className="mb-6">
-          <h4 className="text-2xl font-medium text-[#fc5d01]">Question {questionId}</h4>
+      <div className="mb-8 bg-[#242424] p-4 sm:p-6 rounded">
+        <div className="mb-4 sm:mb-6">
+          <h4 className="text-xl sm:text-2xl font-medium text-[#fc5d01]">Question {questionId}</h4>
         </div>
 
-        <div className="text-white mb-6">
+        <div className="text-white mb-4 sm:mb-6">
           <div>
             <p className="text-[#fc5d01] font-medium mb-2">Question Text:</p>
-            <div className="bg-[#2a2a2a] p-4 rounded">
+            <div className="bg-[#2a2a2a] p-3 sm:p-4 rounded">
               {(() => {
                 const parts = answer.content.split('_____');
                 const totalBlanks = answer.correctAnswers?.length || parts.length - 1;
@@ -170,23 +170,23 @@ const AnswerCard: React.FC<AnswerCardProps> = ({
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {isRWFIB ? (
             <div>
-              <p className="text-[#fc5d01] font-medium mb-4">Options:</p>
+              <p className="text-[#fc5d01] font-medium mb-3 sm:mb-4">Options:</p>
               {answer.content.split('_____').slice(0, -1).map((_, blankIndex) => {
                 const options = Array.isArray(answer.options) ? 
                   answer.options.slice(blankIndex * 4, (blankIndex + 1) * 4) : 
                   answer.allOptions?.slice(blankIndex * 4, (blankIndex + 1) * 4) || [];
                 
                 return (
-                  <div key={blankIndex} className="mb-4">
+                  <div key={blankIndex} className="mb-3 sm:mb-4">
                     <p className="text-white mb-2">Blank {blankIndex + 1}:</p>
                     <div className="flex gap-2 flex-wrap">
                       {options.map((option, optionIndex) => (
                         <div
                           key={optionIndex}
-                          className={`px-3 py-1 rounded ${
+                          className={`px-2 sm:px-3 py-1 rounded text-sm sm:text-base ${
                             option === (answer.correctAnswers?.[blankIndex] || '')
                               ? 'bg-[#fc5d01] text-white'
                               : 'bg-[#2a2a2a] text-white'
@@ -202,7 +202,7 @@ const AnswerCard: React.FC<AnswerCardProps> = ({
             </div>
           ) : (
             <div>
-              <p className="text-[#fc5d01] font-medium mb-4">Options:</p>
+              <p className="text-[#fc5d01] font-medium mb-3 sm:mb-4">Options:</p>
               <div className="flex gap-2 flex-wrap">
                 {(() => {
                   const options = Array.isArray(answer.options) ? answer.options : 
@@ -211,7 +211,7 @@ const AnswerCard: React.FC<AnswerCardProps> = ({
                   return options.map((option: string, index: number) => (
                     <div
                       key={index}
-                      className={`px-3 py-1 rounded ${
+                      className={`px-2 sm:px-3 py-1 rounded text-sm sm:text-base ${
                         correctAnswers.includes(option)
                           ? 'bg-[#fc5d01] text-white'
                           : 'bg-[#2a2a2a] text-white'
@@ -229,7 +229,7 @@ const AnswerCard: React.FC<AnswerCardProps> = ({
         <div className="space-y-4">
           <div>
             <p className="text-[#fc5d01] font-medium mb-2">Your Answer:</p>
-            <div className="text-white">
+            <div className="text-white break-words">
               {answer.answer}
             </div>
           </div>
@@ -276,15 +276,15 @@ const AnswerCard: React.FC<AnswerCardProps> = ({
 
   // Read Aloud questions (1-3)
   return (
-    <div className="mb-8 bg-[#242424] p-6 rounded">
-      <div className="mb-6">
-        <h4 className="text-2xl font-medium text-[#fc5d01]">Question {questionId}</h4>
+    <div className="mb-8 bg-[#242424] p-4 sm:p-6 rounded">
+      <div className="mb-4 sm:mb-6">
+        <h4 className="text-xl sm:text-2xl font-medium text-[#fc5d01]">Question {questionId}</h4>
       </div>
 
       <div className="space-y-4">
         <div>
           <p className="text-[#fc5d01] font-medium mb-2">Question Text:</p>
-          <div className="text-white bg-[#2a2a2a] p-4 rounded">
+          <div className="text-white bg-[#2a2a2a] p-3 sm:p-4 rounded">
             {question?.content || answer.content || 'No text available'}
           </div>
         </div>
@@ -294,7 +294,7 @@ const AnswerCard: React.FC<AnswerCardProps> = ({
           {audioUrl ? (
             renderAudioPlayer(answer.answer)
           ) : (
-            <div className="text-white bg-[#2a2a2a] p-4 rounded">
+            <div className="text-white bg-[#2a2a2a] p-3 sm:p-4 rounded">
               No recording available
             </div>
           )}

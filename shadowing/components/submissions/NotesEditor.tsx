@@ -29,10 +29,10 @@ const NotesEditor: React.FC<NotesEditorProps> = ({
           rows={4}
           placeholder="Enter notes here..."
         />
-        <div className="mt-2 space-x-2">
+        <div className="mt-2 flex flex-wrap gap-2">
           <button
             onClick={() => onSave(submissionId, tempNotes)}
-            className="px-4 py-2 bg-[#fc5d01] text-white rounded hover:bg-[#fd7f33]"
+            className="px-3 sm:px-4 py-2 bg-[#fc5d01] text-white rounded hover:bg-[#fd7f33] text-sm sm:text-base"
           >
             Save Notes
           </button>
@@ -41,7 +41,7 @@ const NotesEditor: React.FC<NotesEditorProps> = ({
               onCancelEdit();
               setTempNotes(initialNotes);
             }}
-            className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+            className="px-3 sm:px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 text-sm sm:text-base"
           >
             Cancel
           </button>
@@ -54,10 +54,10 @@ const NotesEditor: React.FC<NotesEditorProps> = ({
     <div className="mt-4">
       {initialNotes ? (
         <>
-          <p className="text-[#FFFFFF] mb-2">{initialNotes}</p>
+          <p className="text-[#FFFFFF] mb-2 break-words">{initialNotes}</p>
           <button
             onClick={onStartEdit}
-            className="text-[#fc5d01] hover:text-[#fd7f33]"
+            className="text-[#fc5d01] hover:text-[#fd7f33] text-sm sm:text-base"
           >
             Edit Notes
           </button>
@@ -65,7 +65,7 @@ const NotesEditor: React.FC<NotesEditorProps> = ({
       ) : (
         <button
           onClick={onStartEdit}
-          className="text-[#fc5d01] hover:text-[#fd7f33]"
+          className="text-[#fc5d01] hover:text-[#fd7f33] text-sm sm:text-base"
         >
           Add Notes
         </button>

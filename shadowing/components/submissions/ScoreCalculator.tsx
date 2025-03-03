@@ -109,7 +109,7 @@ interface ScoreSummaryProps {
 
 export const ScoreSummary: React.FC<ScoreSummaryProps> = ({ score, label }) => {
   return (
-    <p>
+    <p className="text-sm sm:text-base">
       <span className="text-[#FFFFFF]">{label}: </span>
       <span className="text-[#fd7f33] font-bold">{score.correct}/{score.total}</span>
     </p>

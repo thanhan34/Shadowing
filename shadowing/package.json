@@ -31,6 +31,7 @@
     "eslint": "8.46.0",
     "eslint-config-next": "13.4.12",
     "firebase": "^10.1.0",
+    "firebase-admin": "^13.1.0",
     "html-react-parser": "^4.2.1",
     "json2csv": "^6.0.0-alpha.2",
     "microsoft-cognitiveservices-speech-sdk": "^1.41.0",

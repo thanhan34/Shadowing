@@ -59,22 +59,22 @@ const SubmissionDetail: React.FC<SubmissionDetailProps> = ({
   };
 
   return (
-    <div className="w-full lg:w-5/6 p-6 max-h-[calc(100vh-100px)] overflow-y-auto">
-      <div className="flex justify-between items-start mb-6">
+    <div className="w-full lg:w-5/6 p-4 sm:p-6 max-h-[calc(100vh-100px)] overflow-y-auto">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6">
         <div>
           <h2 className="text-xl font-bold mb-4 text-[#fc5d01]">Submission Details</h2>
           <div className="space-y-2">
             <p>
               <span className="font-medium text-[#FFFFFF]">Name: </span>
-              <span className="text-[#FFFFFF]">{submission.personalInfo.fullName}</span>
+              <span className="text-[#FFFFFF] break-words">{submission.personalInfo.fullName}</span>
             </p>
             <p>
               <span className="font-medium text-[#FFFFFF]">Email: </span>
-              <span className="text-[#FFFFFF]">{submission.personalInfo.email}</span>
+              <span className="text-[#FFFFFF] break-words">{submission.personalInfo.email}</span>
             </p>
             <p>
               <span className="font-medium text-[#FFFFFF]">Phone: </span>
-              <span className="text-[#FFFFFF]">{submission.personalInfo.phone}</span>
+              <span className="text-[#FFFFFF] break-words">{submission.personalInfo.phone}</span>
             </p>
             <p>
               <span className="font-medium text-[#FFFFFF]">Target Score: </span>
@@ -82,7 +82,7 @@ const SubmissionDetail: React.FC<SubmissionDetailProps> = ({
             </p>
           </div>
         </div>
-        <div className="text-right">
+        <div className="md:text-right">
           <p className="text-[#fd7f33] mb-2">{formatDate(submission.timestamp)}</p>
           <p className="text-sm text-[#fd7f33] mb-4">ID: {submission.id}</p>
           <button
@@ -110,8 +110,8 @@ const SubmissionDetail: React.FC<SubmissionDetailProps> = ({
         />
       </div>
 
-      <div className="pt-6">
-        <div className="bg-[#242424] p-6 rounded mb-6">
+      <div className="pt-4 sm:pt-6">
+        <div className="bg-[#242424] p-4 sm:p-6 rounded mb-6">
           <h3 className="text-xl font-semibold mb-4 text-[#fc5d01]">Summary</h3>
           <div className="space-y-2">
             <div className="text-[#FFFFFF] space-y-2">
