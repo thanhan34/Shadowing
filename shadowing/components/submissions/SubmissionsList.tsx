@@ -1,19 +1,16 @@
 import React from 'react';
 import { Timestamp } from 'firebase/firestore';
 import { Submission } from '../../types/placement-test';
+import Link from 'next/link';
 
 interface SubmissionsListProps {
   submissions: Submission[];
-  selectedSubmissionId: string | null;
-  onSelectSubmission: (submission: Submission) => void;
   searchTerm: string;
   onSearchChange: (term: string) => void;
 }
 
 const SubmissionsList: React.FC<SubmissionsListProps> = ({
   submissions,
-  selectedSubmissionId,
-  onSelectSubmission,
   searchTerm,
   onSearchChange,
 }) => {
@@ -28,7 +25,7 @@ const SubmissionsList: React.FC<SubmissionsListProps> = ({
   };
 
   return (
-    <div className="w-full lg:w-1/6 pr-4">
+    <div className="w-full">
       <div className="mb-4">
         <input
           type="text"
@@ -38,21 +35,22 @@ const SubmissionsList: React.FC<SubmissionsListProps> = ({
           className="w-full p-2 border rounded bg-[#232323] text-white border-[#fc5d01] focus:outline-none focus:ring-2 focus:ring-[#fc5d01]"
         />
       </div>
-      <div className="space-y-2 max-h-[calc(100vh-200px)] overflow-y-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {submissions.map((submission) => (
-          <div
-            key={submission.id}
-            onClick={() => onSelectSubmission(submission)}
-            className={`p-4 rounded-lg cursor-pointer transition-colors ${
-              selectedSubmissionId === submission.id
-                ? 'bg-[#fc5d01] text-white'
-                : 'bg-[#2b2b2b] text-[#FFFFFF] hover:bg-[#3e3e5f]'
-            }`}
+          <Link 
+            key={submission.id} 
+            href={`/submissions/${submission.id}`}
+            className="block p-4 rounded-lg cursor-pointer transition-colors bg-[#2b2b2b] text-[#FFFFFF] hover:bg-[#3e3e5f]"
           >
             <p className="font-semibold truncate">{submission.personalInfo.fullName}</p>
             <p className="text-sm opacity-75 truncate">{submission.personalInfo.email}</p>
             <p className="text-sm opacity-75">{formatDate(submission.timestamp)}</p>
-          </div>
+            {submission.notes && (
+              <p className="mt-2 text-sm text-[#fd7f33] truncate">
+                Notes: {submission.notes}
+              </p>
+            )}
+          </Link>
         ))}
       </div>
     </div>
