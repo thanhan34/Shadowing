@@ -68,7 +68,7 @@ const AnswerCard: React.FC<AnswerCardProps> = ({
   if (isWFD) {
     // WFD format
     return (
-      <div className="mb-8 bg-[#242424] p-4 sm:p-6 rounded">
+      <div className="mb-8 bg-[#242424] p-4 sm:p-6 rounded w-full">
         <div className="mb-4 sm:mb-6">
           <h4 className="text-xl sm:text-2xl font-medium text-[#fc5d01]">Question {questionId}</h4>
         </div>
@@ -143,7 +143,7 @@ const AnswerCard: React.FC<AnswerCardProps> = ({
 
   if (isRWFIB || isRFIB) {
     return (
-      <div className="mb-8 bg-[#242424] p-4 sm:p-6 rounded">
+      <div className="mb-8 bg-[#242424] p-4 sm:p-6 rounded w-full">
         <div className="mb-4 sm:mb-6">
           <h4 className="text-xl sm:text-2xl font-medium text-[#fc5d01]">Question {questionId}</h4>
         </div>
@@ -276,7 +276,7 @@ const AnswerCard: React.FC<AnswerCardProps> = ({
 
   // Read Aloud questions (1-3)
   return (
-    <div className="mb-8 bg-[#242424] p-4 sm:p-6 rounded">
+    <div className="mb-8 bg-[#242424] p-4 sm:p-6 rounded w-full">
       <div className="mb-4 sm:mb-6">
         <h4 className="text-xl sm:text-2xl font-medium text-[#fc5d01]">Question {questionId}</h4>
       </div>

@@ -131,7 +131,7 @@ export default function SubmissionsIndex({ initialSubmissions, hasMore: initialH
     <div className="p-3 sm:p-4 bg-[#232323] min-h-screen">
       <Head>
         <title>PTE Intensive Placement Test Submissions</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
       </Head>
       <div className="flex justify-center mb-6 sm:mb-8">
         <Image src="/logo1.png" alt="Logo" width={120} height={120} className="w-[100px] h-[100px] sm:w-[150px] sm:h-[150px]" priority />
@@ -169,6 +169,32 @@ export default function SubmissionsIndex({ initialSubmissions, hasMore: initialH
   );
 }
 
+// Helper function to handle undefined values for serialization
+const serializeData = (obj: any): any => {
+  if (obj === undefined) {
+    return null;
+  }
+  
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+  
+  if (obj instanceof Date) {
+    return obj.toISOString();
+  }
+  
+  if (Array.isArray(obj)) {
+    return obj.map(item => serializeData(item));
+  }
+  
+  const result: any = {};
+  Object.keys(obj).forEach(key => {
+    result[key] = serializeData(obj[key]);
+  });
+  
+  return result;
+};
+
 // Server-side rendering
 export const getServerSideProps: GetServerSideProps = async () => {
   try {
@@ -189,22 +215,25 @@ export const getServerSideProps: GetServerSideProps = async () => {
       const data = doc.data();
       return {
         id: doc.id,
-        personalInfo: data.personalInfo,
+        personalInfo: data.personalInfo || {},
         timestamp: {
-          seconds: data.timestamp.seconds,
-          nanoseconds: data.timestamp.nanoseconds
+          seconds: data.timestamp?.seconds || 0,
+          nanoseconds: data.timestamp?.nanoseconds || 0
         },
-        notes: data.notes,
-        status: data.status
+        notes: data.notes || null,
+        status: data.status || 'pending'
       };
     });
     
     // Check if there are more submissions
     const hasMore = submissionsSnapshot.size >= SUBMISSIONS_PER_PAGE;
     
+    // Serialize the data to ensure it's JSON-compatible
+    const serializedSubmissions = serializeData(initialSubmissions);
+    
     return {
       props: {
-        initialSubmissions,
+        initialSubmissions: serializedSubmissions,
         hasMore
       }
     };

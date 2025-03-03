@@ -48,18 +48,52 @@ const SubmissionDetail: React.FC<SubmissionDetailProps> = ({
     );
   }
 
-  const formatDate = (timestamp: Timestamp) => {
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(timestamp.toDate());
+  const formatDate = (timestamp: any) => {
+    try {
+      // Check if it's a Firestore Timestamp object
+      if (timestamp && typeof timestamp.toDate === 'function') {
+        return new Intl.DateTimeFormat('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }).format(timestamp.toDate());
+      }
+      
+      // Check if it's our serialized timestamp format
+      if (timestamp && timestamp._isTimestamp) {
+        const date = new Date(timestamp._seconds * 1000);
+        return new Intl.DateTimeFormat('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }).format(date);
+      }
+      
+      // If it's a date object
+      if (timestamp instanceof Date) {
+        return new Intl.DateTimeFormat('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }).format(timestamp);
+      }
+      
+      // Fallback
+      return 'Invalid date';
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid date';
+    }
   };
 
   return (
-    <div className="w-full lg:w-5/6 p-4 sm:p-6 max-h-[calc(100vh-100px)] overflow-y-auto">
+    <div className="w-full p-4 sm:p-6 overflow-y-auto">
       <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6">
         <div>
           <h2 className="text-xl font-bold mb-4 text-[#fc5d01]">Submission Details</h2>

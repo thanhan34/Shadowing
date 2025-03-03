@@ -194,7 +194,7 @@ export default function SubmissionPage({ initialSubmission, initialQuestions, er
     <div className="p-3 sm:p-4 bg-[#232323] min-h-screen">
       <Head>
         <title>Submission Details - PTE Intensive</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
       </Head>
       <div className="flex justify-center mb-6 sm:mb-8">
         <Image src="/logo1.png" alt="Logo" width={120} height={120} className="w-[100px] h-[100px] sm:w-[150px] sm:h-[150px]" priority />
@@ -210,7 +210,7 @@ export default function SubmissionPage({ initialSubmission, initialQuestions, er
       </div>
       
       {submission && (
-        <div className="w-full">
+        <div className="w-full max-w-full">
           <SubmissionDetail
             submission={submission}
             questions={questions}
@@ -237,9 +237,13 @@ export default function SubmissionPage({ initialSubmission, initialQuestions, er
   );
 }
 
-// Helper function to convert Firestore timestamps to serializable objects
+// Helper function to convert Firestore timestamps to serializable objects and handle undefined values
 const convertTimestamps = (obj: any): any => {
-  if (obj === null || obj === undefined || typeof obj !== 'object') {
+  if (obj === undefined) {
+    return null;
+  }
+  
+  if (obj === null || typeof obj !== 'object') {
     return obj;
   }
 
@@ -249,6 +253,10 @@ const convertTimestamps = (obj: any): any => {
       _nanoseconds: obj.nanoseconds,
       _isTimestamp: true
     };
+  }
+  
+  if (obj instanceof Date) {
+    return obj.toISOString();
   }
 
   if (Array.isArray(obj)) {
@@ -335,11 +343,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     const submissionWithAnswers = {
       id: submissionDoc.id,
-      personalInfo: submissionData.personalInfo,
+      personalInfo: submissionData.personalInfo || {},
       answers,
-      notes: submissionData.notes,
-      timestamp: submissionData.timestamp,
-      status: submissionData.status
+      notes: submissionData.notes || null,
+      timestamp: submissionData.timestamp || Timestamp.now(),
+      status: submissionData.status || 'pending'
     };
 
     // Fetch questions

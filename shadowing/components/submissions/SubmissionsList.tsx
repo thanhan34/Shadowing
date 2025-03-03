@@ -39,14 +39,60 @@ const SubmissionsList: React.FC<SubmissionsListProps> = ({
     onSearchChange(debouncedSearchTerm);
   }, [debouncedSearchTerm, onSearchChange]);
 
-  const formatDate = (timestamp: Timestamp) => {
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(timestamp.toDate());
+  const formatDate = (timestamp: any) => {
+    try {
+      // Check if it's a Firestore Timestamp object
+      if (timestamp && typeof timestamp.toDate === 'function') {
+        return new Intl.DateTimeFormat('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }).format(timestamp.toDate());
+      }
+      
+      // Check if it's our serialized timestamp format
+      if (timestamp && timestamp._isTimestamp) {
+        const date = new Date(timestamp._seconds * 1000);
+        return new Intl.DateTimeFormat('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }).format(date);
+      }
+      
+      // If it's a date object
+      if (timestamp instanceof Date) {
+        return new Intl.DateTimeFormat('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }).format(timestamp);
+      }
+      
+      // If it's a plain object with seconds
+      if (timestamp && typeof timestamp.seconds === 'number') {
+        const date = new Date(timestamp.seconds * 1000);
+        return new Intl.DateTimeFormat('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }).format(date);
+      }
+      
+      // Fallback
+      return 'Invalid date';
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid date';
+    }
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
