@@ -819,13 +819,11 @@ const EditAudioSamplePage: React.FC = () => {
             <h3 className="text-lg font-semibold">Bulk Vietnamese Translation Update</h3>
           </div>
           <p className="text-sm mb-2">
-            Paste text in format: "English text | Vietnamese translation" (one per line)
+            Paste text in format: &quot;English text | Vietnamese translation&quot; (one per line)
           </p>
           <textarea
             className="w-full p-2 border border-gray-300 rounded text-black mb-4 h-40"
-            placeholder="Example:
-The weather is nice today. | Thời tiết hôm nay đẹp.
-I like to read books. | Tôi thích đọc sách."
+            placeholder={"Example:\nThe weather is nice today. | Thời tiết hôm nay đẹp.\nI like to read books. | Tôi thích đọc sách."}
           />
           <button
             className="px-4 py-2 bg-[#fc5d01] text-white rounded hover:bg-[#fd7f33]"
