@@ -848,7 +848,7 @@ I like to read books. | Tôi thích đọc sách."
               });
               
               if (updates.length === 0) {
-                alert('No valid updates found. Please use the format: "English text | Vietnamese translation"');
+                alert('No valid updates found. Please use the format: &quot;English text | Vietnamese translation&quot;');
                 return;
               }
               
@@ -888,7 +888,7 @@ I like to read books. | Tôi thích đọc sách."
                   } else {
                     notFound++;
                     notFoundTexts.push(text);
-                    console.log(`No matching sample found for text: "${text}"`);
+                    console.log(`No matching sample found for text: &quot;${text}&quot;`);
                   }
                 }
                 
@@ -896,7 +896,7 @@ I like to read books. | Tôi thích đọc sách."
                 let alertMessage = `Updated ${updated} translations. ${notFound} texts not found.`;
                 if (notFound > 0) {
                   const exampleCount = Math.min(3, notFoundTexts.length);
-                  const examples = notFoundTexts.slice(0, exampleCount).map(t => `"${t}"`).join(', ');
+                  const examples = notFoundTexts.slice(0, exampleCount).map(t => `&quot;${t}&quot;`).join(', ');
                   alertMessage += `\n\nExamples of texts not found: ${examples}`;
                   
                   // Log all not found texts to console for debugging
