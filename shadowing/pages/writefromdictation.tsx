@@ -17,6 +17,7 @@ interface AudioSample {
   createdAt: Timestamp;
   isHidden: boolean;
   questionType: string;
+  vietnameseTranslation?: string;
 }
 
 const WriteFromDictation: React.FC = () => {
@@ -264,6 +265,7 @@ const WriteFromDictation: React.FC = () => {
             questionType={sortedAudioSamples[currentIndex]?.questionType}
             audio={sortedAudioSamples[currentIndex]?.audio[selectedVoice]}
             text={sortedAudioSamples[currentIndex]?.text}
+            vietnameseTranslation={sortedAudioSamples[currentIndex]?.vietnameseTranslation}
             onEnded={handleAudioEnd}
             showAnswer={showAnswer}
             playbackRate={playbackRate}

@@ -14,6 +14,7 @@ interface AudioPlayerProps {
   playbackRate: number;
   onPlaybackRateChange: (newRate: number) => void;
   questionType: string;
+  vietnameseTranslation?: string;
 }
 
 const AudioPlayer = forwardRef<CustomAudioRef, AudioPlayerProps>(({
@@ -25,6 +26,7 @@ const AudioPlayer = forwardRef<CustomAudioRef, AudioPlayerProps>(({
   playbackRate,
   onPlaybackRateChange, 
   questionType,
+  vietnameseTranslation
 }, ref) => {
   const audioElementRef = useRef<HTMLAudioElement>(null);
 
@@ -97,6 +99,11 @@ const AudioPlayer = forwardRef<CustomAudioRef, AudioPlayerProps>(({
       {showAnswer && text && (
         <div className="mb-4 w-full">
           <p className="p-4 bg-blue-50 border border-blue-200 rounded text-gray-800 text-lg">{text}</p>
+          {vietnameseTranslation && (
+            <p className="p-4 mt-2 bg-[#fedac2] border border-[#fc5d01] rounded text-gray-800 text-lg">
+              <span className="font-bold text-[#fc5d01]">Nghĩa tiếng Việt:</span> {vietnameseTranslation}
+            </p>
+          )}
         </div>
       )}
     </div>

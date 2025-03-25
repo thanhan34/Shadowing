@@ -13,6 +13,7 @@ interface AudioSample {
   occurrence: number;
   createdAt: Timestamp;
   isHidden?: boolean;
+  vietnameseTranslation?: string;
 }
 
 const EditAudioSamplePage: React.FC = () => {
@@ -21,6 +22,7 @@ const EditAudioSamplePage: React.FC = () => {
   const [audioSamples, setAudioSamples] = useState<AudioSample[]>([]);
   const [filteredSamples, setFilteredSamples] = useState<AudioSample[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [showOnlyMissingTranslations, setShowOnlyMissingTranslations] = useState(true);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [currentSample, setCurrentSample] = useState<AudioSample | null>(null);
@@ -111,32 +113,35 @@ const EditAudioSamplePage: React.FC = () => {
     console.log('Filtering samples...');
     console.log('Total samples:', audioSamples.length);
     
-    const filtered = audioSamples.filter(sample => {
-      // Initialize audio object if it doesn't exist
-      if (!sample.audio) {
-        console.log('Sample missing audio object:', sample.text);
-        return true;
-      }
+    // Make sure we only show visible samples (isHidden === false)
+    const visibleSamples = audioSamples.filter(sample => sample.isHidden !== true);
+    console.log('Visible samples:', visibleSamples.length);
+    
+    let filtered = visibleSamples;
+    
+    // Filter to show only samples missing EITHER Vietnamese translation OR at least one audio link
+    filtered = visibleSamples.filter(sample => {
+      // Check if the sample needs Vietnamese translation
+      const needsVietnameseTranslation = !sample.vietnameseTranslation || sample.vietnameseTranslation.trim() === '';
       
-      // Check each voice's audio URL
+      // Check if the sample is missing any audio links
       const voices = ['Brian', 'Joanna', 'Olivia'];
-      const missingVoices = voices.filter(voice => {
-        const hasAudio = sample.audio[voice] && typeof sample.audio[voice] === 'string' && sample.audio[voice].trim() !== '';
-        return !hasAudio;
+      const hasMissingAudio = voices.some(voice => {
+        return !sample.audio?.[voice] || !sample.audio[voice].trim();
       });
-
-      const hasMissingAudio = missingVoices.length > 0;
       
       // Debug log for each sample
-      if (hasMissingAudio) {
-        console.log('Sample with missing audio:', {
+      if (needsVietnameseTranslation || hasMissingAudio) {
+        console.log('Sample needing Vietnamese translation or missing audio:', {
           text: sample.text,
-          audio: sample.audio,
-          missingVoices
+          needsVietnameseTranslation,
+          hasMissingAudio,
+          audio: sample.audio
         });
       }
       
-      return hasMissingAudio;
+      // Include samples that need EITHER Vietnamese translation OR have missing audio
+      return needsVietnameseTranslation || hasMissingAudio;
     });
     
     console.log('Filtered samples:', filtered.length);
@@ -147,7 +152,7 @@ const EditAudioSamplePage: React.FC = () => {
     } else {
       setCurrentSample(null);
     }
-  }, [audioSamples, currentIndex]);
+  }, [audioSamples, currentIndex, showOnlyMissingTranslations]);
 
   // Function to find existing audio URLs for a voice
   const findExistingAudioUrl = useCallback((text: string, voice: string) => {
@@ -679,20 +684,53 @@ const EditAudioSamplePage: React.FC = () => {
       
       {/* Display filtered samples' sentences */}
       <div className="mb-4 w-full max-w-2xl">
-        <h2 className="text-xl font-semibold mb-2">Texts Missing Audio Files:</h2>
+        <div className="mb-2">
+          <h2 className="text-xl font-semibold">Texts Needing Completion:</h2>
+        </div>
         <p className="text-sm text-gray-400 mb-4">
-          Below are texts that need audio files. Icons show which voices are missing:
+          Showing {filteredSamples.length} sentences that need either Vietnamese translations or audio links.
         </p>
-        <div className=" p-4 rounded max-h-[70vh]  space-y-4">
-          {filteredSamples.map((sample, index) => (
-            <div key={sample.id} >
-              <div className="flex items-start justify-between mb-2">
-                <p className="text-white font-mono text-sm flex-grow">
-                  {sample.text}
-                </p>
-              </div>
-            </div>
-          ))}
+        <div className="bg-gray-800 p-4 rounded max-h-[70vh] overflow-y-auto space-y-4">
+          {filteredSamples.length > 0 ? (
+            filteredSamples.map((sample, index) => {
+              // Check if the sample needs Vietnamese translation
+              const needsTranslation = !sample.vietnameseTranslation || sample.vietnameseTranslation.trim() === '';
+              
+              // Check if the sample is missing any audio links
+              const voices = ['Brian', 'Joanna', 'Olivia'];
+              const hasMissingAudio = voices.some(voice => {
+                return !sample.audio?.[voice] || !sample.audio[voice].trim();
+              });
+              
+              // Determine if this sample needs attention
+              const needsAttention = needsTranslation || hasMissingAudio;
+              return (
+                <div 
+                  key={sample.id} 
+                  className={`border-b border-gray-700 pb-2 ${needsAttention ? 'bg-[#fc5d01] bg-opacity-10' : ''}`}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <p className="text-white font-mono text-sm flex-grow">
+                      {sample.text}
+                    </p>
+                    <div className="flex flex-col ml-2">
+                      {!needsTranslation && (
+                        <span className="text-green-400 text-xs">✓ Vietnamese</span>
+                      )}
+                      {!hasMissingAudio && (
+                        <span className="text-green-400 text-xs">✓ Audio</span>
+                      )}
+                    </div>
+                  </div>
+                  {sample.vietnameseTranslation && (
+                    <p className="text-gray-400 text-xs ml-6 mt-1">{sample.vietnameseTranslation}</p>
+                  )}
+                </div>
+              );
+            })
+          ) : (
+            <p className="text-gray-400 text-center py-4">No sentences found that need Vietnamese translations.</p>
+          )}
         </div>
       </div>
 
@@ -707,6 +745,14 @@ const EditAudioSamplePage: React.FC = () => {
                 className="w-full p-2 border border-gray-300 rounded text-black"
                 value={currentSample.text}
                 onChange={(e) => handleChange(e, 'text')}
+              ></textarea>
+              <label htmlFor="vietnameseTranslation" className="block mb-2">Vietnamese Translation</label>
+              <textarea
+                id="vietnameseTranslation"
+                className="w-full p-2 border border-gray-300 rounded text-black"
+                value={currentSample.vietnameseTranslation || ''}
+                onChange={(e) => handleChange(e, 'vietnameseTranslation')}
+                placeholder="Enter Vietnamese translation here"
               ></textarea>
               <label htmlFor="occurrence" className="block mb-2">Occurrence</label>
               <input
@@ -738,6 +784,9 @@ const EditAudioSamplePage: React.FC = () => {
           ) : (
             <div>
               <p className="text-black"><strong>Text:</strong> {currentSample.text}</p>
+              {currentSample.vietnameseTranslation && (
+                <p className="text-black"><strong>Vietnamese Translation:</strong> {currentSample.vietnameseTranslation}</p>
+              )}
               <p className="text-black"><strong>Occurrence:</strong> {currentSample.occurrence}</p>
               <div>
                 <strong>Audio URLs:</strong>
@@ -764,7 +813,114 @@ const EditAudioSamplePage: React.FC = () => {
       )}
 
       <div className="mt-4 w-full max-w-md space-y-4">
-        {/* Bulk upload section */}
+        {/* Bulk Vietnamese Translation Update section */}
+        <div className="border p-4 rounded bg-[#fc5d01] bg-opacity-20">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">Bulk Vietnamese Translation Update</h3>
+          </div>
+          <p className="text-sm mb-2">
+            Paste text in format: "English text | Vietnamese translation" (one per line)
+          </p>
+          <textarea
+            className="w-full p-2 border border-gray-300 rounded text-black mb-4 h-40"
+            placeholder="Example:
+The weather is nice today. | Thời tiết hôm nay đẹp.
+I like to read books. | Tôi thích đọc sách."
+          />
+          <button
+            className="px-4 py-2 bg-[#fc5d01] text-white rounded hover:bg-[#fd7f33]"
+            onClick={() => {
+              const textarea = document.querySelector('textarea') as HTMLTextAreaElement;
+              if (!textarea) return;
+              
+              const lines = textarea.value.split('\n').filter(line => line.trim());
+              const updates: {text: string, translation: string}[] = [];
+              
+              lines.forEach(line => {
+                const parts = line.split('|');
+                if (parts.length === 2) {
+                  const text = parts[0].trim();
+                  const translation = parts[1].trim();
+                  if (text && translation) {
+                    updates.push({text, translation});
+                  }
+                }
+              });
+              
+              if (updates.length === 0) {
+                alert('No valid updates found. Please use the format: "English text | Vietnamese translation"');
+                return;
+              }
+              
+              const updateTranslations = async () => {
+                let updated = 0;
+                let notFound = 0;
+                
+                // Function to normalize text for comparison
+                const normalizeText = (text: string): string => {
+                  return text
+                    .toLowerCase()
+                    .replace(/[.,!?;:'"]/g, '') // Remove punctuation
+                    .replace(/\s+/g, ' ')       // Normalize spaces
+                    .trim();
+                };
+                
+                // Create a map of normalized texts to original samples for faster lookup
+                const normalizedSamplesMap = new Map<string, AudioSample>();
+                audioSamples.forEach(sample => {
+                  const normalizedText = normalizeText(sample.text);
+                  normalizedSamplesMap.set(normalizedText, sample);
+                });
+                
+                const notFoundTexts: string[] = [];
+                
+                for (const {text, translation} of updates) {
+                  // Normalize the input text
+                  const normalizedText = normalizeText(text);
+                  
+                  // Find the sample with matching normalized text
+                  const sample = normalizedSamplesMap.get(normalizedText);
+                  
+                  if (sample) {
+                    const docRef = doc(db, 'writefromdictation', sample.id);
+                    await updateDoc(docRef, { vietnameseTranslation: translation });
+                    updated++;
+                  } else {
+                    notFound++;
+                    notFoundTexts.push(text);
+                    console.log(`No matching sample found for text: "${text}"`);
+                  }
+                }
+                
+                // If there are not found texts, show the first few in the alert
+                let alertMessage = `Updated ${updated} translations. ${notFound} texts not found.`;
+                if (notFound > 0) {
+                  const exampleCount = Math.min(3, notFoundTexts.length);
+                  const examples = notFoundTexts.slice(0, exampleCount).map(t => `"${t}"`).join(', ');
+                  alertMessage += `\n\nExamples of texts not found: ${examples}`;
+                  
+                  // Log all not found texts to console for debugging
+                  console.log('All texts not found:', notFoundTexts);
+                }
+                
+                alert(alertMessage);
+                
+                // Alert is now handled above
+                textarea.value = '';
+              };
+              
+              if (updates.length > 0) {
+                if (confirm(`Update ${updates.length} Vietnamese translations?`)) {
+                  updateTranslations();
+                }
+              }
+            }}
+          >
+            Update Translations
+          </button>
+        </div>
+        
+        {/* Bulk audio upload section */}
         <div className="border p-4 rounded bg-gray-800">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold">Bulk Audio Upload</h3>
