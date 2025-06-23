@@ -16,6 +16,9 @@ const Navigation: React.FC = () => {
         <Link href="/shadow" legacyBehavior>
             <a className="text-black hover:underline">Shadowing</a>
           </Link>
+          <Link href="/shadowing-methods" legacyBehavior>
+            <a className="text-black hover:underline">Phương Pháp Học</a>
+          </Link>
           <Link href="/writefromdictation" legacyBehavior>
             <a className="text-black hover:underline">Write From Dictation</a>
           </Link>
@@ -55,6 +58,12 @@ const Navigation: React.FC = () => {
       </div>
       {menuOpen && (
         <div className="md:hidden">
+          <Link href="/shadow" legacyBehavior>
+            <a className="block text-black py-2 px-4 hover:underline">Shadowing</a>
+          </Link>
+          <Link href="/shadowing-methods" legacyBehavior>
+            <a className="block text-black py-2 px-4 hover:underline">Phương Pháp Học</a>
+          </Link>
           <Link href="/writefromdictation" legacyBehavior>
             <a className="block text-black py-2 px-4 hover:underline">Write From Dictation</a>
           </Link>

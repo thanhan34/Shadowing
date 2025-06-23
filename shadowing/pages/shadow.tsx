@@ -89,6 +89,9 @@ const Shadow: React.FC<ShadowProps> = ({ initialData }) => {
       <h1 className="mb-2 text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-gray-600 dark:text-white">
         SHADOWING
       </h1>
+      <Link href="/shadowing-methods" className="mb-4 px-4 py-2 bg-[#fc5d01] text-white rounded-lg hover:bg-[#fd7f33] transition-colors duration-300">
+        Xem Phương Pháp Học Shadowing
+      </Link>
       <input
         type="text"
         value={searchQuery}

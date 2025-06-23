@@ -5,6 +5,7 @@ import { testDb as newDb } from '../firebaseTest';
 import { storage } from '../firebase';
 import { collection, doc, updateDoc, getDocs, CollectionReference, query, orderBy, Query, DocumentData, Timestamp, onSnapshot, where } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import * as XLSX from 'xlsx';
 
 interface AudioSample {
   id: string;
@@ -119,7 +120,7 @@ const EditAudioSamplePage: React.FC = () => {
     
     let filtered = visibleSamples;
     
-    // Filter to show only samples missing EITHER Vietnamese translation OR at least one audio link
+    // Filter based on toggle state
     filtered = visibleSamples.filter(sample => {
       // Check if the sample needs Vietnamese translation
       const needsVietnameseTranslation = !sample.vietnameseTranslation || sample.vietnameseTranslation.trim() === '';
@@ -131,8 +132,9 @@ const EditAudioSamplePage: React.FC = () => {
       });
       
       // Debug log for each sample
-      if (needsVietnameseTranslation || hasMissingAudio) {
-        console.log('Sample needing Vietnamese translation or missing audio:', {
+      if ((showOnlyMissingTranslations && needsVietnameseTranslation) || 
+          (!showOnlyMissingTranslations && hasMissingAudio)) {
+        console.log('Sample matching current filter:', {
           text: sample.text,
           needsVietnameseTranslation,
           hasMissingAudio,
@@ -140,15 +142,20 @@ const EditAudioSamplePage: React.FC = () => {
         });
       }
       
-      // Include samples that need EITHER Vietnamese translation OR have missing audio
-      return needsVietnameseTranslation || hasMissingAudio;
+      // Filter based on toggle state
+      return showOnlyMissingTranslations 
+        ? needsVietnameseTranslation  // Show only samples missing Vietnamese translations
+        : hasMissingAudio;            // Show only samples missing audio links
     });
     
     console.log('Filtered samples:', filtered.length);
     
     setFilteredSamples(filtered);
-    if (filtered.length > 0 && currentIndex < filtered.length) {
-      setCurrentSample(filtered[currentIndex]);
+    // Reset current index when filter changes to avoid out of bounds
+    if (filtered.length > 0) {
+      const newIndex = currentIndex < filtered.length ? currentIndex : 0;
+      setCurrentIndex(newIndex);
+      setCurrentSample(filtered[newIndex]);
     } else {
       setCurrentSample(null);
     }
@@ -627,6 +634,58 @@ const EditAudioSamplePage: React.FC = () => {
     }
   }, []);
 
+  // Function to export filtered data to Excel
+  const exportToExcel = useCallback(() => {
+    // Create a worksheet with the filtered data
+    // Note: filteredSamples already only includes visible items (isHidden !== true)
+    const worksheet = XLSX.utils.json_to_sheet(
+      filteredSamples.map(sample => {
+        // Check which voices have audio
+        const brianHasAudio = sample.audio?.Brian && sample.audio.Brian.trim() !== '';
+        const joannaHasAudio = sample.audio?.Joanna && sample.audio.Joanna.trim() !== '';
+        const oliviaHasAudio = sample.audio?.Olivia && sample.audio.Olivia.trim() !== '';
+        
+        // Return a simplified object for Excel
+        return {
+          'English Text': sample.text,
+          'Vietnamese Translation': sample.vietnameseTranslation || '',
+          'Has Brian Audio': brianHasAudio ? 'Yes' : 'No',
+          'Has Joanna Audio': joannaHasAudio ? 'Yes' : 'No',
+          'Has Olivia Audio': oliviaHasAudio ? 'Yes' : 'No',
+          'Missing': showOnlyMissingTranslations ? 'Translation' : 'Audio',
+          'Visible': sample.isHidden === true ? 'No' : 'Yes'
+        };
+      })
+    );
+
+    // Set column widths
+    const columnWidths = [
+      { wch: 50 }, // English Text
+      { wch: 50 }, // Vietnamese Translation
+      { wch: 15 }, // Has Brian Audio
+      { wch: 15 }, // Has Joanna Audio
+      { wch: 15 }, // Has Olivia Audio
+      { wch: 15 }, // Missing
+      { wch: 10 }  // Visible
+    ];
+    worksheet['!cols'] = columnWidths;
+
+    // Create a workbook and add the worksheet
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(
+      workbook, 
+      worksheet, 
+      showOnlyMissingTranslations ? 'Missing Translations' : 'Missing Audio'
+    );
+
+    // Generate filename with current date
+    const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const filename = `audio_samples_${showOnlyMissingTranslations ? 'missing_translations' : 'missing_audio'}_${date}.xlsx`;
+
+    // Export to Excel file
+    XLSX.writeFile(workbook, filename);
+  }, [filteredSamples, showOnlyMissingTranslations]);
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -682,13 +741,36 @@ const EditAudioSamplePage: React.FC = () => {
         </div>
       </div>
       
-      {/* Display filtered samples' sentences */}
-      <div className="mb-4 w-full max-w-2xl">
-        <div className="mb-2">
+      {/* Toggle switch for filtering */}
+      <div className="w-full max-w-2xl mb-4">
+        <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold">Texts Needing Completion:</h2>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center space-x-2">
+              <span className={`text-sm ${!showOnlyMissingTranslations ? 'text-[#fc5d01] font-bold' : 'text-gray-400'}`}>
+                Missing Audio
+              </span>
+              <div 
+                className="relative inline-block w-12 h-6 transition duration-200 ease-in-out rounded-full cursor-pointer"
+                onClick={() => setShowOnlyMissingTranslations(prev => !prev)}
+              >
+                <div className={`absolute left-0 top-0 w-12 h-6 rounded-full transition-colors duration-200 ease-in-out ${showOnlyMissingTranslations ? 'bg-[#fc5d01]' : 'bg-[#fdbc94]'}`}></div>
+                <div className={`absolute w-5 h-5 bg-white rounded-full transition-transform duration-200 ease-in-out transform ${showOnlyMissingTranslations ? 'translate-x-6' : 'translate-x-1'} top-0.5`}></div>
+              </div>
+              <span className={`text-sm ${showOnlyMissingTranslations ? 'text-[#fc5d01] font-bold' : 'text-gray-400'}`}>
+                Missing Translations
+              </span>
+            </div>
+            <button
+              onClick={exportToExcel}
+              className="px-4 py-2 bg-[#fc5d01] text-white rounded hover:bg-[#fd7f33] transition-colors"
+            >
+              Export to Excel
+            </button>
+          </div>
         </div>
         <p className="text-sm text-gray-400 mb-4">
-          Showing {filteredSamples.length} sentences that need either Vietnamese translations or audio links.
+          Showing {filteredSamples.length} sentences that need {showOnlyMissingTranslations ? 'Vietnamese translations' : 'audio links'}.
         </p>
         <div className="bg-gray-800 p-4 rounded max-h-[70vh] overflow-y-auto space-y-4">
           {filteredSamples.length > 0 ? (
@@ -714,11 +796,10 @@ const EditAudioSamplePage: React.FC = () => {
                       {sample.text}
                     </p>
                     <div className="flex flex-col ml-2">
-                      {!needsTranslation && (
-                        <span className="text-green-400 text-xs">✓ Vietnamese</span>
-                      )}
-                      {!hasMissingAudio && (
-                        <span className="text-green-400 text-xs">✓ Audio</span>
+                      {showOnlyMissingTranslations ? (
+                        <span className="text-[#ffac7b] text-xs">Missing Translation</span>
+                      ) : (
+                        <span className="text-[#ffac7b] text-xs">Missing Audio</span>
                       )}
                     </div>
                   </div>
@@ -729,7 +810,9 @@ const EditAudioSamplePage: React.FC = () => {
               );
             })
           ) : (
-            <p className="text-gray-400 text-center py-4">No sentences found that need Vietnamese translations.</p>
+            <p className="text-gray-400 text-center py-4">
+              No sentences found that need {showOnlyMissingTranslations ? 'Vietnamese translations' : 'audio links'}.
+            </p>
           )}
         </div>
       </div>
