@@ -13,6 +13,14 @@ import TimedTyping from "../components/shadowing-methods/TimedTyping";
 import PhrasesPractice from "../components/shadowing-methods/PhrasesPractice";
 import RepeatAndType from "../components/shadowing-methods/RepeatAndType";
 
+// Type definition for methods
+interface Method {
+  id: string;
+  title: string;
+  description: string;
+  integration?: string;
+}
+
 const ShadowingMethods: React.FC = () => {
   const [backgroundImage, setBackgroundImage] = useState("");
   const [activeMethod, setActiveMethod] = useState<string | null>(null);
@@ -22,7 +30,7 @@ const ShadowingMethods: React.FC = () => {
     setBackgroundImage(getNextImage());
   }, []);
 
-  const basicMethods = [
+  const basicMethods: Method[] = [
     {
       id: "basic-dictation",
       title: "Nghe – Chép (Basic Dictation)",
@@ -61,7 +69,7 @@ const ShadowingMethods: React.FC = () => {
     }
   ];
 
-  const advancedMethods = [
+  const advancedMethods: Method[] = [
     {
       id: "chunking",
       title: "Chunking",
