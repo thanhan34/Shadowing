@@ -15,7 +15,219 @@ interface AudioSample {
   createdAt: Timestamp;
   isHidden?: boolean;
   vietnameseTranslation?: string;
+  topic?: string;
 }
+
+// Define default topics
+const DEFAULT_TOPICS = [
+  "Business & Work",
+  "Education & Learning", 
+  "Technology & Science",
+  "Daily Life & Routine",
+  "Health & Medicine",
+  "Travel & Tourism",
+  "Food & Cooking",
+  "Sports & Recreation",
+  "Environment & Nature",
+  "Arts & Humanities",
+  "General"
+];
+
+// SampleCard component for inline editing
+interface SampleCardProps {
+  sample: AudioSample;
+  index: number;
+  filterMode: 'translations' | 'audio' | 'topics';
+  needsAttention: boolean;
+  needsTranslation: boolean;
+  needsTopic: boolean;
+  onUpdate: (updatedSample: AudioSample) => Promise<void>;
+}
+
+const SampleCard: React.FC<SampleCardProps> = ({ 
+  sample, 
+  index, 
+  filterMode, 
+  needsAttention, 
+  needsTranslation, 
+  needsTopic, 
+  onUpdate 
+}) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedSample, setEditedSample] = useState<AudioSample>(sample);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await onUpdate(editedSample);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error saving:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setEditedSample(sample);
+    setIsEditing(false);
+  };
+
+  const getStatusIcon = () => {
+    if (filterMode === 'translations' && needsTranslation) return '🔤';
+    if (filterMode === 'audio') return '🎵';
+    if (filterMode === 'topics' && needsTopic) return '🏷️';
+    return '✅';
+  };
+
+  const getStatusText = () => {
+    if (filterMode === 'translations') return 'Missing Translation';
+    if (filterMode === 'audio') return 'Missing Audio';
+    if (filterMode === 'topics') return 'Missing Topic';
+    return 'Complete';
+  };
+
+  return (
+    <div className={`
+      relative p-4 rounded-lg border transition-all duration-200 hover:shadow-lg
+      ${needsAttention 
+        ? 'bg-gradient-to-r from-[#fc5d01]/10 to-[#fd7f33]/5 border-[#fc5d01]/30' 
+        : 'bg-gradient-to-r from-gray-700/50 to-gray-600/30 border-gray-600/50'
+      }
+    `}>
+      {/* Header with status and actions */}
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">{getStatusIcon()}</span>
+          <span className="text-xs font-medium text-[#ffac7b] bg-[#fc5d01]/20 px-2 py-1 rounded-full">
+            #{index + 1} - {getStatusText()}
+          </span>
+        </div>
+        <div className="flex gap-2">
+          {!isEditing ? (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+            >
+              ✏️ Edit
+            </button>
+          ) : (
+            <div className="flex gap-1">
+              <button
+                onClick={handleSave}
+                disabled={isSaving}
+                className="px-3 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600 transition-colors disabled:opacity-50"
+              >
+                {isSaving ? '💾' : '✅'} Save
+              </button>
+              <button
+                onClick={handleCancel}
+                className="px-3 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+              >
+                ❌ Cancel
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="space-y-3">
+        {/* English Text */}
+        <div>
+          <label className="block text-xs font-medium text-gray-300 mb-1">English Text:</label>
+          {isEditing ? (
+            <textarea
+              value={editedSample.text}
+              onChange={(e) => setEditedSample({...editedSample, text: e.target.value})}
+              className="w-full p-2 text-sm bg-gray-800 border border-gray-600 rounded text-white resize-none"
+              rows={2}
+            />
+          ) : (
+            <p className="text-white font-mono text-sm bg-gray-800/50 p-2 rounded">
+              {sample.text}
+            </p>
+          )}
+        </div>
+
+        {/* Vietnamese Translation */}
+        {(filterMode === 'translations' || sample.vietnameseTranslation) && (
+          <div>
+            <label className="block text-xs font-medium text-gray-300 mb-1">Vietnamese Translation:</label>
+            {isEditing ? (
+              <textarea
+                value={editedSample.vietnameseTranslation || ''}
+                onChange={(e) => setEditedSample({...editedSample, vietnameseTranslation: e.target.value})}
+                placeholder="Enter Vietnamese translation..."
+                className="w-full p-2 text-sm bg-gray-800 border border-gray-600 rounded text-white resize-none"
+                rows={2}
+              />
+            ) : (
+              <p className="text-gray-300 text-sm bg-gray-800/30 p-2 rounded italic">
+                {sample.vietnameseTranslation || 'No translation available'}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Topic */}
+        {(filterMode === 'topics' || sample.topic) && (
+          <div>
+            <label className="block text-xs font-medium text-gray-300 mb-1">Topic:</label>
+            {isEditing ? (
+              <select
+                value={editedSample.topic || 'General'}
+                onChange={(e) => setEditedSample({...editedSample, topic: e.target.value})}
+                className="w-full p-2 text-sm bg-gray-800 border border-gray-600 rounded text-white"
+              >
+                {DEFAULT_TOPICS.map((topic) => (
+                  <option key={topic} value={topic}>
+                    {topic}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <span className="inline-block px-2 py-1 text-xs bg-[#fd7f33] text-white rounded-full">
+                {sample.topic || 'General'}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Audio Status (for audio filter mode) */}
+        {filterMode === 'audio' && (
+          <div>
+            <label className="block text-xs font-medium text-gray-300 mb-1">Audio Status:</label>
+            <div className="flex gap-2 flex-wrap">
+              {['Brian', 'Joanna', 'Olivia'].map(voice => {
+                const hasAudio = sample.audio?.[voice] && sample.audio[voice].trim() !== '';
+                return (
+                  <span
+                    key={voice}
+                    className={`px-2 py-1 text-xs rounded-full ${
+                      hasAudio 
+                        ? 'bg-green-500/20 text-green-300 border border-green-500/30' 
+                        : 'bg-red-500/20 text-red-300 border border-red-500/30'
+                    }`}
+                  >
+                    {voice}: {hasAudio ? '✅' : '❌'}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Additional Info */}
+        <div className="flex justify-between items-center text-xs text-gray-400 pt-2 border-t border-gray-600/30">
+          <span>Occurrence: {sample.occurrence}</span>
+          <span>ID: {sample.id.slice(-6)}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const EditAudioSamplePage: React.FC = () => {
   const [useNewDb, setUseNewDb] = useState(true);
@@ -23,7 +235,7 @@ const EditAudioSamplePage: React.FC = () => {
   const [audioSamples, setAudioSamples] = useState<AudioSample[]>([]);
   const [filteredSamples, setFilteredSamples] = useState<AudioSample[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [showOnlyMissingTranslations, setShowOnlyMissingTranslations] = useState(true);
+  const [filterMode, setFilterMode] = useState<'translations' | 'audio' | 'topics'>('translations');
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [currentSample, setCurrentSample] = useState<AudioSample | null>(null);
@@ -120,7 +332,7 @@ const EditAudioSamplePage: React.FC = () => {
     
     let filtered = visibleSamples;
     
-    // Filter based on toggle state
+    // Filter based on filter mode
     filtered = visibleSamples.filter(sample => {
       // Check if the sample needs Vietnamese translation
       const needsVietnameseTranslation = !sample.vietnameseTranslation || sample.vietnameseTranslation.trim() === '';
@@ -131,21 +343,33 @@ const EditAudioSamplePage: React.FC = () => {
         return !sample.audio?.[voice] || !sample.audio[voice].trim();
       });
       
+      // Check if the sample is missing topic
+      const needsTopic = !sample.topic || sample.topic.trim() === '';
+      
       // Debug log for each sample
-      if ((showOnlyMissingTranslations && needsVietnameseTranslation) || 
-          (!showOnlyMissingTranslations && hasMissingAudio)) {
+      if ((filterMode === 'translations' && needsVietnameseTranslation) || 
+          (filterMode === 'audio' && hasMissingAudio) ||
+          (filterMode === 'topics' && needsTopic)) {
         console.log('Sample matching current filter:', {
           text: sample.text,
           needsVietnameseTranslation,
           hasMissingAudio,
+          needsTopic,
           audio: sample.audio
         });
       }
       
-      // Filter based on toggle state
-      return showOnlyMissingTranslations 
-        ? needsVietnameseTranslation  // Show only samples missing Vietnamese translations
-        : hasMissingAudio;            // Show only samples missing audio links
+      // Filter based on mode
+      switch (filterMode) {
+        case 'translations':
+          return needsVietnameseTranslation;
+        case 'audio':
+          return hasMissingAudio;
+        case 'topics':
+          return needsTopic;
+        default:
+          return needsVietnameseTranslation;
+      }
     });
     
     console.log('Filtered samples:', filtered.length);
@@ -159,7 +383,7 @@ const EditAudioSamplePage: React.FC = () => {
     } else {
       setCurrentSample(null);
     }
-  }, [audioSamples, currentIndex, showOnlyMissingTranslations]);
+  }, [audioSamples, currentIndex, filterMode]);
 
   // Function to find existing audio URLs for a voice
   const findExistingAudioUrl = useCallback((text: string, voice: string) => {
@@ -557,7 +781,7 @@ const EditAudioSamplePage: React.FC = () => {
     }
   }, [currentSample, db]);
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: keyof AudioSample) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>, field: keyof AudioSample) => {
     if (currentSample) {
       setCurrentSample({ ...currentSample, [field]: e.target.value });
     }
@@ -649,10 +873,11 @@ const EditAudioSamplePage: React.FC = () => {
         return {
           'English Text': sample.text,
           'Vietnamese Translation': sample.vietnameseTranslation || '',
+          'Topic': sample.topic || 'General',
           'Has Brian Audio': brianHasAudio ? 'Yes' : 'No',
           'Has Joanna Audio': joannaHasAudio ? 'Yes' : 'No',
           'Has Olivia Audio': oliviaHasAudio ? 'Yes' : 'No',
-          'Missing': showOnlyMissingTranslations ? 'Translation' : 'Audio',
+          'Missing': filterMode === 'translations' ? 'Translation' : filterMode === 'audio' ? 'Audio' : 'Topic',
           'Visible': sample.isHidden === true ? 'No' : 'Yes'
         };
       })
@@ -662,6 +887,7 @@ const EditAudioSamplePage: React.FC = () => {
     const columnWidths = [
       { wch: 50 }, // English Text
       { wch: 50 }, // Vietnamese Translation
+      { wch: 20 }, // Topic
       { wch: 15 }, // Has Brian Audio
       { wch: 15 }, // Has Joanna Audio
       { wch: 15 }, // Has Olivia Audio
@@ -672,19 +898,19 @@ const EditAudioSamplePage: React.FC = () => {
 
     // Create a workbook and add the worksheet
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(
-      workbook, 
-      worksheet, 
-      showOnlyMissingTranslations ? 'Missing Translations' : 'Missing Audio'
-    );
+    const sheetName = filterMode === 'translations' ? 'Missing Translations' : 
+                     filterMode === 'audio' ? 'Missing Audio' : 'Missing Topics';
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
 
     // Generate filename with current date
     const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-    const filename = `audio_samples_${showOnlyMissingTranslations ? 'missing_translations' : 'missing_audio'}_${date}.xlsx`;
+    const filenameSuffix = filterMode === 'translations' ? 'missing_translations' : 
+                          filterMode === 'audio' ? 'missing_audio' : 'missing_topics';
+    const filename = `audio_samples_${filenameSuffix}_${date}.xlsx`;
 
     // Export to Excel file
     XLSX.writeFile(workbook, filename);
-  }, [filteredSamples, showOnlyMissingTranslations]);
+  }, [filteredSamples, filterMode]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -741,25 +967,21 @@ const EditAudioSamplePage: React.FC = () => {
         </div>
       </div>
       
-      {/* Toggle switch for filtering */}
+      {/* Filter mode selection */}
       <div className="w-full max-w-2xl mb-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold">Texts Needing Completion:</h2>
           <div className="flex items-center gap-4">
             <div className="flex items-center space-x-2">
-              <span className={`text-sm ${!showOnlyMissingTranslations ? 'text-[#fc5d01] font-bold' : 'text-gray-400'}`}>
-                Missing Audio
-              </span>
-              <div 
-                className="relative inline-block w-12 h-6 transition duration-200 ease-in-out rounded-full cursor-pointer"
-                onClick={() => setShowOnlyMissingTranslations(prev => !prev)}
+              <select
+                value={filterMode}
+                onChange={(e) => setFilterMode(e.target.value as 'translations' | 'audio' | 'topics')}
+                className="px-3 py-1 bg-[#fc5d01] text-white rounded text-sm"
               >
-                <div className={`absolute left-0 top-0 w-12 h-6 rounded-full transition-colors duration-200 ease-in-out ${showOnlyMissingTranslations ? 'bg-[#fc5d01]' : 'bg-[#fdbc94]'}`}></div>
-                <div className={`absolute w-5 h-5 bg-white rounded-full transition-transform duration-200 ease-in-out transform ${showOnlyMissingTranslations ? 'translate-x-6' : 'translate-x-1'} top-0.5`}></div>
-              </div>
-              <span className={`text-sm ${showOnlyMissingTranslations ? 'text-[#fc5d01] font-bold' : 'text-gray-400'}`}>
-                Missing Translations
-              </span>
+                <option value="translations">Missing Translations</option>
+                <option value="audio">Missing Audio</option>
+                <option value="topics">Missing Topics</option>
+              </select>
             </div>
             <button
               onClick={exportToExcel}
@@ -770,9 +992,12 @@ const EditAudioSamplePage: React.FC = () => {
           </div>
         </div>
         <p className="text-sm text-gray-400 mb-4">
-          Showing {filteredSamples.length} sentences that need {showOnlyMissingTranslations ? 'Vietnamese translations' : 'audio links'}.
+          Showing {filteredSamples.length} sentences that need {
+            filterMode === 'translations' ? 'Vietnamese translations' : 
+            filterMode === 'audio' ? 'audio links' : 'topics'
+          }.
         </p>
-        <div className="bg-gray-800 p-4 rounded max-h-[70vh] overflow-y-auto space-y-4">
+        <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-xl shadow-2xl max-h-[70vh] overflow-y-auto space-y-3">
           {filteredSamples.length > 0 ? (
             filteredSamples.map((sample, index) => {
               // Check if the sample needs Vietnamese translation
@@ -784,35 +1009,47 @@ const EditAudioSamplePage: React.FC = () => {
                 return !sample.audio?.[voice] || !sample.audio[voice].trim();
               });
               
+              // Check if missing topic
+              const needsTopic = !sample.topic || sample.topic.trim() === '';
+              
               // Determine if this sample needs attention
-              const needsAttention = needsTranslation || hasMissingAudio;
+              const needsAttention = needsTranslation || hasMissingAudio || needsTopic;
+              
               return (
-                <div 
-                  key={sample.id} 
-                  className={`border-b border-gray-700 pb-2 ${needsAttention ? 'bg-[#fc5d01] bg-opacity-10' : ''}`}
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <p className="text-white font-mono text-sm flex-grow">
-                      {sample.text}
-                    </p>
-                    <div className="flex flex-col ml-2">
-                      {showOnlyMissingTranslations ? (
-                        <span className="text-[#ffac7b] text-xs">Missing Translation</span>
-                      ) : (
-                        <span className="text-[#ffac7b] text-xs">Missing Audio</span>
-                      )}
-                    </div>
-                  </div>
-                  {sample.vietnameseTranslation && (
-                    <p className="text-gray-400 text-xs ml-6 mt-1">{sample.vietnameseTranslation}</p>
-                  )}
-                </div>
+                <SampleCard 
+                  key={sample.id}
+                  sample={sample}
+                  index={index}
+                  filterMode={filterMode}
+                  needsAttention={needsAttention}
+                  needsTranslation={needsTranslation}
+                  needsTopic={needsTopic}
+                  onUpdate={async (updatedSample) => {
+                    try {
+                      const docRef = doc(db, 'writefromdictation', updatedSample.id);
+                      const { id, ...data } = updatedSample;
+                      await updateDoc(docRef, data);
+                    } catch (error) {
+                      console.error('Error updating sample:', error);
+                      alert('Error updating sample');
+                    }
+                  }}
+                />
               );
             })
           ) : (
-            <p className="text-gray-400 text-center py-4">
-              No sentences found that need {showOnlyMissingTranslations ? 'Vietnamese translations' : 'audio links'}.
-            </p>
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">📝</div>
+              <p className="text-gray-400 text-lg">
+                No sentences found that need {
+                  filterMode === 'translations' ? 'Vietnamese translations' : 
+                  filterMode === 'audio' ? 'audio links' : 'topics'
+                }.
+              </p>
+              <p className="text-gray-500 text-sm mt-2">
+                Try switching to a different filter mode or check your data.
+              </p>
+            </div>
           )}
         </div>
       </div>
@@ -845,6 +1082,19 @@ const EditAudioSamplePage: React.FC = () => {
                 value={currentSample.occurrence}
                 onChange={(e) => handleChange(e, 'occurrence')}
               />
+              <label htmlFor="topic" className="block mb-2">Topic</label>
+              <select
+                id="topic"
+                className="w-full p-2 border border-gray-300 rounded text-black"
+                value={currentSample.topic || 'General'}
+                onChange={(e) => handleChange(e, 'topic')}
+              >
+                {DEFAULT_TOPICS.map((topic) => (
+                  <option key={topic} value={topic}>
+                    {topic}
+                  </option>
+                ))}
+              </select>
               <label htmlFor="audio" className="block mb-2">Audio URLs</label>
               {['Brian', 'Joanna', 'Olivia'].map(renderAudioField)}
               {uploadingFor && (
@@ -905,13 +1155,14 @@ const EditAudioSamplePage: React.FC = () => {
             Paste text in format: &quot;English text | Vietnamese translation&quot; (one per line)
           </p>
           <textarea
+            id="translation-textarea"
             className="w-full p-2 border border-gray-300 rounded text-black mb-4 h-40"
             placeholder={"Example:\nThe weather is nice today. | Thời tiết hôm nay đẹp.\nI like to read books. | Tôi thích đọc sách."}
           />
           <button
             className="px-4 py-2 bg-[#fc5d01] text-white rounded hover:bg-[#fd7f33]"
             onClick={() => {
-              const textarea = document.querySelector('textarea') as HTMLTextAreaElement;
+              const textarea = document.getElementById('translation-textarea') as HTMLTextAreaElement;
               if (!textarea) return;
               
               const lines = textarea.value.split('\n').filter(line => line.trim());
@@ -999,6 +1250,246 @@ const EditAudioSamplePage: React.FC = () => {
           >
             Update Translations
           </button>
+        </div>
+
+        {/* Bulk Topic Update section */}
+        <div className="border p-4 rounded bg-[#fedac2] bg-opacity-20">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">Bulk Topic Update</h3>
+          </div>
+          
+          {/* Simple Bulk Update - Select topic and paste sentences */}
+          <div className="mb-6">
+            <h4 className="text-sm font-semibold mb-2">Bulk Update with Selected Topic</h4>
+            <p className="text-xs mb-3 text-gray-300">
+              1. Select a topic from dropdown<br/>
+              2. Paste English sentences (one per line)<br/>
+              3. All pasted sentences will be assigned the selected topic
+            </p>
+            
+            <div className="mb-3">
+              <label className="block text-xs font-medium mb-1">Select Topic:</label>
+              <select
+                id="bulk-topic-dropdown"
+                className="w-full p-2 border border-gray-300 rounded text-black text-sm"
+                defaultValue=""
+              >
+                <option value="" disabled>Choose topic to assign</option>
+                {DEFAULT_TOPICS.filter(topic => topic !== 'All').map((topic) => (
+                  <option key={topic} value={topic}>
+                    {topic}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            <div className="mb-3">
+              <label className="block text-xs font-medium mb-1">Paste English Sentences:</label>
+              <textarea
+                id="bulk-sentences-textarea"
+                className="w-full p-2 border border-gray-300 rounded text-black text-sm h-32"
+                placeholder={"Paste English sentences here (one per line):\nThe weather is nice today.\nI like to read books.\nShe is going to the market."}
+              />
+            </div>
+            
+            <button
+              className="px-4 py-2 bg-[#fc5d01] text-white rounded hover:bg-[#fd7f33] text-sm"
+              onClick={async () => {
+                const topicSelect = document.getElementById('bulk-topic-dropdown') as HTMLSelectElement;
+                const textarea = document.getElementById('bulk-sentences-textarea') as HTMLTextAreaElement;
+                
+                if (!topicSelect || !topicSelect.value) {
+                  alert('Please select a topic first');
+                  return;
+                }
+                
+                if (!textarea || !textarea.value.trim()) {
+                  alert('Please paste some English sentences');
+                  return;
+                }
+                
+                const selectedTopic = topicSelect.value;
+                const lines = textarea.value.split('\n').filter(line => line.trim());
+                
+                if (lines.length === 0) {
+                  alert('No valid sentences found');
+                  return;
+                }
+                
+                if (confirm(`Update ${lines.length} sentences to topic "${selectedTopic}"?`)) {
+                  let updated = 0;
+                  let notFound = 0;
+                  
+                  // Function to normalize text for comparison
+                  const normalizeText = (text: string): string => {
+                    return text
+                      .toLowerCase()
+                      .replace(/[.,!?;:'"]/g, '') // Remove punctuation
+                      .replace(/\s+/g, ' ')       // Normalize spaces
+                      .trim();
+                  };
+                  
+                  // Create a map of normalized texts to original samples for faster lookup
+                  const normalizedSamplesMap = new Map<string, AudioSample>();
+                  audioSamples.forEach(sample => {
+                    const normalizedText = normalizeText(sample.text);
+                    normalizedSamplesMap.set(normalizedText, sample);
+                  });
+                  
+                  const notFoundTexts: string[] = [];
+                  
+                  for (const line of lines) {
+                    const text = line.trim();
+                    if (!text) continue;
+                    
+                    // Normalize the input text
+                    const normalizedText = normalizeText(text);
+                    
+                    // Find the sample with matching normalized text
+                    const sample = normalizedSamplesMap.get(normalizedText);
+                    
+                    if (sample) {
+                      try {
+                        const docRef = doc(db, 'writefromdictation', sample.id);
+                        await updateDoc(docRef, { topic: selectedTopic });
+                        updated++;
+                      } catch (error) {
+                        console.error(`Error updating sample ${sample.id}:`, error);
+                      }
+                    } else {
+                      notFound++;
+                      notFoundTexts.push(text);
+                      console.log(`No matching sample found for text: "${text}"`);
+                    }
+                  }
+                  
+                  // Show results
+                  let alertMessage = `Successfully updated ${updated} sentences to topic "${selectedTopic}".`;
+                  if (notFound > 0) {
+                    alertMessage += `\n${notFound} sentences not found in database.`;
+                    
+                    const exampleCount = Math.min(3, notFoundTexts.length);
+                    const examples = notFoundTexts.slice(0, exampleCount).map(t => `"${t}"`).join(', ');
+                    alertMessage += `\n\nExamples not found: ${examples}`;
+                    
+                    // Log all not found texts to console for debugging
+                    console.log('All texts not found:', notFoundTexts);
+                  }
+                  
+                  alert(alertMessage);
+                  
+                  // Clear inputs
+                  textarea.value = '';
+                  topicSelect.value = '';
+                }
+              }}
+            >
+              Update All Sentences
+            </button>
+          </div>
+
+          {/* Advanced Update - Text format with individual topics */}
+          <div className="border-t pt-4">
+            <h4 className="text-sm font-semibold mb-2">Advanced Update (Individual Topics)</h4>
+            <p className="text-xs mb-2">
+              For different topics per sentence, use format: &quot;English text | Topic&quot; (one per line)
+            </p>
+            <textarea
+              id="advanced-topic-textarea"
+              className="w-full p-2 border border-gray-300 rounded text-black mb-4 h-32 text-sm"
+              placeholder={"Example:\nThe weather is nice today. | Environment & Nature\nI like to read books. | Education & Learning"}
+            />
+            <button
+              className="px-4 py-2 bg-[#fd7f33] text-white rounded hover:bg-[#fc5d01] text-sm"
+              onClick={() => {
+                const textarea = document.getElementById('advanced-topic-textarea') as HTMLTextAreaElement;
+                if (!textarea) return;
+                
+                const lines = textarea.value.split('\n').filter(line => line.trim());
+                const updates: {text: string, topic: string}[] = [];
+                
+                lines.forEach(line => {
+                  const parts = line.split('|');
+                  if (parts.length === 2) {
+                    const text = parts[0].trim();
+                    const topic = parts[1].trim();
+                    if (text && topic && DEFAULT_TOPICS.includes(topic)) {
+                      updates.push({text, topic});
+                    }
+                  }
+                });
+                
+                if (updates.length === 0) {
+                  alert(`No valid updates found. Please use the format: "English text | Topic"\nValid topics: ${DEFAULT_TOPICS.join(', ')}`);
+                  return;
+                }
+                
+                const updateTopics = async () => {
+                  let updated = 0;
+                  let notFound = 0;
+                  
+                  // Function to normalize text for comparison
+                  const normalizeText = (text: string): string => {
+                    return text
+                      .toLowerCase()
+                      .replace(/[.,!?;:'"]/g, '') // Remove punctuation
+                      .replace(/\s+/g, ' ')       // Normalize spaces
+                      .trim();
+                  };
+                  
+                  // Create a map of normalized texts to original samples for faster lookup
+                  const normalizedSamplesMap = new Map<string, AudioSample>();
+                  audioSamples.forEach(sample => {
+                    const normalizedText = normalizeText(sample.text);
+                    normalizedSamplesMap.set(normalizedText, sample);
+                  });
+                  
+                  const notFoundTexts: string[] = [];
+                  
+                  for (const {text, topic} of updates) {
+                    // Normalize the input text
+                    const normalizedText = normalizeText(text);
+                    
+                    // Find the sample with matching normalized text
+                    const sample = normalizedSamplesMap.get(normalizedText);
+                    
+                    if (sample) {
+                      const docRef = doc(db, 'writefromdictation', sample.id);
+                      await updateDoc(docRef, { topic: topic });
+                      updated++;
+                    } else {
+                      notFound++;
+                      notFoundTexts.push(text);
+                      console.log(`No matching sample found for text: "${text}"`);
+                    }
+                  }
+                  
+                  // If there are not found texts, show the first few in the alert
+                  let alertMessage = `Updated ${updated} topics. ${notFound} texts not found.`;
+                  if (notFound > 0) {
+                    const exampleCount = Math.min(3, notFoundTexts.length);
+                    const examples = notFoundTexts.slice(0, exampleCount).map(t => `"${t}"`).join(', ');
+                    alertMessage += `\n\nExamples of texts not found: ${examples}`;
+                    
+                    // Log all not found texts to console for debugging
+                    console.log('All texts not found:', notFoundTexts);
+                  }
+                  
+                  alert(alertMessage);
+                  
+                  textarea.value = '';
+                };
+                
+                if (updates.length > 0) {
+                  if (confirm(`Update ${updates.length} topics?`)) {
+                    updateTopics();
+                  }
+                }
+              }}
+            >
+              Update Topics
+            </button>
+          </div>
         </div>
         
         {/* Bulk audio upload section */}

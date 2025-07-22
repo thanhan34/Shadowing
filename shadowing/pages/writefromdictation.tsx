@@ -18,7 +18,24 @@ interface AudioSample {
   isHidden: boolean;
   questionType: string;
   vietnameseTranslation?: string;
+  topic?: string;
 }
+
+// Define default topics
+const DEFAULT_TOPICS = [
+  "All",
+  "Business & Work",
+  "Education & Learning", 
+  "Technology & Science",
+  "Daily Life & Routine",
+  "Health & Medicine",
+  "Travel & Tourism",
+  "Food & Cooking",
+  "Sports & Recreation",
+  "Environment & Nature",
+  "Arts & Humanities",
+  "General"
+];
 
 const WriteFromDictation: React.FC = () => {
   const [audioSamples, setAudioSamples] = useState<AudioSample[]>([]);
@@ -36,6 +53,7 @@ const WriteFromDictation: React.FC = () => {
   const [alwaysShowAnswer, setAlwaysShowAnswer] = useState(false);
   const [backgroundImage, setBackgroundImage] = useState('');
   const [filterOption, setFilterOption] = useState<string>("All");
+  const [topicFilter, setTopicFilter] = useState<string>("All");
 
   useEffect(() => {
     setBackgroundImage(getNextImage());
@@ -64,15 +82,31 @@ const WriteFromDictation: React.FC = () => {
   }, []);
 
   const filteredAudioSamples = useMemo(() => {
+    let filtered = audioSamples;
+    
+    // Filter by question type
     switch (filterOption) {
       case "New":
-        return audioSamples.filter(sample => sample.questionType === "New");
+        filtered = filtered.filter(sample => sample.questionType === "New");
+        break;
       case "Still Important":
-        return audioSamples.filter(sample => sample.questionType === "Still Important");
+        filtered = filtered.filter(sample => sample.questionType === "Still Important");
+        break;
       default:
-        return audioSamples; // Show all items when filterOption is "All"
+        // Show all items when filterOption is "All"
+        break;
     }
-  }, [audioSamples, filterOption]);
+    
+    // Filter by topic
+    if (topicFilter !== "All") {
+      filtered = filtered.filter(sample => {
+        const sampleTopic = sample.topic || "General";
+        return sampleTopic === topicFilter;
+      });
+    }
+    
+    return filtered;
+  }, [audioSamples, filterOption, topicFilter]);
 
   const sortedAudioSamples = useMemo(() => {
     return [...filteredAudioSamples].sort((a, b) => {
@@ -212,11 +246,15 @@ const WriteFromDictation: React.FC = () => {
   const handleExportCSV = useCallback(() => {
     if (sortedAudioSamples.length === 0) return;
 
-    const fields = ['text', 'occurrence', 'questionType'];
+    const fields = ['text', 'occurrence', 'questionType', 'topic', 'vietnameseTranslation'];
     const opts = { fields };
 
     try {
-      const csv = parse(sortedAudioSamples, opts);
+      const dataWithDefaults = sortedAudioSamples.map(sample => ({
+        ...sample,
+        topic: sample.topic || 'General'
+      }));
+      const csv = parse(dataWithDefaults, opts);
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -347,6 +385,23 @@ const WriteFromDictation: React.FC = () => {
               <option value="All">All</option>
               <option value="New">New</option>
               <option value="Still Important">Still Important</option>
+            </select>
+          </div>
+          <div className="mb-4 md:mb-0 md:mr-4 w-full">
+            <label htmlFor="topic-filter" className="block mb-1 font-medium text-gray-700">
+              Topic:
+            </label>
+            <select
+              id="topic-filter"
+              value={topicFilter}
+              onChange={(e) => setTopicFilter(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+            >
+              {DEFAULT_TOPICS.map((topic) => (
+                <option key={topic} value={topic}>
+                  {topic}
+                </option>
+              ))}
             </select>
           </div>
         </div>
