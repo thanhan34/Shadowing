@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/router';
-import { db as oldDb } from '../firebase';
-import { testDb as newDb } from '../firebaseTest';
-import { storage } from '../firebase';
+import { db, storage } from '../firebase';
 import { collection, doc, updateDoc, getDocs, CollectionReference, query, orderBy, Query, DocumentData, Timestamp, onSnapshot, where } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import * as XLSX from 'xlsx';
@@ -230,8 +228,6 @@ const SampleCard: React.FC<SampleCardProps> = ({
 };
 
 const EditAudioSamplePage: React.FC = () => {
-  const [useNewDb, setUseNewDb] = useState(true);
-  const db = useNewDb ? newDb : oldDb;
   const [audioSamples, setAudioSamples] = useState<AudioSample[]>([]);
   const [filteredSamples, setFilteredSamples] = useState<AudioSample[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -249,17 +245,6 @@ const EditAudioSamplePage: React.FC = () => {
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bulkFileInputRef = useRef<HTMLInputElement>(null);
-
-  // Reset state when switching projects
-  const handleProjectSwitch = useCallback(() => {
-    setUseNewDb(prev => !prev);
-    setAudioSamples([]);
-    setFilteredSamples([]);
-    setCurrentIndex(0);
-    setCurrentSample(null);
-    setLoading(true);
-    setUploadedFiles([]);
-  }, []);
 
   // Firestore listener effect
   useEffect(() => {
@@ -953,17 +938,9 @@ const EditAudioSamplePage: React.FC = () => {
       <div className="flex justify-between items-center w-full max-w-2xl mb-4">
         <h1 className="text-2xl font-bold">Edit Audio Sample</h1>
         <div className="flex items-center gap-2">
-          <span className={`text-sm ${useNewDb ? 'text-green-400' : 'text-gray-400'}`}>
-            {useNewDb ? 'Using New Project' : 'Using Old Project'}
+          <span className="text-sm text-[#fc5d01]">
+            Using Old Project (pteshadowing)
           </span>
-          <button
-            onClick={handleProjectSwitch}
-            className={`px-4 py-2 rounded text-white ${
-              useNewDb ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'
-            }`}
-          >
-            Switch to {useNewDb ? 'Old' : 'New'} Project
-          </button>
         </div>
       </div>
       
