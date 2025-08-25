@@ -125,7 +125,7 @@ const Scraper: React.FC = () => {
             This tool extracts audio sources and text content from web pages.
           </p>
           <p className="text-xs text-gray-500 mt-2">
-            Looking for: &lt;audio data-testid="audio"&gt; and &lt;div class="ra-body"&gt;
+            Looking for: &lt;audio data-testid=&quot;audio&quot;&gt; and &lt;div class=&quot;ra-body&quot;&gt;
           </p>
         </div>
       </div>
