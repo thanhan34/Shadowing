@@ -68,7 +68,7 @@ const Sentence: React.FC<SentenceProps> = ({ videoSource, sentence }) => {
           <p className="p-3 border rounded-full border-cyan-400 ra-link">
             Linking
           </p>
-          <p className="p-3 border border-gray-500 rounded-full ra-weak ">
+          <p className="p-3 border border-gray-500 rounded-full ra-weak">
             Weak
           </p>
         </div>

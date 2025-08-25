@@ -62,7 +62,7 @@ const Paragraph: React.FC<ParagraphProps> = ({ videoSource, sentence }) => {
           <p className="p-3 border border-red-500 rounded-full ra-break">Pause</p>
           <p className="p-3 border border-orange-500 rounded-full ra-loss">Loss</p>
           <p className="p-3 border rounded-full border-cyan-400 ra-link">Linking</p>
-          <p className="p-3 border border-gray-500 rounded-full ra-weak ">Weak</p>
+          <p className="p-3 border border-gray-500 rounded-full ra-weak">Weak</p>
         </div>
       </div>
     </div>
