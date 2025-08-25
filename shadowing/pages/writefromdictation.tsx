@@ -143,7 +143,10 @@ const WriteFromDictation: React.FC = () => {
 
   const handleAudioEnd = useCallback(() => {
     if (isAutoplay) {
-      handleNext();
+      // Add 5-second delay before playing next audio
+      setTimeout(() => {
+        handleNext();
+      }, 5000);
     } else if (isRepeatMode) {
       // If repeat mode is active, play the current audio again
       if (audioRef.current) {
