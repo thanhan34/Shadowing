@@ -78,31 +78,32 @@ const RetellParagraph: React.FC<RetellParagraphProps> = ({ sentences, fullText, 
   };
 
   return (
-    <div className="z-10 items-center justify-between w-full max-w-5xl font-mono text-sm lg:flex">
-      <div className="mt-5 d-flex flex-col h-100 w-full">
+    <div className="w-full">
+      <div className="bg-white bg-opacity-95 backdrop-blur-md rounded-2xl shadow-2xl p-6 md:p-8">
+        {/* Audio Player */}
         <audio 
           ref={audioRef} 
           controls 
           key={getAudioUrl()}
           onTimeUpdate={handleTimeUpdate}
           onEnded={handleAudioEnded}
-          className="w-full"
+          className="w-full mb-6 rounded-xl shadow-lg"
         >
           <source src={getAudioUrl()} type="audio/mpeg" />
         </audio>
         
         {/* Speed Control */}
-        <div className="flex items-center gap-2 mt-3 mb-2">
-          <span className="text-sm text-gray-600 font-medium">Tốc độ:</span>
-          <div className="flex gap-1">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
+          <span className="text-lg font-bold text-gray-800">⚡ Tốc độ:</span>
+          <div className="flex gap-2">
             {speedOptions.map((speed) => (
               <button
                 key={speed}
                 onClick={() => handleSpeedChange(speed)}
-                className={`px-3 py-1 text-sm font-medium rounded-md transition-colors duration-200 ${
+                className={`px-5 py-2 text-base font-bold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 ${
                   playbackRate === speed
-                    ? 'bg-[#fc5d01] text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-gradient-to-r from-[#fc5d01] to-[#fd7f33] text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-100 border-2 border-gray-300'
                 }`}
               >
                 {speed}x
@@ -111,14 +112,27 @@ const RetellParagraph: React.FC<RetellParagraphProps> = ({ sentences, fullText, 
           </div>
         </div>
 
-        <div className="mt-5 mb-5 text-lg sm:text-xl text-center sm:text-left space-y-3">
+        {/* Text Content */}
+        <div className="space-y-4">
           {sentences.map((sentence, index) => (
-            <p 
-              key={sentence.number} 
-              className={`text-gray-700 ${index === currentSentenceIndex ? 'font-bold text-[#fc5d01]' : ''}`}
+            <div
+              key={sentence.number}
+              className={`p-4 rounded-xl transition-all duration-300 ${
+                index === currentSentenceIndex
+                  ? 'bg-gradient-to-r from-[#fedac2] to-[#ffac7b] shadow-lg transform scale-105'
+                  : 'bg-gray-50'
+              }`}
             >
-              {sentence.text}
-            </p>
+              <p 
+                className={`text-lg md:text-xl leading-relaxed ${
+                  index === currentSentenceIndex 
+                    ? 'font-extrabold text-[#fc5d01]' 
+                    : 'font-medium text-gray-800'
+                }`}
+              >
+                {sentence.text}
+              </p>
+            </div>
           ))}
         </div>
       </div>

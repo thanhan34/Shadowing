@@ -37,7 +37,7 @@ const RetellLectureShadowing: React.FC<Props> = ({ retellData }) => {
   };
 
   return (
-    <div className="z-10 items-center justify-between w-full max-w-5xl font-mono px-4 md:px-6 lg:px-8 py-4">
+    <div className="z-10 items-center justify-between w-full max-w-6xl px-4 md:px-6 lg:px-8 py-6">
       <Head>
         <title>{retellData.name} - Retell Lecture Shadowing</title>
         <meta
@@ -64,22 +64,24 @@ const RetellLectureShadowing: React.FC<Props> = ({ retellData }) => {
         </Link>
       </div>
 
-      <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-center mb-4">
-        Retell Lecture Shadowing: {retellData.name}
+      <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-6 text-white drop-shadow-lg">
+        Retell Lecture Shadowing
       </h1>
 
-      {/* Voice Selector */}
-      <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-4">
-        <label className="text-lg font-semibold text-gray-700">Chọn giọng đọc:</label>
-        <select
-          value={selectedVoice}
-          onChange={handleVoiceChange}
-          className="px-4 py-2 text-lg font-medium border-2 border-[#fc5d01] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fd7f33] bg-white text-gray-700"
-        >
-          <option value="brian">Brian</option>
-          <option value="joanna">Joanna</option>
-          <option value="olivia">Olivia</option>
-        </select>
+      {/* Voice Selector Card */}
+      <div className="bg-white bg-opacity-95 backdrop-blur-md rounded-2xl shadow-2xl p-6 mb-6">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-4">
+          <label className="text-xl font-bold text-gray-800">Chọn giọng đọc:</label>
+          <select
+            value={selectedVoice}
+            onChange={handleVoiceChange}
+            className="px-6 py-3 text-xl font-bold border-3 border-[#fc5d01] rounded-xl focus:outline-none focus:ring-4 focus:ring-[#fd7f33] bg-white text-gray-800 shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
+          >
+            <option value="brian">🎙️ Brian</option>
+            <option value="joanna">🎙️ Joanna</option>
+            <option value="olivia">🎙️ Olivia</option>
+          </select>
+        </div>
       </div>
 
       {mode ? (
@@ -96,37 +98,37 @@ const RetellLectureShadowing: React.FC<Props> = ({ retellData }) => {
       )}
 
       {mode ? (
-        <div className="flex flex-col md:flex-row mt-4 space-y-2 md:space-y-0 md:space-x-4">
+        <div className="flex flex-col md:flex-row justify-center mt-6 space-y-3 md:space-y-0 md:space-x-4">
           <button
-            className="px-4 py-2 font-bold text-white bg-[#fc5d01] rounded-full hover:bg-[#fd7f33]"
+            className="px-8 py-4 text-lg font-bold text-white bg-gradient-to-r from-[#fc5d01] to-[#fd7f33] rounded-2xl hover:shadow-2xl hover:scale-105 transform transition-all duration-200"
             onClick={handleModeChange}
           >
-            1 Sentence Mode
+            🎯 1 Sentence Mode
           </button>
         </div>
       ) : (
-        <div className="flex flex-col md:flex-row mt-4 space-y-2 md:space-y-0 md:space-x-4">
+        <div className="flex flex-col md:flex-row justify-center mt-6 space-y-3 md:space-y-0 md:space-x-4">
           <button
-            className="px-4 py-2 font-bold text-white bg-[#fc5d01] rounded-full hover:bg-[#fd7f33]"
+            className="px-8 py-4 text-lg font-bold text-white bg-gradient-to-r from-[#fc5d01] to-[#fd7f33] rounded-2xl hover:shadow-2xl hover:scale-105 transform transition-all duration-200"
             onClick={handleModeChange}
           >
-            Paragraph Mode
+            📝 Paragraph Mode
           </button>
           <button
-            className="px-4 py-2 font-bold text-white bg-[#fc5d01] rounded-full hover:bg-[#fd7f33]"
+            className="px-8 py-4 text-lg font-bold text-white bg-gradient-to-r from-[#fc5d01] to-[#fd7f33] rounded-2xl hover:shadow-2xl hover:scale-105 transform transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             onClick={handleBackClick}
             disabled={count === 0}
           >
-            Back
+            ⬅️ Back
           </button>
           <button
-            className="px-4 py-2 font-bold text-white bg-[#fc5d01] rounded-full hover:bg-[#fd7f33]"
+            className="px-8 py-4 text-lg font-bold text-white bg-gradient-to-r from-[#fc5d01] to-[#fd7f33] rounded-2xl hover:shadow-2xl hover:scale-105 transform transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             onClick={handleNextClick}
             disabled={count + 1 >= retellData.sentences.length}
           >
-            Next
+            Next ➡️
           </button>
-          <button className="px-4 py-2 font-bold text-white bg-[#fc5d01] rounded-full" disabled>
+          <button className="px-8 py-4 text-lg font-bold text-white bg-gray-600 rounded-2xl cursor-default" disabled>
             {count + 1}/{retellData.sentences.length}
           </button>
         </div>
