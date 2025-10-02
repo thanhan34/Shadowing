@@ -19,6 +19,9 @@ const Navigation: React.FC = () => {
           <Link href="/retell-lecture" legacyBehavior>
             <a className="text-black hover:underline">Retell Lecture</a>
           </Link>
+          <Link href="/describe-image-shadowing" legacyBehavior>
+            <a className="text-black hover:underline">Describe Image</a>
+          </Link>
           <Link href="/shadowing-methods" legacyBehavior>
             <a className="text-black hover:underline">Phương Pháp Học</a>
           </Link>
@@ -66,6 +69,9 @@ const Navigation: React.FC = () => {
           </Link>
           <Link href="/retell-lecture" legacyBehavior>
             <a className="block text-black py-2 px-4 hover:underline">Retell Lecture</a>
+          </Link>
+          <Link href="/describe-image-shadowing" legacyBehavior>
+            <a className="block text-black py-2 px-4 hover:underline">Describe Image</a>
           </Link>
           <Link href="/shadowing-methods" legacyBehavior>
             <a className="block text-black py-2 px-4 hover:underline">Phương Pháp Học</a>
