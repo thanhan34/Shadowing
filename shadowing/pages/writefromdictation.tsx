@@ -183,6 +183,21 @@ const WriteFromDictation: React.FC = () => {
     setInputText(event.target.value);
   };
 
+  const handlePreventCopyPaste = (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    event.preventDefault();
+    return false;
+  };
+
+  const handlePreventContextMenu = (event: React.MouseEvent<HTMLTextAreaElement>) => {
+    event.preventDefault();
+    return false;
+  };
+
+  const handlePreventDragDrop = (event: React.DragEvent<HTMLTextAreaElement>) => {
+    event.preventDefault();
+    return false;
+  };
+
   const handleVoiceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedVoice(event.target.value);
   };
@@ -320,6 +335,12 @@ const WriteFromDictation: React.FC = () => {
             className="w-full p-4 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
             value={inputText}
             onChange={handleTextareaChange}
+            onCopy={handlePreventCopyPaste}
+            onCut={handlePreventCopyPaste}
+            onPaste={handlePreventCopyPaste}
+            onContextMenu={handlePreventContextMenu}
+            onDrop={handlePreventDragDrop}
+            onDragOver={handlePreventDragDrop}
           ></textarea>
         </div>
         <div className="flex flex-col md:flex-row justify-between items-center mb-4 mt-4">
