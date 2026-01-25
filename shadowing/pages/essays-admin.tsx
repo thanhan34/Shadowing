@@ -15,6 +15,9 @@ interface Keyword {
 const EssaysAdminPage: React.FC = () => {
   const [backgroundImage, setBackgroundImage] = useState('');
   const [title, setTitle] = useState('');
+  const [question, setQuestion] = useState('');
+  const [questionLink, setQuestionLink] = useState('');
+  const [sampleEssayLink, setSampleEssayLink] = useState('');
   const [content, setContent] = useState('');
   const [keywords, setKeywords] = useState<Keyword[]>([
     { slot: 'Topic', value: '' },
@@ -85,6 +88,9 @@ const EssaysAdminPage: React.FC = () => {
         setEditId(essayId);
         setIsEditMode(true);
         setTitle(essayData.title);
+        setQuestion(essayData.question || '');
+        setQuestionLink(essayData.questionLink || '');
+        setSampleEssayLink(essayData.sampleEssayLink || '');
         setContent(essayData.content);
         setKeywords(essayData.keywords);
       }
@@ -113,6 +119,9 @@ const EssaysAdminPage: React.FC = () => {
     
     const essayData = {
       title,
+      question,
+      questionLink,
+      sampleEssayLink,
       content,
       keywords: keywords.filter(k => k.slot && k.value),
       createdAt: new Date().toISOString(),
@@ -144,6 +153,9 @@ const EssaysAdminPage: React.FC = () => {
         
         // Reset form
         setTitle('');
+        setQuestion('');
+        setQuestionLink('');
+        setSampleEssayLink('');
         setContent('');
         setKeywords([
           { slot: 'Topic', value: '' },
@@ -169,6 +181,9 @@ const EssaysAdminPage: React.FC = () => {
 
   const loadSampleData = () => {
     setTitle('The Benefits of Remote Work');
+    setQuestion('Some people believe that working from home is more productive than working in an office. Others think that office environments are better for collaboration and productivity. Discuss both views and give your own opinion.');
+    setQuestionLink('https://example.com/question-remote-work');
+    setSampleEssayLink('https://example.com/sample-essay-remote-work');
     setContent(`Remote work has become increasingly prevalent in modern professional environments. Many organizations have adopted flexible work arrangements that allow employees to perform their duties from home or other locations outside traditional office settings.
 
 One of the primary benefits is improved work-life balance. Employees can better manage personal responsibilities while maintaining professional productivity, leading to higher job satisfaction and reduced stress levels.
@@ -248,6 +263,48 @@ In conclusion, while remote work offers significant advantages in terms of flexi
               onChange={(e) => setTitle(e.target.value)}
               required
               placeholder="Ví dụ: The Role of Formal Written Examinations in Education"
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-[#fc5d01] focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            />
+          </div>
+
+          {/* Question */}
+          <div className="mb-6">
+            <label className="block text-gray-900 dark:text-white font-semibold mb-2">
+              Câu hỏi đề bài (Essay Question)
+            </label>
+            <textarea
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              rows={3}
+              placeholder="Ví dụ: Some people think that formal written examinations are the best way to assess students. Others believe continuous assessment through coursework is more effective. Discuss both views and give your own opinion."
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-[#fc5d01] focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            />
+          </div>
+
+          {/* Question Link */}
+          <div className="mb-6">
+            <label className="block text-gray-900 dark:text-white font-semibold mb-2">
+              Link đến đề bài (Question Link)
+            </label>
+            <input
+              type="url"
+              value={questionLink}
+              onChange={(e) => setQuestionLink(e.target.value)}
+              placeholder="https://example.com/question-link"
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-[#fc5d01] focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            />
+          </div>
+
+          {/* Sample Essay Link */}
+          <div className="mb-6">
+            <label className="block text-gray-900 dark:text-white font-semibold mb-2">
+              Link bài mẫu (Sample Essay Link)
+            </label>
+            <input
+              type="url"
+              value={sampleEssayLink}
+              onChange={(e) => setSampleEssayLink(e.target.value)}
+              placeholder="https://example.com/sample-essay-link"
               className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-[#fc5d01] focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
             />
           </div>
@@ -357,6 +414,9 @@ In conclusion, while remote work offers significant advantages in terms of flexi
               onClick={() => {
                 if (confirm('Bạn có chắc muốn xóa toàn bộ form?')) {
                   setTitle('');
+                  setQuestion('');
+                  setQuestionLink('');
+                  setSampleEssayLink('');
                   setContent('');
                   setKeywords([
                     { slot: 'Topic', value: '' },
