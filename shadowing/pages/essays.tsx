@@ -71,6 +71,13 @@ const EssaysListPage: React.FC = () => {
         Explore model essays with automatic keyword highlighting. Each essay includes a keyword reference table to help you learn effective vocabulary and structure.
       </p>
 
+      <Link
+        href="/essays/practice"
+        className="px-5 py-3 rounded-lg bg-[#fc5d01] text-white font-semibold hover:bg-[#fd7f33] transition-colors"
+      >
+        Luyện gõ template (Essay Practice)
+      </Link>
+
       {loading ? (
         <div className="text-center text-gray-600 dark:text-white">
           <p className="text-lg">Đang tải essays...</p>
