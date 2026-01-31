@@ -27,6 +27,7 @@
     "autoprefixer": "10.4.14",
     "classnames": "^2.3.2",
     "cmu-pronouncing-dictionary": "^3.0.0",
+    "csv-parser": "^3.2.0",
     "dompurify": "^3.0.5",
     "en-ipa": "^0.0.1",
     "eslint": "8.46.0",
