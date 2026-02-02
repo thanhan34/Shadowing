@@ -31,10 +31,10 @@ const TypingArea: React.FC<TypingAreaProps> = ({
   const [hasError, setHasError] = useState(false);
   const [errorIndex, setErrorIndex] = useState<number | null>(null);
   const [mismatchChar, setMismatchChar] = useState<string | null>(null);
+  const [displayInput, setDisplayInput] = useState("");
+  const [currentWordBuffer, setCurrentWordBuffer] = useState("");
   const startedAt = persistedStartedAt;
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const currentCharRef = useRef<HTMLSpanElement>(null);
   const hasCompletedRef = useRef(false);
 
   useEffect(() => {
@@ -45,14 +45,6 @@ const TypingArea: React.FC<TypingAreaProps> = ({
     }
   }, [typedText, hasError, mismatchChar]);
 
-  useEffect(() => {
-    if (currentCharRef.current) {
-      currentCharRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "center"
-      });
-    }
-  }, [typedText, hasError, mismatchChar]);
 
   useEffect(() => {
     if (typedText.length < templateText.length) {
@@ -77,17 +69,25 @@ const TypingArea: React.FC<TypingAreaProps> = ({
       return;
     }
 
+    if (mismatchChar && event.key !== "Backspace") {
+      event.preventDefault();
+      return;
+    }
+
     if (event.key === "Backspace") {
       event.preventDefault();
       if (mismatchChar) {
         setMismatchChar(null);
         setHasError(false);
         setErrorIndex(null);
+        setDisplayInput(currentWordBuffer);
         return;
       }
       if (typedText.length > 0) {
         onProgressChange(typedText.slice(0, -1), errorCount);
       }
+      setDisplayInput("");
+      setCurrentWordBuffer("");
       return;
     }
 
@@ -104,6 +104,7 @@ const TypingArea: React.FC<TypingAreaProps> = ({
       setHasError(true);
       setErrorIndex(typedText.length);
       setMismatchChar(incomingChar);
+      setDisplayInput(`${currentWordBuffer}${incomingChar}`);
       onProgressChange(typedText, errorCount + 1);
       return;
     }
@@ -111,6 +112,15 @@ const TypingArea: React.FC<TypingAreaProps> = ({
     setHasError(false);
     setErrorIndex(null);
     setMismatchChar(null);
+    const isWordBoundary = incomingChar === " " || incomingChar === "\n";
+    if (isWordBoundary) {
+      setDisplayInput("");
+      setCurrentWordBuffer("");
+    } else {
+      const nextWord = `${currentWordBuffer}${incomingChar}`;
+      setCurrentWordBuffer(nextWord);
+      setDisplayInput(nextWord);
+    }
     const nextText = typedText + incomingChar;
     if (!startedAt && nextText.length > 0) {
       onStartChange(Date.now());
@@ -147,7 +157,6 @@ const TypingArea: React.FC<TypingAreaProps> = ({
           <span
             key={`br-${index}`}
             className={`block h-6 ${lineClass}`}
-            ref={isCurrent ? currentCharRef : undefined}
           >
             {isCurrent && mismatchChar ? mismatchChar : isTyped ? "" : ghostChar}
           </span>
@@ -170,7 +179,6 @@ const TypingArea: React.FC<TypingAreaProps> = ({
                 ? "text-red-600"
                 : "text-gray-400"
           }`}
-          ref={isCurrent ? currentCharRef : undefined}
         >
           {isTyped
             ? char
@@ -182,7 +190,7 @@ const TypingArea: React.FC<TypingAreaProps> = ({
         </span>
       );
     });
-  }, [templateText, typedText, mode, displayText]);
+  }, [templateText, typedText, mode, displayText, errorIndex, mismatchChar]);
 
   return (
     <div className="w-full">
@@ -199,7 +207,6 @@ const TypingArea: React.FC<TypingAreaProps> = ({
         </div>
       ) : null}
       <div
-        ref={containerRef}
         className={`max-h-[260px] overflow-y-auto whitespace-pre-wrap rounded-lg border bg-white p-4 text-lg leading-relaxed tracking-wide ${
           hasError ? "border-red-500" : "border-[#fedac2]"
         }`}
@@ -208,7 +215,7 @@ const TypingArea: React.FC<TypingAreaProps> = ({
       </div>
       <textarea
         ref={inputRef}
-        value={typedText}
+        value={displayInput}
         onKeyDown={handleKeyDown}
         onFocus={handleFocus}
         onClick={handleFocus}
