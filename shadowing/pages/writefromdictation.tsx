@@ -1,291 +1,58 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import AudioPlayer from "@/components/AudioPlayer";
-import { CustomAudioRef } from "@/types";
-import { db } from "../firebase";
-import { collection, getDocs, CollectionReference, query, where, Query, DocumentData, Timestamp } from "firebase/firestore";
 import Navigation from "@/components/Navigation";
-import { getNextImage } from "../utils/background";
-import { parse } from 'json2csv';
 import Head from "next/head";
-
-interface AudioSample {
-  audio: { [key: string]: string };
-  text: string;
-  occurrence: number;
-  createdAt: Timestamp;
-  isHidden: boolean;
-  questionType: string;
-  vietnameseTranslation?: string;
-  topic?: string;
-}
-
-// Define default topics
-const DEFAULT_TOPICS = [
-  "All",
-  "Business & Work",
-  "Education & Learning", 
-  "Technology & Science",
-  "Daily Life & Routine",
-  "Health & Medicine",
-  "Travel & Tourism",
-  "Food & Cooking",
-  "Sports & Recreation",
-  "Environment & Nature",
-  "Arts & Humanities",
-  "General"
-];
+import { DEFAULT_TOPICS } from "../types/writefromdictation";
+import AnswerSummary from "../components/writefromdictation/AnswerSummary";
+import { useWriteFromDictation } from "../hooks/useWriteFromDictation";
+import { useAnswerInputGuards } from "../hooks/useAnswerInputGuards";
 
 const WriteFromDictation: React.FC = () => {
-  const [audioSamples, setAudioSamples] = useState<AudioSample[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAutoplay, setIsAutoplay] = useState(false);
-  const [isRepeatMode, setIsRepeatMode] = useState(false);
-  const audioRef = useRef<CustomAudioRef>(null);
-  const [showAnswer, setShowAnswer] = useState(false);
-  const [inputText, setInputText] = useState("");
-  const [numberOfIncorrect, setNumberOfIncorrect] = useState(0);
-  const [selectedVoice, setSelectedVoice] = useState<string>("Brian");
-  const [sortingOption, setSortingOption] = useState<string>("occurrence");
-  const [playbackRate, setPlaybackRate] = useState<number>(1);
-  const [loading, setLoading] = useState(true);
-  const [alwaysShowAnswer, setAlwaysShowAnswer] = useState(false);
-  const [backgroundImage, setBackgroundImage] = useState('');
-  const [filterOption, setFilterOption] = useState<string>("All");
-  const [topicFilter, setTopicFilter] = useState<string>("All");
-
-  useEffect(() => {
-    setBackgroundImage(getNextImage());
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const collectionRef: CollectionReference<DocumentData> = collection(db, "writefromdictation");
-        const q: Query<DocumentData> = query(collectionRef, where("isHidden", "==", false));
-
-        const querySnapshot = await getDocs(q);
-        const data: AudioSample[] = querySnapshot.docs.map((doc) => doc.data() as AudioSample);
-
-        setAudioSamples(data);
-        setCurrentIndex(0); // Reset the currentIndex to 0
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const filteredAudioSamples = useMemo(() => {
-    let filtered = audioSamples;
-    
-    // Filter by question type
-    switch (filterOption) {
-      case "New":
-        filtered = filtered.filter(sample => sample.questionType === "New");
-        break;
-      case "Still Important":
-        filtered = filtered.filter(sample => sample.questionType === "Still Important");
-        break;
-      default:
-        // Show all items when filterOption is "All"
-        break;
-    }
-    
-    // Filter by topic
-    if (topicFilter !== "All") {
-      filtered = filtered.filter(sample => {
-        const sampleTopic = sample.topic || "General";
-        return sampleTopic === topicFilter;
-      });
-    }
-    
-    return filtered;
-  }, [audioSamples, filterOption, topicFilter]);
-
-  const sortedAudioSamples = useMemo(() => {
-    return [...filteredAudioSamples].sort((a, b) => {
-      switch (sortingOption) {
-        case "alphabetical":
-          return a.text.localeCompare(b.text);
-        case "occurrence":
-          return b.occurrence - a.occurrence;
-        case "newest":
-          return b.createdAt.seconds - a.createdAt.seconds;
-        case "easyToDifficult":
-          return a.text.length - b.text.length;
-        default:
-          return b.occurrence - a.occurrence;
-      }
-    });
-  }, [filteredAudioSamples, sortingOption]);
-
-  const handleNext = useCallback(async () => {
-    if (audioRef.current) {
-      await audioRef.current.stop();
-    }
-    setInputText("");
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % sortedAudioSamples.length);
-    setShowAnswer(alwaysShowAnswer);
-  }, [sortedAudioSamples.length, alwaysShowAnswer, audioRef]);
-
-  const handlePlayAll = useCallback(() => {
-    setIsAutoplay((prev) => !prev);
-    if (!isAutoplay) {
-      handleNext();
-    }
-  }, [isAutoplay, handleNext]);
-
-  const handleAudioEnd = useCallback(() => {
-    if (isAutoplay) {
-      // Add 5-second delay before playing next audio
-      setTimeout(() => {
-        handleNext();
-      }, 5000);
-    } else if (isRepeatMode) {
-      // If repeat mode is active, play the current audio again
-      if (audioRef.current) {
-        audioRef.current.play();
-      }
-    }
-  }, [isAutoplay, isRepeatMode, handleNext]);
-
-  useEffect(() => {
-    if (sortedAudioSamples.length > 0 && audioRef.current) {
-      audioRef.current.play();
-    }
-  }, [sortedAudioSamples, currentIndex, audioRef]);
-
-  const handleSelectChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const newIndex = parseInt(event.target.value, 10);
-    if (audioRef.current) {
-      await audioRef.current.stop();
-    }
-    setCurrentIndex(newIndex);
-    if (audioRef.current) {
-      await audioRef.current.play();
-    }
-    setShowAnswer(alwaysShowAnswer);
-    setInputText("");
-  };
-
-  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setAlwaysShowAnswer(event.target.checked);
-    setShowAnswer(event.target.checked);
-  };
-
-  const handleTextareaChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInputText(event.target.value);
-  };
-
-  const handlePreventCopyPaste = (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
-    event.preventDefault();
-    return false;
-  };
-
-  const handlePreventContextMenu = (event: React.MouseEvent<HTMLTextAreaElement>) => {
-    event.preventDefault();
-    return false;
-  };
-
-  const handlePreventDragDrop = (event: React.DragEvent<HTMLTextAreaElement>) => {
-    event.preventDefault();
-    return false;
-  };
-
-  const handleVoiceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedVoice(event.target.value);
-  };
-
-  const handleSortingChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSortingOption(event.target.value);
-  };
-
-  const handlePlaybackRateChange = (newRate: number) => {
-    setPlaybackRate(newRate);
-  };
-
-  const countIncorrect = () => {
-    if (sortedAudioSamples.length === 0) return;
-
-    const correctText = sortedAudioSamples[currentIndex]?.text.trim();
-    const inputTextTrimmed = inputText.trim();
-
-    const correctWords = correctText.split(/\s+/);
-    const inputWords = inputTextTrimmed.split(/\s+/);
-
-    let incorrectCount = 0;
-    const wordCount = (words: string[]) =>
-      words.reduce((count, word) => {
-        count[word] = (count[word] || 0) + 1;
-        return count;
-      }, {} as Record<string, number>);
-
-    const correctWordCounts = wordCount(correctWords);
-    const inputWordCounts = wordCount(inputWords);
-
-    Object.keys(correctWordCounts).forEach((word) => {
-      if (!inputWordCounts[word] || inputWordCounts[word] < correctWordCounts[word]) {
-        incorrectCount += correctWordCounts[word] - (inputWordCounts[word] || 0);
-      }
-    });
-
-    setNumberOfIncorrect(incorrectCount);
-  };
-
-  const handleAnswerButtonClick = () => {
-    setShowAnswer(true);
-    countIncorrect();
-  };
-
-  const handlePlay = useCallback(async () => {
-    if (audioRef.current) {
-      await audioRef.current.play();
-    }
-  }, [audioRef]);
-
-  const handleRepeat = useCallback(async () => {
-    if (audioRef.current) {
-      await audioRef.current.stop();
-      setInputText("");
-      await audioRef.current.play();
-    }
-  }, [audioRef]);
-
-  const toggleRepeatMode = useCallback(() => {
-    setIsRepeatMode(prev => !prev);
-  }, []);
-
-  const handleExportCSV = useCallback(() => {
-    if (sortedAudioSamples.length === 0) return;
-
-    const fields = ['text', 'occurrence', 'questionType', 'topic', 'vietnameseTranslation'];
-    const opts = { fields };
-
-    try {
-      const dataWithDefaults = sortedAudioSamples.map(sample => ({
-        ...sample,
-        topic: sample.topic || 'General'
-      }));
-      const csv = parse(dataWithDefaults, opts);
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.setAttribute('href', url);
-      link.setAttribute('download', 'audio_samples.csv');
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (err) {
-      console.error('Error exporting CSV:', err);
-    }
-  }, [sortedAudioSamples]);
+  const {
+    audioRef,
+    backgroundImage,
+    sortedAudioSamples,
+    currentAudioSample,
+    currentIndex,
+    isAutoplay,
+    isRepeatMode,
+    showAnswer,
+    alwaysShowAnswer,
+    inputText,
+    numberOfIncorrect,
+    score,
+    maxScore,
+    wordStatuses,
+    selectedVoice,
+    sortingOption,
+    playbackRate,
+    loading,
+    filterOption,
+    topicFilter,
+    handleNext,
+    handleBack,
+    handlePlayAll,
+    handleAudioEnd,
+    handleSelectIndexChange,
+    handleAlwaysShowAnswerChange,
+    handleInputTextChange,
+    handleVoiceChange,
+    handleSortingChange,
+    handleFilterChange,
+    handleTopicFilterChange,
+    handlePlaybackRateChange,
+    handleAnswerButtonClick,
+    handlePlay,
+    handleRepeat,
+    toggleRepeatMode,
+    handleExportCSV
+  } = useWriteFromDictation();
+  const {
+    handlePreventCopyPaste,
+    handlePreventContextMenu,
+    handlePreventDragDrop
+  } = useAnswerInputGuards();
 
   if (loading) {
     return <div>Loading...</div>;
@@ -314,14 +81,14 @@ const WriteFromDictation: React.FC = () => {
         Write From Dictation
       </h1>
       <div className="w-full max-w-2xl mx-auto">
-        {sortedAudioSamples.length > 0 && (
+        {sortedAudioSamples.length > 0 && currentAudioSample && (
           <AudioPlayer
             ref={audioRef}
-            occurrence={sortedAudioSamples[currentIndex]?.occurrence}
-            questionType={sortedAudioSamples[currentIndex]?.questionType}
-            audio={sortedAudioSamples[currentIndex]?.audio[selectedVoice]}
-            text={sortedAudioSamples[currentIndex]?.text}
-            vietnameseTranslation={sortedAudioSamples[currentIndex]?.vietnameseTranslation}
+            occurrence={currentAudioSample.occurrence}
+            questionType={currentAudioSample.questionType}
+            audio={currentAudioSample.audio[selectedVoice]}
+            text={currentAudioSample.text}
+            vietnameseTranslation={currentAudioSample.vietnameseTranslation}
             onEnded={handleAudioEnd}
             showAnswer={showAnswer}
             playbackRate={playbackRate}
@@ -334,7 +101,7 @@ const WriteFromDictation: React.FC = () => {
             rows={5}
             className="w-full p-4 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
             value={inputText}
-            onChange={handleTextareaChange}
+            onChange={(event) => handleInputTextChange(event.target.value)}
             onCopy={handlePreventCopyPaste}
             onCut={handlePreventCopyPaste}
             onPaste={handlePreventCopyPaste}
@@ -351,7 +118,7 @@ const WriteFromDictation: React.FC = () => {
             <select
               id="audio-select"
               value={currentIndex}
-              onChange={handleSelectChange}
+              onChange={(event) => handleSelectIndexChange(parseInt(event.target.value, 10))}
               className="w-full p-2 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
               disabled={sortedAudioSamples.length === 0}
             >
@@ -369,7 +136,7 @@ const WriteFromDictation: React.FC = () => {
             <select
               id="voice-select"
               value={selectedVoice}
-              onChange={handleVoiceChange}
+              onChange={(event) => handleVoiceChange(event.target.value)}
               className="w-full p-2 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
             >
               {sortedAudioSamples.length > 0 &&
@@ -387,7 +154,7 @@ const WriteFromDictation: React.FC = () => {
             <select
               id="sorting-select"
               value={sortingOption}
-              onChange={handleSortingChange}
+              onChange={(event) => handleSortingChange(event.target.value)}
               className="w-full p-2 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
             >
               <option value="alphabetical">Alphabetical</option>
@@ -403,7 +170,7 @@ const WriteFromDictation: React.FC = () => {
             <select
               id="filter-select"
               value={filterOption}
-              onChange={(e) => setFilterOption(e.target.value)}
+              onChange={(event) => handleFilterChange(event.target.value)}
               className="w-full p-2 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
             >
               <option value="All">All</option>
@@ -418,7 +185,7 @@ const WriteFromDictation: React.FC = () => {
             <select
               id="topic-filter"
               value={topicFilter}
-              onChange={(e) => setTopicFilter(e.target.value)}
+              onChange={(event) => handleTopicFilterChange(event.target.value)}
               className="w-full p-2 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
             >
               {DEFAULT_TOPICS.map((topic) => (
@@ -434,54 +201,66 @@ const WriteFromDictation: React.FC = () => {
             type="checkbox"
             id="showAnswer"
             checked={alwaysShowAnswer}
-            onChange={handleCheckboxChange}
+            onChange={(event) => handleAlwaysShowAnswerChange(event.target.checked)}
             className="mr-2"
           />
           <label htmlFor="showAnswer" className="text-white">
             Always show answer
           </label>
         </div>
-        <p className="mt-4 text-white">Incorrect: {numberOfIncorrect}</p>
-        <div className="flex flex-col md:flex-row justify-center items-center space-y-2 md:space-y-0 md:space-x-2">
+        <AnswerSummary
+          score={score}
+          maxScore={maxScore}
+          showAnswer={showAnswer}
+          wordStatuses={wordStatuses}
+        />
+        <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           <button
-            className="px-4 py-2 w-full md:w-auto bg-purple-500 text-white rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-purple-400/50 shadow-xl"
+            className="w-full rounded-lg bg-[#fd7f33] px-4 py-2 text-white shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-[#fdbc94]/50 shadow-xl"
+            onClick={handleBack}
+            disabled={sortedAudioSamples.length === 0}
+          >
+            Back
+          </button>
+          <button
+            className="w-full rounded-lg bg-purple-500 px-4 py-2 text-white shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-purple-400/50 shadow-xl"
             onClick={handlePlay}
           >
             Play
           </button>
           <button
-            className="px-4 py-2 w-full md:w-auto bg-yellow-500 text-white rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-yellow-400/50 shadow-xl"
+            className="w-full rounded-lg bg-yellow-500 px-4 py-2 text-white shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-yellow-400/50 shadow-xl"
             onClick={handleRepeat}
           >
             Repeat
           </button>
           <button
-            className={`px-4 py-2 w-full md:w-auto ${isRepeatMode ? 'bg-[#fc5d01]' : 'bg-[#fd7f33]'} text-white rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-[#fdbc94]/50 shadow-xl`}
+            className={`w-full rounded-lg px-4 py-2 text-white shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-[#fdbc94]/50 shadow-xl ${isRepeatMode ? 'bg-[#fc5d01]' : 'bg-[#fd7f33]'}`}
             onClick={toggleRepeatMode}
           >
             {isRepeatMode ? 'Stop Looping' : 'Loop Current'}
           </button>
           <button
-            className="px-4 py-2 w-full md:w-auto bg-blue-500 text-white rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-blue-400/50 shadow-xl"
+            className="w-full rounded-lg bg-blue-500 px-4 py-2 text-white shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-blue-400/50 shadow-xl"
             onClick={handleNext}
             disabled={sortedAudioSamples.length === 0}
           >
             Next
           </button>
           <button
-            className="px-4 py-2 w-full md:w-auto bg-green-500 text-white rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-green-400/50 shadow-xl"
+            className="w-full rounded-lg bg-green-500 px-4 py-2 text-white shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-green-400/50 shadow-xl"
             onClick={handlePlayAll}
           >
             {isAutoplay ? "Stop" : "Play All"}
           </button>
           <button
-            className="px-4 py-2 w-full md:w-auto bg-red-500 text-white rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-red-400/50 shadow-xl"
+            className="w-full rounded-lg bg-red-500 px-4 py-2 text-white shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-red-400/50 shadow-xl"
             onClick={handleAnswerButtonClick}
           >
             Answer
           </button>
           <button
-            className="px-4 py-2 w-full md:w-auto bg-orange-500 text-white rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-orange-400/50 shadow-xl"
+            className="w-full rounded-lg bg-orange-500 px-4 py-2 text-white shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-orange-400/50 shadow-xl"
             onClick={handleExportCSV}
           >
             Export CSV
