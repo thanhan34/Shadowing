@@ -20,7 +20,6 @@ const WriteFromDictation: React.FC = () => {
     showAnswer,
     alwaysShowAnswer,
     inputText,
-    numberOfIncorrect,
     score,
     maxScore,
     wordStatuses,

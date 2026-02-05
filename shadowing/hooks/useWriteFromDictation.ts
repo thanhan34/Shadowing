@@ -23,7 +23,6 @@ export const useWriteFromDictation = () => {
   const [inputText, setInputText] = useState("");
   const [score, setScore] = useState(0);
   const [maxScore, setMaxScore] = useState(0);
-  const [numberOfIncorrect, setNumberOfIncorrect] = useState(0);
   const [wordStatuses, setWordStatuses] = useState<Array<{ word: string; status: "correct" | "incorrect" | "missing" }>>([]);
   const [selectedVoice, setSelectedVoice] = useState<string>("Brian");
   const [sortingOption, setSortingOption] = useState<string>("occurrence");
@@ -111,7 +110,6 @@ export const useWriteFromDictation = () => {
     const resetState = resetScoreState();
     setScore(resetState.score);
     setMaxScore(resetState.maxScore);
-    setNumberOfIncorrect(resetState.numberOfIncorrect);
     setWordStatuses(resetState.wordStatuses);
   }, []);
 
@@ -218,7 +216,6 @@ export const useWriteFromDictation = () => {
 
     setScore(scoring.score);
     setMaxScore(scoring.maxScore);
-    setNumberOfIncorrect(scoring.incorrectCount);
     setWordStatuses(answerTokens);
   }, [currentAudioSample, inputText]);
 
@@ -282,7 +279,6 @@ export const useWriteFromDictation = () => {
     showAnswer,
     alwaysShowAnswer,
     inputText,
-    numberOfIncorrect,
     score,
     maxScore,
     wordStatuses,
