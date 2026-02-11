@@ -3,7 +3,6 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import Navigation from "../../components/Navigation";
 import TemplateSelector from "../../components/essay-practice/TemplateSelector";
 import ModeSelector from "../../components/essay-practice/ModeSelector";
 import { essayTemplates, PracticeMode, getPracticeModeLabel } from "../../data/essayTemplates";
@@ -45,11 +44,7 @@ const EssayPracticePage: React.FC = () => {
           content="Practice fixed PTE essay templates with strict typing validation."
         />
         <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <Navigation />
-
-      <Link href="/" className="flex justify-center">
+      </Head>      <Link href="/" className="flex justify-center">
         <Image
           src="/logo1.png"
           alt="Logo"

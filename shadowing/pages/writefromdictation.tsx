@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import AudioPlayer from "@/components/AudioPlayer";
-import Navigation from "@/components/Navigation";
 import Head from "next/head";
 import { DEFAULT_TOPICS } from "../types/writefromdictation";
 import AnswerSummary from "../components/writefromdictation/AnswerSummary";
@@ -71,9 +70,7 @@ const WriteFromDictation: React.FC = () => {
         />
         <meta name="author" content="PTE Intensive" />
         <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <Navigation />
-      <Link href="/" className="flex justify-center mb-4">
+      </Head>      <Link href="/" className="flex justify-center mb-4">
         <Image src="/logo1.png" alt="Logo" width={200} height={200} />
       </Link>
       <h1 className="mb-2 text-2xl font-bold tracking-tight text-gray-800 dark:text-white">

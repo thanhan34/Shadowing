@@ -4,7 +4,6 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
-import Navigation from '../../components/Navigation';
 import DescribeImageTemplate from '../../components/DescribeImageTemplate';
 import { getNextImage } from '../../utils/background';
 
@@ -43,11 +42,7 @@ const DescribeImageType: React.FC<Props> = ({ type, backgroundImage }) => {
           content={`Practice ${getTitle()} for PTE exam with interactive templates and guidance.`}
         />
         <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <Navigation />
-
-      <Link href="/" className="flex justify-center">
+      </Head>      <Link href="/" className="flex justify-center">
         <Image
           src="/logo1.png"
           alt="Logo"

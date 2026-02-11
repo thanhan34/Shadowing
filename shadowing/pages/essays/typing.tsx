@@ -3,7 +3,6 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import Navigation from "../../components/Navigation";
 import ProgressBar from "../../components/essay-practice/ProgressBar";
 import ResultScreen from "../../components/essay-practice/ResultScreen";
 import TypingArea from "../../components/essay-practice/TypingArea";
@@ -204,10 +203,7 @@ const EssayTypingPage: React.FC = () => {
         className="bg-cover bg-center bg-fixed min-h-screen"
         style={{ backgroundImage: `url(${backgroundImage})` }}
       >
-        <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
-          <Navigation />
-
-          <Link href="/" className="flex justify-center">
+        <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">          <Link href="/" className="flex justify-center">
             <Image
               src="/logo1.png"
               alt="Logo"

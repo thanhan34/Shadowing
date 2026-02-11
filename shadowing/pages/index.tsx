@@ -65,7 +65,7 @@ const Home: React.FC = () => {
               </a>
             </Link>
             <Link
-              href="https://www.youtube.com/channel/UCG-3Z9RIe330EbUBNb8weZw?sub_confirmation=1"
+              href="https://www.youtube.com/@andoan.pteintensive?sub_confirmation=1"
               legacyBehavior
             >
               <a target="_blank" className="hover:text-gray-400">

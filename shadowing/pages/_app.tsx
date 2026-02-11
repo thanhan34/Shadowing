@@ -2,6 +2,7 @@ import '../styles/globals.css';
 import type { AppProps } from 'next/app';
 import { useEffect, useState } from 'react';
 import { initializeApp, getApps } from 'firebase/app';
+import Navigation from '../components/Navigation';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBdDDNRvAwiOz9gjQtyv5yGdjUKQ8cd7bs",
@@ -38,5 +39,10 @@ export default function App({ Component, pageProps }: AppProps) {
     );
   }
 
-  return <Component {...pageProps} />;
+  return (
+    <>
+      <Navigation />
+      <Component {...pageProps} />
+    </>
+  );
 }

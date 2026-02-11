@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
-import Navigation from '../components/Navigation';
 import { getNextImage } from '../utils/background';
 import { db } from '../firebase';
 import { collection, addDoc, updateDoc, doc, getDoc, getDocs, deleteDoc } from 'firebase/firestore';
@@ -218,11 +217,7 @@ In conclusion, while remote work offers significant advantages in terms of flexi
         <title>Add Essay - Essay Library Admin</title>
         <meta name="description" content="Add new essays to the library" />
         <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <Navigation />
-
-      <Link href="/" className="flex justify-center">
+      </Head>      <Link href="/" className="flex justify-center">
         <Image
           src="/logo1.png"
           alt="Logo"

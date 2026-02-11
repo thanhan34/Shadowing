@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
-import Navigation from '../components/Navigation';
 import { getNextImage } from '../utils/background';
 import { mockEssays, Essay } from '../data/mockEssays';
 import { db } from '../firebase';
@@ -49,11 +48,7 @@ const EssaysListPage: React.FC = () => {
         <meta name="keywords" content="PTE essays, writing practice, essay library, PTE training" />
         <meta name="author" content="PTE Intensive" />
         <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <Navigation />
-
-      <Link href="/" className="flex justify-center">
+      </Head>      <Link href="/" className="flex justify-center">
         <Image
           src="/logo1.png"
           alt="Logo"

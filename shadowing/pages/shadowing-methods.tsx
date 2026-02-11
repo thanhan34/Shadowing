@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import Navigation from "../components/Navigation";
 import { getNextImage } from "../utils/background";
 import Head from 'next/head';
 
@@ -133,9 +132,7 @@ const ShadowingMethods: React.FC = () => {
         />
         <meta name="author" content="PTE Intensive" />
         <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <Navigation />
-      <Link href="/" className="flex justify-center">
+      </Head>      <Link href="/" className="flex justify-center">
         <Image src="/logo1.png" alt="Logo" width={150} height={150} className="sm:w-40 sm:h-40 lg:w-48 lg:h-48" />
       </Link>
       <h1 className="mb-2 text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-gray-600 dark:text-white">

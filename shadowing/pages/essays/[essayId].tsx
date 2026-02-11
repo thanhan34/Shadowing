@@ -3,7 +3,6 @@ import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import Navigation from '../../components/Navigation';
 import { getNextImage } from '../../utils/background';
 import { mockEssays, Essay } from '../../data/mockEssays';
 import { highlightKeywords } from '../../utils/highlightKeywords';
@@ -74,11 +73,7 @@ const EssayDetailPage: React.FC<EssayDetailPageProps> = () => {
         <meta name="description" content={`Read model essay: ${essay.title}`} />
         <meta name="keywords" content="PTE essay, writing practice" />
         <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <Navigation />
-
-      <Link href="/" className="flex justify-center">
+      </Head>      <Link href="/" className="flex justify-center">
         <Image
           src="/logo1.png"
           alt="Logo"
