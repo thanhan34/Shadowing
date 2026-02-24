@@ -1,0 +1,222 @@
+{
+  "total": 1092,
+  "bad": 347,
+  "nbsp": 0,
+  "nnbsp": 0,
+  "duplicateGroups": 347,
+  "duplicateDocCount": 694,
+  "badSamples": [
+    {
+      "docId": "rs_0035565252c8885cf928a062800f",
+      "ID": "#799 RS",
+      "text": "To�receive�the�reimbursement,�you�must�keep�the�original�receipts."
+    },
+    {
+      "docId": "rs_009081cf2b1b5acf7561b6511086",
+      "ID": "#1662 RS",
+      "text": "Numerous�courses�devoted�to�life�sciences�are�listed�in�the�prospectus."
+    },
+    {
+      "docId": "rs_00c8c7438207e34be4ce29adfb3d",
+      "ID": "#930 RS",
+      "text": "In�my�free�time,�I�would�like�to�read�current�affairs�and�newspapers."
+    },
+    {
+      "docId": "rs_00d2db61cca347052605bacac4c9",
+      "ID": "#372 RS",
+      "text": "Glass�is�not�a�true�solid�because�it�does�not�have�a�crystal�structure."
+    },
+    {
+      "docId": "rs_0267d9b002f835501215a6a8191b",
+      "ID": "#299 RS",
+      "text": "The�student�welfare�officer�can�help�with�questions�about�exam�techniques."
+    },
+    {
+      "docId": "rs_02c5f3b39574dc7924734b443af3",
+      "ID": "#2862 RS",
+      "text": "We�will�change�the�classroom�because�this�one�is�too�small."
+    },
+    {
+      "docId": "rs_03f1af7ea605c90586a6f5bc05a4",
+      "ID": "#782 RS",
+      "text": "Nearly�half�of�television�outputs�are�given�away�for�educational�programs."
+    },
+    {
+      "docId": "rs_0420b93b5ff5ddf16929bbb846c1",
+      "ID": "#509 RS",
+      "text": "Meteorology�is�the�detailed�study�of�the�Earth's�atmosphere."
+    },
+    {
+      "docId": "rs_0430babb18cea66181f5bbaa10ce",
+      "ID": "#789 RS",
+      "text": "The�recent�study�has�thrown�out�the�validity�of�the�argument."
+    },
+    {
+      "docId": "rs_04389efd3e3c7d8700789940c7c7",
+      "ID": "#349 RS",
+      "text": "I�expect�a�long�and�stagnant�debate�on�this�issue�for�a�week�or�two."
+    }
+  ],
+  "topDuplicateGroups": [
+    {
+      "key": "#799 RS|||To receive the reimbursement, you must keep the original receipts.",
+      "count": 2,
+      "docs": [
+        {
+          "docId": "rs_0035565252c8885cf928a062800f",
+          "id": "#799 RS",
+          "text": "To�receive�the�reimbursement,�you�must�keep�the�original�receipts."
+        },
+        {
+          "docId": "rs_616e4314ed76ef777d082e08d62e",
+          "id": "#799 RS",
+          "text": "To receive the reimbursement, you must keep the original receipts."
+        }
+      ]
+    },
+    {
+      "key": "#1662 RS|||Numerous courses devoted to life sciences are listed in the prospectus.",
+      "count": 2,
+      "docs": [
+        {
+          "docId": "rs_009081cf2b1b5acf7561b6511086",
+          "id": "#1662 RS",
+          "text": "Numerous�courses�devoted�to�life�sciences�are�listed�in�the�prospectus."
+        },
+        {
+          "docId": "rs_066414bee6791238576e09726024",
+          "id": "#1662 RS",
+          "text": "Numerous courses devoted to life sciences are listed in the prospectus."
+        }
+      ]
+    },
+    {
+      "key": "#930 RS|||In my free time, I would like to read current affairs and newspapers.",
+      "count": 2,
+      "docs": [
+        {
+          "docId": "rs_00c8c7438207e34be4ce29adfb3d",
+          "id": "#930 RS",
+          "text": "In�my�free�time,�I�would�like�to�read�current�affairs�and�newspapers."
+        },
+        {
+          "docId": "rs_c909c35f00487f7aad292300cc5c",
+          "id": "#930 RS",
+          "text": "In my free time, I would like to read current affairs and newspapers."
+        }
+      ]
+    },
+    {
+      "key": "#372 RS|||Glass is not a true solid because it does not have a crystal structure.",
+      "count": 2,
+      "docs": [
+        {
+          "docId": "rs_00d2db61cca347052605bacac4c9",
+          "id": "#372 RS",
+          "text": "Glass�is�not�a�true�solid�because�it�does�not�have�a�crystal�structure."
+        },
+        {
+          "docId": "rs_6acaa4757809653a2478b2e3a7ca",
+          "id": "#372 RS",
+          "text": "Glass is not a true solid because it does not have a crystal structure."
+        }
+      ]
+    },
+    {
+      "key": "#905 RS|||To answer such a complex question with a simple yes or no is absolutely impossible.",
+      "count": 2,
+      "docs": [
+        {
+          "docId": "rs_0127b3039d92357892d8c0505139",
+          "id": "#905 RS",
+          "text": "To answer such a complex question with a simple yes or no is absolutely impossible."
+        },
+        {
+          "docId": "rs_5306655b680b3bbaa7a7ea35028c",
+          "id": "#905 RS",
+          "text": "To�answer�such�a�complex�question�with�a�simple�yes�or�no�is�absolutely�impossible."
+        }
+      ]
+    },
+    {
+      "key": "#299 RS|||The student welfare officer can help with questions about exam techniques.",
+      "count": 2,
+      "docs": [
+        {
+          "docId": "rs_0267d9b002f835501215a6a8191b",
+          "id": "#299 RS",
+          "text": "The�student�welfare�officer�can�help�with�questions�about�exam�techniques."
+        },
+        {
+          "docId": "rs_b2f1473fb84cc79d4c3a78b53142",
+          "id": "#299 RS",
+          "text": "The student welfare officer can help with questions about exam techniques."
+        }
+      ]
+    },
+    {
+      "key": "#2862 RS|||We will change the classroom because this one is too small.",
+      "count": 2,
+      "docs": [
+        {
+          "docId": "rs_02c5f3b39574dc7924734b443af3",
+          "id": "#2862 RS",
+          "text": "We�will�change�the�classroom�because�this�one�is�too�small."
+        },
+        {
+          "docId": "rs_b0bcb483f28c3d1eed31d66fa1c1",
+          "id": "#2862 RS",
+          "text": "We will change the classroom because this one is too small."
+        }
+      ]
+    },
+    {
+      "key": "#1548 RS|||Telecommunication is based on the array of networks.",
+      "count": 2,
+      "docs": [
+        {
+          "docId": "rs_0332cb09bd83562798f4b997bcb4",
+          "id": "#1548 RS",
+          "text": "Telecommunication is based on the array of networks."
+        },
+        {
+          "docId": "rs_2b4c201cfd60a2d6062ab8d3c5b3",
+          "id": "#1548 RS",
+          "text": "Telecommunication�is�based�on�the�array�of�networks."
+        }
+      ]
+    },
+    {
+      "key": "#782 RS|||Nearly half of television outputs are given away for educational programs.",
+      "count": 2,
+      "docs": [
+        {
+          "docId": "rs_03f1af7ea605c90586a6f5bc05a4",
+          "id": "#782 RS",
+          "text": "Nearly�half�of�television�outputs�are�given�away�for�educational�programs."
+        },
+        {
+          "docId": "rs_45d9f566bb072ddc7c1dc198601e",
+          "id": "#782 RS",
+          "text": "Nearly half of television outputs are given away for educational programs."
+        }
+      ]
+    },
+    {
+      "key": "#509 RS|||Meteorology is the detailed study of the Earth's atmosphere.",
+      "count": 2,
+      "docs": [
+        {
+          "docId": "rs_0420b93b5ff5ddf16929bbb846c1",
+          "id": "#509 RS",
+          "text": "Meteorology�is�the�detailed�study�of�the�Earth's�atmosphere."
+        },
+        {
+          "docId": "rs_29e2ce707b72b879834d59862112",
+          "id": "#509 RS",
+          "text": "Meteorology is the detailed study of the Earth's atmosphere."
+        }
+      ]
+    }
+  ]
+}

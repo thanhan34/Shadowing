@@ -15,6 +15,7 @@ const MAIN_NAV_ITEMS: NavItem[] = [
   { label: "Essay Library", href: "/essays" },
   { label: "Phương Pháp Học", href: "/shadowing-methods" },
   { label: "Write From Dictation", href: "/writefromdictation" },
+  { label: "Repeat Sentence", href: "/RepeatSentence" },
 ];
 
 const USEFUL_LINKS: NavItem[] = [
