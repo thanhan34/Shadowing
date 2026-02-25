@@ -80,15 +80,13 @@ const Shadow: React.FC<ShadowProps> = ({ initialData }) => {
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
-      </Head>      <Link href="/" className="flex justify-center">
+      </Head>
+      <Link href="/" className="flex justify-center">
         <Image src="/logo1.png" alt="Logo" width={150} height={150} className="sm:w-40 sm:h-40 lg:w-48 lg:h-48" />
       </Link>
       <h1 className="mb-2 text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-gray-600 dark:text-white">
         SHADOWING
       </h1>
-      <Link href="/shadowing-methods" className="mb-4 px-4 py-2 bg-[#fc5d01] text-white rounded-lg hover:bg-[#fd7f33] transition-colors duration-300">
-        Xem Phương Pháp Học Shadowing
-      </Link>
       <input
         type="text"
         value={searchQuery}

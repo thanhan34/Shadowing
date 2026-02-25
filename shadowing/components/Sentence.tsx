@@ -31,15 +31,15 @@ const Sentence: React.FC<SentenceProps> = ({ videoSource, sentence }) => {
   };
 
   return (
-    <div className="z-10 items-center justify-between w-full max-w-5xl font-mono text-sm lg:flex">
-      <div className="mt-5 d-flex flex-column h-100">
+    <div className="z-10 items-center justify-between w-full max-w-5xl font-mono text-sm text-white/90 lg:flex">
+      <div className="mt-5 d-flex flex-column h-100 text-white/90">
         <audio ref={audioRef} controls autoPlay loop key={videoSource}>
           <source src={videoSource} type="audio/mpeg" />
         </audio>
         
         {/* Speed Control */}
         <div className="flex items-center gap-2 mt-3 mb-2">
-          <span className="text-sm text-gray-600 font-medium">Tốc độ:</span>
+          <span className="text-sm font-medium text-white/80">Tốc độ:</span>
           <div className="flex gap-1">
             {speedOptions.map((speed) => (
               <button
@@ -57,7 +57,7 @@ const Sentence: React.FC<SentenceProps> = ({ videoSource, sentence }) => {
           </div>
         </div>
 
-        <p className="mt-5 mb-5 text-2xl">{parse(sentence)}</p>
+        <p className="mt-5 mb-5 text-2xl text-white">{parse(sentence)}</p>
         <div className="flex flex-row pt-5 pb-5 space-x-5">
           <p className="p-3 border border-red-500 rounded-full ra-break">
             Pause

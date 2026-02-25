@@ -13,7 +13,6 @@ const MAIN_NAV_ITEMS: NavItem[] = [
   { label: "Retell Lecture", href: "/retell-lecture" },
   { label: "Describe Image", href: "/describe-image-shadowing" },
   { label: "Essay Library", href: "/essays" },
-  { label: "Phương Pháp Học", href: "/shadowing-methods" },
   { label: "Write From Dictation", href: "/writefromdictation" },
   { label: "Repeat Sentence", href: "/RepeatSentence" },
 ];
