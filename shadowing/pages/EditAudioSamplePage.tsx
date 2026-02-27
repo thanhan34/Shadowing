@@ -1092,7 +1092,7 @@ const EditAudioSamplePage: React.FC = () => {
             activeKey="edit"
             onChange={(key) => {
               if (key === 'wfd') {
-                router.push('/AddAudioSample');
+                router.push('/add-audio-sample');
                 return;
               }
 

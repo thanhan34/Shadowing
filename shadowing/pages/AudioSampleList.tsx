@@ -287,7 +287,7 @@ const AudioSampleList: React.FC = () => {
             activeKey="list"
             onChange={(key) => {
               if (key === "wfd") {
-                router.push("/AddAudioSample");
+                router.push("/add-audio-sample");
                 return;
               }
               if (key === "rs") {

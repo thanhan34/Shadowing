@@ -251,7 +251,7 @@ const EditRepeatSentenceList: React.FC = () => {
             activeKey="rs-edit"
             onChange={(key) => {
               if (key === "wfd") {
-                router.push("/AddAudioSample");
+                router.push("/add-audio-sample");
                 return;
               }
               if (key === "rs") {

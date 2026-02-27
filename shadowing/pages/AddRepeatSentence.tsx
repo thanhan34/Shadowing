@@ -331,7 +331,7 @@ const AddRepeatSentence: React.FC = () => {
             activeKey="rs"
             onChange={(key) => {
               if (key === "wfd") {
-                router.push("/AddAudioSample");
+                router.push("/add-audio-sample");
                 return;
               }
               if (key === "edit") {
