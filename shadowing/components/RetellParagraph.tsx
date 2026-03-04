@@ -55,7 +55,7 @@ const RetellParagraph: React.FC<RetellParagraphProps> = ({ sentences, fullText, 
       audio.playbackRate = playbackRate;
       audio.load();
       // Auto play next sentence
-      audio.play().catch(e => console.log('Auto-play prevented:', e));
+      audio.play().catch(() => {});
     }
   }, [selectedVoice, currentSentenceIndex]);
 

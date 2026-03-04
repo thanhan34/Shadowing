@@ -13,7 +13,6 @@ export const getNextImage = () => {
     const currentIndex = parseInt(localStorage.getItem('backgroundIndex')) || 0;
     const lastUpdate = parseInt(localStorage.getItem('backgroundLastUpdate')) || 0;
     const now = Date.now();
-    console.log(now - lastUpdate)
     if (now - lastUpdate < TEN_MINUTES) {
       return imageUrls[currentIndex];
     } else {

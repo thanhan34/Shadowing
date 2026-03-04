@@ -4,8 +4,6 @@ export default async function handler(req, res) {
   let browser;
   
   try {
-    console.log('Attempting to launch Puppeteer...');
-    
     browser = await puppeteer.launch({
       headless: true,
       args: [
@@ -16,16 +14,11 @@ export default async function handler(req, res) {
       ]
     });
     
-    console.log('Puppeteer launched successfully');
-    
     const page = await browser.newPage();
-    console.log('New page created');
     
     await page.goto('https://example.com', { waitUntil: 'networkidle2', timeout: 10000 });
-    console.log('Page loaded');
     
     const title = await page.title();
-    console.log('Page title:', title);
     
     res.status(200).json({ 
       success: true, 

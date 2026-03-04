@@ -23,7 +23,6 @@ const Paragraph = () => {
     };
     fetchDownloadLinks();
   }, []);
-console.log(downloadLinks)
 useEffect(() => {
   // Filter download links based on the searchKeywords
   const filtered = downloadLinks.filter((link) =>

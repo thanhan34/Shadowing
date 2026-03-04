@@ -91,7 +91,6 @@ async function convertToWav(audioFile: File): Promise<ArrayBuffer> {
 export async function transcribeAudio(audioFile: File): Promise<string> {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log('Converting audio to WAV format...');
       const wavData = await convertToWav(audioFile);
       
       const speechConfig = sdk.SpeechConfig.fromSubscription(
@@ -124,15 +123,12 @@ export async function transcribeAudio(audioFile: File): Promise<string> {
       recognizer.recognized = (s, e) => {
         if (e.result.reason === sdk.ResultReason.RecognizedSpeech) {
           transcription += e.result.text + ' ';
-          console.log('Recognized:', e.result.text);
         }
       };
 
       // Start recognition
-      console.log('Starting recognition...');
       recognizer.startContinuousRecognitionAsync(
         () => {
-          console.log('Recognition started successfully');
           // Stop after a reasonable time
           setTimeout(async () => {
             try {

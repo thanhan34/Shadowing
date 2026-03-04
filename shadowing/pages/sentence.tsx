@@ -77,9 +77,6 @@ const Sentence = () => {
         // Reset editing state
         setEditingSubSentenceId(null);
         setNewSubSentenceText("");
-        console.log("Sub-sentence updated in Firebase");
-      } else {
-        console.log("Please enter a valid text to update.");
       }
     } catch (error) {
       console.error("Error updating sub-sentence in Firebase:", error);
@@ -135,9 +132,6 @@ const Sentence = () => {
       }));
 
       setSubSentences(subSentenceData);
-      console.log(
-        "Sub-sentences loaded for the selected sentence, ordered by timestamp."
-      );
     } catch (error) {
       console.error("Error fetching sub-sentences:", error);
     }
@@ -176,14 +170,6 @@ const Sentence = () => {
                   text,
                 },
               ]);
-
-              console.log(
-                `Sentence added to subcollection in Firestore: URL - ${url}, Text - ${text}`
-              );
-            } else {
-              console.log(
-                "Please fill in all fields and select a shadowing document"
-              );
             }
           } catch (e) {
             console.error(
@@ -192,8 +178,6 @@ const Sentence = () => {
             );
           }
         }
-      } else {
-        console.log("Invalid input. Please provide a valid JSON array.");
       }
     } catch (e) {
       console.error("Error parsing input text:", e);
@@ -217,8 +201,6 @@ const Sentence = () => {
       setSubSentences((prevSubSentences) =>
         prevSubSentences.filter((subSentence) => subSentence.id !== subSentenceId)
       );
-  
-      console.log("Sub-sentence deleted from Firebase");
     } catch (error) {
       console.error("Error deleting sub-sentence from Firebase:", error);
     }

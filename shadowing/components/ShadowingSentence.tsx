@@ -33,7 +33,6 @@ const ShadowingSentence: React.FC<Props> = ({ shadowingData }) => {
  
   const handleModeChange = () => {
     if (mode && arraySen.length === 0) {
-      console.log("No sentences available for this paragraph.");
       return;
     }
     setMode(!mode);

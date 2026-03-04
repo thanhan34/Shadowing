@@ -26,8 +26,6 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid URL format: ' + cleanUrl });
   }
 
-  console.log('Scraping URL:', cleanUrl);
-
   let browser;
   
   try {
@@ -66,9 +64,7 @@ export default async function handler(req, res) {
       if (audioElement) {
         audioSrc = await page.evaluate(el => el.src, audioElement);
       }
-    } catch (error) {
-      console.log('Audio element not found:', error.message);
-    }
+    } catch (error) {}
 
     // Extract ra-body content
     let raBodyContent = null;
@@ -77,9 +73,7 @@ export default async function handler(req, res) {
       if (raBodyElement) {
         raBodyContent = await page.evaluate(el => el.textContent ? el.textContent.trim() : null, raBodyElement);
       }
-    } catch (error) {
-      console.log('RA body element not found:', error.message);
-    }
+    } catch (error) {}
 
     // Return the results
     res.status(200).json({

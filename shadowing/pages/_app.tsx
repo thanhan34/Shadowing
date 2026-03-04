@@ -20,9 +20,7 @@ export default function App({ Component, pageProps }: AppProps) {
     try {
       // Only initialize Firebase if it hasn't been initialized yet
       if (!getApps().length) {
-        console.log('Initializing Firebase...');
         initializeApp(firebaseConfig);
-        console.log('Firebase initialized successfully');
       }
     } catch (err) {
       console.error('Error initializing Firebase:', err);

@@ -64,9 +64,6 @@ const Admin = () => {
         setText("")
         setUrl("")
         setPractice("")
-        console.log("Document written to Firebase");
-      } else {
-        console.log("Please fill in all fields");
       }
     } catch (e) {
       console.error("Error adding to Firebase", e);
