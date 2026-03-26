@@ -8,11 +8,27 @@ import AnswerSummary from "../components/writefromdictation/AnswerSummary";
 import FlashcardMode from "../components/writefromdictation/FlashcardMode";
 import { useWriteFromDictation } from "../hooks/useWriteFromDictation";
 import { useAnswerInputGuards } from "../hooks/useAnswerInputGuards";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
+import Input from "@/components/ui/Input";
 
 type PageMode = "practice" | "flashcard";
+type ReportIssueType = "Sai audio" | "Sai topic" | "Sai bản dịch" | "Lỗi khác";
+
+const REPORT_ISSUE_OPTIONS: ReportIssueType[] = [
+  "Sai audio",
+  "Sai topic",
+  "Sai bản dịch",
+  "Lỗi khác",
+];
 
 const WriteFromDictation: React.FC = () => {
   const [pageMode, setPageMode] = useState<PageMode>("practice");
+  const [isReportPanelOpen, setIsReportPanelOpen] = useState(false);
+  const [selectedIssues, setSelectedIssues] = useState<ReportIssueType[]>([]);
+  const [reportNote, setReportNote] = useState("");
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+  const [reportStatus, setReportStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   const {
     audioRef,
@@ -57,6 +73,76 @@ const WriteFromDictation: React.FC = () => {
     handlePreventContextMenu,
     handlePreventDragDrop
   } = useAnswerInputGuards();
+
+  const currentQuestionNumber = currentIndex + 1;
+  const hasSelectedIssues = selectedIssues.length > 0;
+
+  const toggleIssueType = (issueType: ReportIssueType) => {
+    setReportStatus(null);
+    setSelectedIssues((prev) =>
+      prev.includes(issueType)
+        ? prev.filter((item) => item !== issueType)
+        : [...prev, issueType]
+    );
+  };
+
+  const resetReportForm = () => {
+    setSelectedIssues([]);
+    setReportNote("");
+    setReportStatus(null);
+  };
+
+  const handleSubmitReport = async () => {
+    if (!currentAudioSample || selectedIssues.length === 0) {
+      setReportStatus({
+        type: "error",
+        message: "Vui lòng chọn ít nhất 1 loại lỗi trước khi gửi báo cáo.",
+      });
+      return;
+    }
+
+    try {
+      setIsSubmittingReport(true);
+      setReportStatus(null);
+
+      const response = await fetch("/api/report-writefromdictation-issue", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          questionNumber: currentQuestionNumber,
+          sentenceText: currentAudioSample.text,
+          topic: currentAudioSample.topic || "General",
+          vietnameseTranslation: currentAudioSample.vietnameseTranslation || "",
+          selectedVoice,
+          audioUrl: currentAudioSample.audio[selectedVoice] || Object.values(currentAudioSample.audio)[0] || "",
+          issueTypes: selectedIssues,
+          note: reportNote,
+          pageMode,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.message || "Không thể gửi báo cáo.");
+      }
+
+      setReportStatus({
+        type: "success",
+        message: "Đã gửi báo cáo lỗi lên Discord thành công.",
+      });
+      resetReportForm();
+    } catch (error) {
+      setReportStatus({
+        type: "error",
+        message: error instanceof Error ? error.message : "Đã có lỗi xảy ra khi gửi báo cáo.",
+      });
+    } finally {
+      setIsSubmittingReport(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -265,6 +351,172 @@ const WriteFromDictation: React.FC = () => {
                 onPlaybackRateChange={handlePlaybackRateChange}
               />
             )}
+
+            {currentAudioSample && (
+              <>
+                <div className="fixed bottom-4 right-4 z-50 sm:bottom-6 sm:right-6">
+                  <button
+                    type="button"
+                    aria-label={isReportPanelOpen ? "Ẩn báo cáo lỗi" : `Báo cáo lỗi câu ${currentQuestionNumber}`}
+                    onClick={() => {
+                      setReportStatus(null);
+                      setIsReportPanelOpen((prev) => !prev);
+                    }}
+                    className="accent-ring glass glass-hover relative flex h-14 w-14 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/90 shadow-[0_12px_30px_rgba(0,0,0,0.35),0_0_22px_rgba(252,93,1,0.18)] backdrop-blur-[20px]"
+                  >
+                    <svg
+                      className="h-6 w-6"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.9"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M12 20h9" />
+                      <path d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4 12.5-12.5z" />
+                    </svg>
+                    {hasSelectedIssues && !isReportPanelOpen && (
+                      <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full border border-[#fc5d01]/50 bg-[#fc5d01] px-1 text-[10px] font-bold text-white shadow-[0_0_14px_rgba(252,93,1,0.5)]">
+                        {selectedIssues.length}
+                      </span>
+                    )}
+                  </button>
+                </div>
+
+                {isReportPanelOpen && (
+                  <div className="fixed bottom-20 right-4 z-50 w-[calc(100vw-2rem)] max-w-md sm:bottom-24 sm:right-6">
+                    <Card strong className="space-y-4 rounded-[22px] border-white/20 bg-white/10 shadow-[0_24px_60px_-24px_rgba(0,0,0,0.85),0_0_24px_rgba(252,93,1,0.14)]">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="space-y-1">
+                          <p className="text-sm font-semibold text-white">Báo cáo lỗi câu #{currentQuestionNumber}</p>
+                          <p className="text-xs text-white/55">Popup này sẽ gửi trực tiếp sang Discord để bạn tiện sửa nhanh.</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setIsReportPanelOpen(false)}
+                          className="accent-ring flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/65 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/30 hover:text-white active:translate-y-0.5"
+                          aria-label="Đóng popup báo lỗi"
+                        >
+                          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M18 6 6 18" />
+                            <path d="m6 6 12 12" />
+                          </svg>
+                        </button>
+                      </div>
+
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="space-y-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="inline-flex min-h-[32px] items-center rounded-full border border-[#fc5d01]/40 bg-[#fc5d01]/15 px-3 py-1 text-xs font-semibold text-orange-200">
+                            Báo cáo lỗi câu #{currentQuestionNumber}
+                          </span>
+                          <span className="inline-flex min-h-[32px] items-center rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-white/70">
+                            Topic: {currentAudioSample.topic || "General"}
+                          </span>
+                        </div>
+                        <p className="text-sm leading-6 text-white/90">
+                          <span className="font-semibold text-white">Sentence:</span> {currentAudioSample.text}
+                        </p>
+                        {currentAudioSample.vietnameseTranslation && (
+                          <p className="text-sm leading-6 text-white/70">
+                            <span className="font-semibold text-white/85">Bản dịch:</span>{" "}
+                            {currentAudioSample.vietnameseTranslation}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="rounded-2xl border border-white/12 bg-white/5 px-4 py-3 text-xs text-white/70">
+                        <p><span className="text-white/90 font-semibold">Voice:</span> {selectedVoice}</p>
+                        <p className="mt-1"><span className="text-white/90 font-semibold">Audio:</span> {currentAudioSample.audio[selectedVoice] ? "Đúng voice đang chọn" : "Fallback voice"}</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <p className="text-sm font-semibold text-white">Chọn lỗi cần báo cáo</p>
+                      <div className="flex flex-wrap gap-2">
+                        {REPORT_ISSUE_OPTIONS.map((issue) => {
+                          const active = selectedIssues.includes(issue);
+
+                          return (
+                            <button
+                              key={issue}
+                              type="button"
+                              onClick={() => toggleIssueType(issue)}
+                              className={`accent-ring min-h-[44px] rounded-full border px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                                active
+                                  ? "border-[#fc5d01]/60 bg-[#fc5d01]/20 text-orange-100 shadow-[0_0_18px_rgba(252,93,1,0.28)]"
+                                  : "border-white/15 bg-white/6 text-white/75 hover:-translate-y-0.5 hover:border-white/30 hover:shadow-lg active:translate-y-0.5"
+                              }`}
+                            >
+                              {issue}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label htmlFor="report-note" className="block text-sm font-semibold text-white">
+                        Mô tả chi tiết thêm
+                      </label>
+                      <Input
+                        id="report-note"
+                        multiline
+                        rows={4}
+                        value={reportNote}
+                        onChange={(event) => {
+                          setReportStatus(null);
+                          setReportNote(event.target.value);
+                        }}
+                        placeholder="Ví dụ: Audio đang phát là câu khác, topic hiển thị chưa đúng, bản dịch bị thiếu nghĩa..."
+                        className="bg-white/8 text-sm text-white placeholder:text-white/45"
+                      />
+                    </div>
+
+                    {reportStatus && (
+                      <div
+                        className={`rounded-2xl border px-4 py-3 text-sm ${
+                          reportStatus.type === "success"
+                            ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-200"
+                            : "border-red-400/30 bg-red-400/10 text-red-200"
+                        }`}
+                      >
+                        {reportStatus.message}
+                      </div>
+                    )}
+
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="text-xs leading-5 text-white/55">
+                        Báo cáo sẽ gửi kèm câu số, sentence, topic, bản dịch, voice và audio URL để tiện chỉnh sửa nhanh.
+                      </p>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="secondary"
+                          onClick={resetReportForm}
+                          disabled={isSubmittingReport}
+                          className="px-4"
+                        >
+                          Xóa chọn
+                        </Button>
+                        <Button
+                          variant="primary"
+                          onClick={async () => {
+                            await handleSubmitReport();
+                          }}
+                          disabled={isSubmittingReport || !currentAudioSample}
+                          className="px-4"
+                        >
+                          {isSubmittingReport ? "Đang gửi..." : "Gửi báo cáo lỗi"}
+                        </Button>
+                      </div>
+                    </div>
+                    </Card>
+                  </div>
+                )}
+              </>
+            )}
+
             <div className="mt-4 w-full">
               <textarea
                 id="txtInput"
