@@ -21,6 +21,22 @@ interface ReadAloudItem {
 }
 
 const TARGET_COLLECTION = "readaloud";
+type ChunkingFilter = "with" | "without";
+
+const hasChunking = (text: string) => text.includes("/");
+
+const renderChunkedText = (text: string) =>
+  text.split(/(\/)/g).map((segment, index) => {
+    if (segment === "/") {
+      return (
+        <span key={`slash-${index}`} className="font-semibold text-[#fc5d01]">
+          /
+        </span>
+      );
+    }
+
+    return <span key={`text-${index}`}>{segment}</span>;
+  });
 
 const extractIdNumber = (id?: string) => {
   if (!id) return Number.MAX_SAFE_INTEGER;
@@ -42,9 +58,9 @@ const sortReadAloud = (a: ReadAloudItem, b: ReadAloudItem) => {
 };
 
 const ReadAloudPage: React.FC = () => {
-  const router = useRouter();
   const [items, setItems] = useState<ReadAloudItem[]>([]);
   const [searchText, setSearchText] = useState("");
+  const [chunkingFilter, setChunkingFilter] = useState<ChunkingFilter>("with");
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -84,6 +100,13 @@ const ReadAloudPage: React.FC = () => {
     const keyword = searchText.trim().toLowerCase();
 
     return items.filter((item) => {
+      const matchesChunking =
+        chunkingFilter === "with" ? hasChunking(item.text) : !hasChunking(item.text);
+
+      if (!matchesChunking) {
+        return false;
+      }
+
       if (!keyword) return true;
 
       return (
@@ -93,16 +116,15 @@ const ReadAloudPage: React.FC = () => {
         (item.vietnameseTranslation ?? "").toLowerCase().includes(keyword)
       );
     });
-  }, [items, searchText]);
+  }, [items, searchText, chunkingFilter]);
 
   const stats = useMemo(() => {
-    const withId = items.filter((item) => Boolean(item.ID)).length;
-    const withTranslation = items.filter((item) => Boolean(item.vietnameseTranslation)).length;
+    const withChunking = items.filter((item) => hasChunking(item.text)).length;
 
     return {
       total: items.length,
-      withId,
-      withTranslation,
+      withChunking,
+      withoutChunking: Math.max(items.length - withChunking, 0),
       filtered: filteredItems.length,
     };
   }, [items, filteredItems.length]);
@@ -126,39 +148,22 @@ const ReadAloudPage: React.FC = () => {
             </div>
           </div>
 
-          <Tabs
-            items={[
-              { key: "ra-list", label: "Read Aloud List" },
-              { key: "ra-add", label: "Add Read Aloud" },
-              { key: "wfd", label: "Write From Dictation" },
-              { key: "rs", label: "Repeat Sentence" },
-              { key: "rs-add", label: "Add Repeat Sentence" },
-            ]}
-            activeKey="ra-list"
-            onChange={(key) => {
-              if (key === "ra-add") {
-                void router.push("/AddReadAloud");
-                return;
-              }
-              if (key === "wfd") {
-                void router.push("/add-audio-sample");
-                return;
-              }
-              if (key === "rs") {
-                void router.push("/RepeatSentence");
-                return;
-              }
-              if (key === "rs-add") {
-                void router.push("/AddRepeatSentence");
-                return;
-              }
-              void router.push("/readaloud");
-            }}
-          />
         </Card>
 
         <Card className="space-y-4">
           <h2 className="text-base font-semibold text-white sm:text-lg">Bộ lọc danh sách Read Aloud</h2>
+
+          <div className="space-y-2">
+            <p className="text-xs uppercase tracking-wide text-white/60">Chunking Toggle</p>
+            <Tabs
+              items={[
+                { key: "with", label: "With Chunking" },
+                { key: "without", label: "Without Chunking" },
+              ]}
+              activeKey={chunkingFilter}
+              onChange={(key) => setChunkingFilter(key as ChunkingFilter)}
+            />
+          </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
             <Input
@@ -185,13 +190,13 @@ const ReadAloudPage: React.FC = () => {
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-[#fc5d01]/10 p-3 text-center">
-              <p className="text-xs uppercase tracking-wide text-white/55">With ID</p>
-              <p className="mt-1 text-2xl font-bold text-[#ffd2b5]">{stats.withId}</p>
+              <p className="text-xs uppercase tracking-wide text-white/55">With Chunking</p>
+              <p className="mt-1 text-2xl font-bold text-[#ffd2b5]">{stats.withChunking}</p>
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-sky-400/10 p-3 text-center">
-              <p className="text-xs uppercase tracking-wide text-white/55">With Translation</p>
-              <p className="mt-1 text-2xl font-bold text-sky-200">{stats.withTranslation}</p>
+              <p className="text-xs uppercase tracking-wide text-white/55">Without Chunking</p>
+              <p className="mt-1 text-2xl font-bold text-sky-200">{stats.withoutChunking}</p>
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-violet-400/10 p-3 text-center">
@@ -246,7 +251,7 @@ const ReadAloudPage: React.FC = () => {
                   </div>
 
                   <p className="mt-3 whitespace-pre-wrap break-words text-sm text-white/90 sm:text-base">
-                    {item.text}
+                    {renderChunkedText(item.text)}
                   </p>
 
                   {item.vietnameseTranslation && (

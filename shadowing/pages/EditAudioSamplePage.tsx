@@ -21,7 +21,7 @@ import AppShellBackground from '../components/ui/AppShellBackground';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
-import Tabs from '../components/ui/Tabs';
+import TaskAdminTabs from '../components/ui/TaskAdminTabs';
 
 interface AudioSample {
   id: string;
@@ -1081,44 +1081,7 @@ const EditAudioSamplePage: React.FC = () => {
             </div>
           </div>
 
-          <Tabs
-            items={[
-              { key: 'wfd', label: 'Write From Dictation' },
-              { key: 'rs', label: 'Repeat Sentence' },
-              { key: 'rs-edit', label: 'Edit RS List' },
-              { key: 'edit', label: 'Edit Audio Sample' },
-              { key: 'list', label: 'Audio Sample List' },
-            ]}
-            activeKey="edit"
-            onChange={(key) => {
-              if (key === 'wfd') {
-                router.push('/add-audio-sample');
-                return;
-              }
-
-              if (key === 'rs') {
-                router.push('/AddRepeatSentence');
-                return;
-              }
-
-              if (key === 'list') {
-                router.push('/AudioSampleList');
-                return;
-              }
-
-              if (key === 'rs-list') {
-                router.push('/RepeatSentence');
-                return;
-              }
-
-              if (key === 'rs-edit') {
-                router.push('/EditRepeatSentenceList');
-                return;
-              }
-
-              router.push('/EditAudioSamplePage');
-            }}
-          />
+          <TaskAdminTabs activeKey="edit" />
         </Card>
 
         <Card className="space-y-4">

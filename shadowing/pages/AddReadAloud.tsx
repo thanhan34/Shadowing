@@ -16,7 +16,7 @@ import AppShellBackground from "../components/ui/AppShellBackground";
 import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
-import Tabs from "../components/ui/Tabs";
+import TaskAdminTabs from "../components/ui/TaskAdminTabs";
 
 type MessageType = "success" | "info" | "warning" | "error";
 
@@ -241,23 +241,8 @@ const AddReadAloud: React.FC = () => {
             </div>
           </div>
 
-          <Tabs
-            items={[
-              { key: "ra", label: "Add Read Aloud" },
-              { key: "wfd", label: "Write From Dictation" },
-              { key: "rs", label: "Repeat Sentence" },
-              { key: "rs-edit", label: "Edit RS List" },
-              { key: "list-ra", label: "Read Aloud List" },
-            ]}
-            activeKey="ra"
-            onChange={(key) => {
-              if (key === "wfd") return void router.push("/add-audio-sample");
-              if (key === "rs") return void router.push("/AddRepeatSentence");
-              if (key === "rs-edit") return void router.push("/EditRepeatSentenceList");
-              if (key === "list-ra") return void router.push("/readaloud");
-              void router.push("/AddReadAloud");
-            }}
-          />
+          <TaskAdminTabs activeKey="ra-add" />
+
         </Card>
 
         <Card className="space-y-4">

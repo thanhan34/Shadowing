@@ -1,15 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Head from "next/head";
-import { useRouter } from "next/router";
-import {
-  collection,
-  doc,
-  getDocs,
-  query,
-  Timestamp,
-  updateDoc,
-  where,
-} from "firebase/firestore";
+import { collection, doc, getDocs, query, Timestamp, updateDoc, where } from "firebase/firestore";
 import { db } from "../firebase";
 import AppShellBackground from "../components/ui/AppShellBackground";
 import Card from "../components/ui/Card";
@@ -25,7 +16,7 @@ interface AppMessage {
   text: string;
 }
 
-interface RepeatSentenceItem {
+interface ReadAloudItem {
   id: string;
   ID?: string;
   text: string;
@@ -36,7 +27,7 @@ interface RepeatSentenceItem {
   vietnameseTranslation?: string;
 }
 
-const TARGET_COLLECTION = "repeatsentence";
+const TARGET_COLLECTION = "readaloud";
 type ChunkingFilter = "with" | "without";
 
 const hasChunking = (text: string) => text.includes("/");
@@ -47,7 +38,7 @@ const extractIdNumber = (id?: string) => {
   return match ? Number(match[1]) : Number.MAX_SAFE_INTEGER;
 };
 
-const sortRepeatSentences = (a: RepeatSentenceItem, b: RepeatSentenceItem) => {
+const sortReadAloud = (a: ReadAloudItem, b: ReadAloudItem) => {
   const aNumber = extractIdNumber(a.ID);
   const bNumber = extractIdNumber(b.ID);
 
@@ -73,10 +64,8 @@ const renderChunkedText = (text: string) =>
     return <span key={`text-${index}`}>{segment}</span>;
   });
 
-const EditRepeatSentenceList: React.FC = () => {
-  const router = useRouter();
-
-  const [items, setItems] = useState<RepeatSentenceItem[]>([]);
+const EditReadAloudList: React.FC = () => {
+  const [items, setItems] = useState<ReadAloudItem[]>([]);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [searchText, setSearchText] = useState("");
   const [chunkingFilter, setChunkingFilter] = useState<ChunkingFilter>("with");
@@ -97,23 +86,23 @@ const EditRepeatSentenceList: React.FC = () => {
     []
   );
 
-  const fetchRepeatSentences = useCallback(async () => {
+  const fetchReadAloud = useCallback(async () => {
     setIsLoading(true);
 
     try {
-      const repeatsentenceRef = collection(db, TARGET_COLLECTION);
-      const q = query(repeatsentenceRef, where("isHidden", "==", false));
+      const readAloudRef = collection(db, TARGET_COLLECTION);
+      const q = query(readAloudRef, where("isHidden", "==", false));
       const querySnapshot = await getDocs(q);
 
       const fetchedItems = querySnapshot.docs
         .map((docSnapshot) => {
-          const data = docSnapshot.data() as Omit<RepeatSentenceItem, "id">;
+          const data = docSnapshot.data() as Omit<ReadAloudItem, "id">;
           return {
             id: docSnapshot.id,
             ...data,
           };
         })
-        .sort(sortRepeatSentences);
+        .sort(sortReadAloud);
 
       setItems(fetchedItems);
       setDrafts(
@@ -124,9 +113,7 @@ const EditRepeatSentenceList: React.FC = () => {
       );
     } catch (error) {
       appendMessage(
-        `Lỗi khi tải Repeat Sentence: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`,
+        `Lỗi khi tải Read Aloud: ${error instanceof Error ? error.message : "Unknown error"}`,
         "error"
       );
     } finally {
@@ -135,8 +122,8 @@ const EditRepeatSentenceList: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    void fetchRepeatSentences();
-  }, [fetchRepeatSentences]);
+    void fetchReadAloud();
+  }, [fetchReadAloud]);
 
   const filteredItems = useMemo(() => {
     const keyword = searchText.trim().toLowerCase();
@@ -178,11 +165,11 @@ const EditRepeatSentenceList: React.FC = () => {
     }));
   };
 
-  const handleSave = async (item: RepeatSentenceItem) => {
+  const handleSave = async (item: ReadAloudItem) => {
     const newText = (drafts[item.id] ?? "").trim();
 
     if (!newText) {
-      appendMessage("Nội dung câu không được để trống.", "error");
+      appendMessage("Nội dung đoạn không được để trống.", "error");
       return;
     }
 
@@ -210,10 +197,7 @@ const EditRepeatSentenceList: React.FC = () => {
 
       appendMessage(`Đã lưu thành công ${item.ID ?? item.id}.`, "success");
     } catch (error) {
-      appendMessage(
-        `Lỗi khi lưu: ${error instanceof Error ? error.message : "Unknown error"}`,
-        "error"
-      );
+      appendMessage(`Lỗi khi lưu: ${error instanceof Error ? error.message : "Unknown error"}`, "error");
     } finally {
       setSavingId(null);
     }
@@ -222,7 +206,7 @@ const EditRepeatSentenceList: React.FC = () => {
   return (
     <AppShellBackground>
       <Head>
-        <title>Edit Repeat Sentence List</title>
+        <title>Edit Read Aloud List</title>
       </Head>
 
       <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-4 px-4 pb-10 pt-24 sm:gap-6 sm:px-6 lg:pt-28">
@@ -230,10 +214,10 @@ const EditRepeatSentenceList: React.FC = () => {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-[24px] font-bold leading-tight text-white sm:text-[30px]">
-                Edit Repeat Sentence List
+                Edit Read Aloud List
               </h1>
               <p className="mt-2 text-sm text-white/70 sm:text-base">
-                Chỉnh sửa nội dung Repeat Sentence và thêm dấu / thủ công để chunking.
+                Chỉnh sửa nội dung Read Aloud và thêm dấu / thủ công để chunking.
               </p>
               <p className="mt-1 text-xs text-white/55 sm:text-[13px]">
                 Collection hiện tại: <span className="font-semibold text-[#ffac7b]">{TARGET_COLLECTION}</span>
@@ -241,14 +225,14 @@ const EditRepeatSentenceList: React.FC = () => {
             </div>
           </div>
 
-          <TaskAdminTabs activeKey="rs-edit" />
+          <TaskAdminTabs activeKey="ra-edit" />
         </Card>
 
         <Card className="space-y-4">
           <h2 className="text-base font-semibold text-white sm:text-lg">Chunking Editor</h2>
 
           <p className="rounded-2xl border border-[#fc5d01]/30 bg-[#fc5d01]/10 px-3 py-2 text-sm text-[#ffd6bc]">
-            Gợi ý: thêm dấu <span className="font-bold text-[#fc5d01]">/</span> để chia cụm khi luyện nói.
+            Gợi ý: thêm dấu <span className="font-bold text-[#fc5d01]">/</span> để chia cụm khi luyện đọc / luyện nói.
           </p>
 
           <div className="space-y-2">
@@ -272,7 +256,7 @@ const EditRepeatSentenceList: React.FC = () => {
             <Button
               variant="secondary"
               onClick={() => {
-                void fetchRepeatSentences();
+                void fetchReadAloud();
               }}
               disabled={isLoading}
               className="w-full sm:w-auto"
@@ -294,7 +278,6 @@ const EditRepeatSentenceList: React.FC = () => {
               <p className="text-xs uppercase tracking-wide text-white/55">Without Chunking</p>
               <p className="mt-1 text-2xl font-bold text-sky-200">{stats.withoutChunking}</p>
             </div>
-
             <div className="rounded-2xl border border-white/10 bg-violet-400/10 p-3 text-center">
               <p className="text-xs uppercase tracking-wide text-white/55">After Filter</p>
               <p className="mt-1 text-2xl font-bold text-violet-200">{stats.filtered}</p>
@@ -304,14 +287,14 @@ const EditRepeatSentenceList: React.FC = () => {
 
         <Card className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-semibold text-white sm:text-lg">Danh sách câu ({filteredItems.length})</h2>
+            <h2 className="text-base font-semibold text-white sm:text-lg">Danh sách đoạn ({filteredItems.length})</h2>
           </div>
 
           {isLoading ? (
-            <p className="text-sm text-white/70">Loading repeat sentence...</p>
+            <p className="text-sm text-white/70">Loading read aloud...</p>
           ) : filteredItems.length === 0 ? (
             <div className="rounded-2xl border border-white/15 bg-white/5 px-4 py-10 text-center">
-              <p className="text-white/85">Không có câu Repeat Sentence phù hợp.</p>
+              <p className="text-white/85">Không có đoạn Read Aloud phù hợp.</p>
             </div>
           ) : (
             <div className="max-h-[70vh] space-y-3 overflow-y-auto pr-1">
@@ -322,7 +305,7 @@ const EditRepeatSentenceList: React.FC = () => {
                   <article key={item.id} className="glass-hover rounded-2xl border border-white/15 bg-white/[0.08] p-4">
                     <div className="space-y-3">
                       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                        <p className="text-xs uppercase tracking-wide text-white/55">Sentence #{index + 1}</p>
+                        <p className="text-xs uppercase tracking-wide text-white/55">Passage #{index + 1}</p>
                         <div className="flex flex-wrap gap-2">
                           {item.ID && (
                             <span className="rounded-full border border-[#fc5d01]/35 bg-[#fc5d01]/15 px-3 py-1 text-xs font-semibold text-[#ffd2b5]">
@@ -341,8 +324,8 @@ const EditRepeatSentenceList: React.FC = () => {
                           multiline
                           value={draftText}
                           onChange={(e) => updateDraft(item.id, e.target.value)}
-                          rows={3}
-                          placeholder="Ví dụ: We should / always review / before speaking"
+                          rows={5}
+                          placeholder="Ví dụ: The chart illustrates / how the population changed / over time"
                         />
                       </div>
 
@@ -397,4 +380,4 @@ const EditRepeatSentenceList: React.FC = () => {
   );
 };
 
-export default EditRepeatSentenceList;
+export default EditReadAloudList;
