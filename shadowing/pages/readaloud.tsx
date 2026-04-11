@@ -1,150 +1,267 @@
-import { useState, useEffect } from 'react';
-import dynamic from 'next/dynamic';
-import { storage, db } from '../firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { collection, addDoc } from 'firebase/firestore';
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import Head from "next/head";
+import { useRouter } from "next/router";
+import { collection, getDocs, query, Timestamp, where } from "firebase/firestore";
+import { db } from "../firebase";
+import AppShellBackground from "../components/ui/AppShellBackground";
+import Card from "../components/ui/Card";
+import Button from "../components/ui/Button";
+import Input from "../components/ui/Input";
+import Tabs from "../components/ui/Tabs";
 
-const Home = () => {
-  const [file, setFile] = useState<File | null>(null);
-  const [text, setText] = useState<string>('');
-  const [ipa, setIpa] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [ffmpeg, setFfmpeg] = useState<any>(null);
-  const [audioUrl, setAudioUrl] = useState<string>('');
+interface ReadAloudItem {
+  id: string;
+  ID?: string;
+  text: string;
+  occurrence?: number;
+  createdAt?: Timestamp;
+  isHidden?: boolean;
+  questionType?: string;
+  vietnameseTranslation?: string;
+}
 
-  useEffect(() => {
-    const loadFfmpeg = async () => {
-      try {
-        const { FFmpeg } = await import('@ffmpeg/ffmpeg');
-        setFfmpeg(new FFmpeg());
-      } catch (error) {
-        console.error('Error loading FFmpeg:', error);
-      }
-    };
+const TARGET_COLLECTION = "readaloud";
 
-    loadFfmpeg();
-  }, []);
+const extractIdNumber = (id?: string) => {
+  if (!id) return Number.MAX_SAFE_INTEGER;
+  const match = id.match(/#(\d+)/);
+  return match ? Number(match[1]) : Number.MAX_SAFE_INTEGER;
+};
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setFile(e.target.files[0]);
-    }
-  };
+const sortReadAloud = (a: ReadAloudItem, b: ReadAloudItem) => {
+  const aNumber = extractIdNumber(a.ID);
+  const bNumber = extractIdNumber(b.ID);
 
-  const handleUpload = async () => {
-    if (!file || !ffmpeg) {
-      alert('Please select an MP3 file and wait for FFmpeg to load.');
-      return;
-    }
+  if (aNumber !== bNumber) {
+    return aNumber - bNumber;
+  }
 
+  const aKey = a.ID ?? a.text ?? "";
+  const bKey = b.ID ?? b.text ?? "";
+  return aKey.localeCompare(bKey);
+};
+
+const ReadAloudPage: React.FC = () => {
+  const router = useRouter();
+  const [items, setItems] = useState<ReadAloudItem[]>([]);
+  const [searchText, setSearchText] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const fetchReadAloud = useCallback(async () => {
     setIsLoading(true);
+    setErrorMessage("");
+
     try {
-      // Load ffmpeg
-      await ffmpeg.load();
+      const readAloudRef = collection(db, TARGET_COLLECTION);
+      const q = query(readAloudRef, where("isHidden", "==", false));
+      const querySnapshot = await getDocs(q);
 
-      // Convert MP3 to WAV
-      const fileData = await file.arrayBuffer();
-      await ffmpeg.writeFile(file.name, new Uint8Array(fileData));
-      await ffmpeg.exec(['-i', file.name, 'output.wav']);
-      const data = await ffmpeg.readFile('output.wav');
-      const audioBlob = new Blob([data], { type: 'audio/wav' });
-      const audioURL = URL.createObjectURL(audioBlob);
+      const fetchedData = querySnapshot.docs
+        .map((docSnapshot) => ({
+          id: docSnapshot.id,
+          ...(docSnapshot.data() as Omit<ReadAloudItem, "id">),
+        }))
+        .sort(sortReadAloud);
 
-      // Upload original MP3 to Firebase Storage
-      const timestamp = Date.now();
-      const storageRef = ref(storage, `readaloud/${timestamp}_${file.name}`);
-      await uploadBytes(storageRef, file);
-      const downloadUrl = await getDownloadURL(storageRef);
-      setAudioUrl(downloadUrl);
-
-      // Speech recognition using Web Speech API
-      const recognition = new (window as any).webkitSpeechRecognition();
-      recognition.lang = 'en-US';
-      recognition.onresult = async (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setText(transcript);
-        const ipaText = convertTextToIPA(transcript);
-        setIpa(ipaText);
-
-        // Store results in Firestore
-        try {
-          await addDoc(collection(db, 'readaloud'), {
-            timestamp: new Date(),
-            audioUrl: downloadUrl,
-            text: transcript,
-            ipa: ipaText
-          });
-        } catch (error) {
-          console.error('Error saving to Firestore:', error);
-        }
-
-        setIsLoading(false);
-      };
-      recognition.onerror = (event: any) => {
-        console.error('Speech recognition error', event);
-        setIsLoading(false);
-      };
-      recognition.onend = () => {
-        setIsLoading(false);
-      };
-
-      // Audio playback (optional)
-      const audio = new Audio(audioURL);
-      audio.play();
-      recognition.start();
+      setItems(fetchedData);
     } catch (error) {
-      console.error('Error during audio processing:', error);
+      setErrorMessage(
+        `Lỗi khi tải Read Aloud: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const convertTextToIPA = (text: string) => {
-    const ipaMapping: { [key: string]: string } = {
-      a: 'ɑ',
-      e: 'ɛ',
-      i: 'i',
-      o: 'oʊ',
-      u: 'u',
-      // Add more mappings for a complete conversion
+  useEffect(() => {
+    void fetchReadAloud();
+  }, [fetchReadAloud]);
+
+  const filteredItems = useMemo(() => {
+    const keyword = searchText.trim().toLowerCase();
+
+    return items.filter((item) => {
+      if (!keyword) return true;
+
+      return (
+        item.text.toLowerCase().includes(keyword) ||
+        (item.ID ?? "").toLowerCase().includes(keyword) ||
+        item.id.toLowerCase().includes(keyword) ||
+        (item.vietnameseTranslation ?? "").toLowerCase().includes(keyword)
+      );
+    });
+  }, [items, searchText]);
+
+  const stats = useMemo(() => {
+    const withId = items.filter((item) => Boolean(item.ID)).length;
+    const withTranslation = items.filter((item) => Boolean(item.vietnameseTranslation)).length;
+
+    return {
+      total: items.length,
+      withId,
+      withTranslation,
+      filtered: filteredItems.length,
     };
-    const converted = text
-      .split('')
-      .map((char) => ipaMapping[char.toLowerCase()] || char)
-      .join('');
-    return converted;
-  };
+  }, [items, filteredItems.length]);
 
   return (
-    <div className="flex flex-col items-center p-8 bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-bold text-blue-600 mb-6">MP3 to IPA Converter (Free Solution)</h1>
-      <input type="file" accept=".mp3" onChange={handleFileChange} className="mb-4" />
-      <button
-        onClick={handleUpload}
-        disabled={isLoading || !ffmpeg}
-        className={`px-6 py-2 ${isLoading || !ffmpeg ? 'bg-gray-400' : 'bg-blue-600'} text-white font-semibold rounded-md shadow hover:bg-blue-700 transition`}
-      >
-        {isLoading ? 'Processing...' : ffmpeg ? 'Upload and Convert' : 'Loading FFmpeg...'}
-      </button>
-      {audioUrl && (
-        <div className="mt-6 w-full max-w-md">
-          <h2 className="text-xl font-semibold mb-2">Recording:</h2>
-          <audio controls src={audioUrl} className="w-full" />
-        </div>
-      )}
-      {text && (
-        <div className="mt-6">
-          <h2 className="text-xl font-semibold">Recognized Text:</h2>
-          <p className="mt-3">{text}</p>
-        </div>
-      )}
-      {ipa && (
-        <div className="mt-6">
-          <h2 className="text-xl font-semibold">Generated IPA:</h2>
-          <p className="mt-3">{ipa}</p>
-        </div>
-      )}
-    </div>
+    <AppShellBackground>
+      <Head>
+        <title>Read Aloud</title>
+      </Head>
+
+      <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-4 px-4 pb-10 pt-24 sm:gap-6 sm:px-6 lg:pt-28">
+        <Card strong className="space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-[24px] font-bold leading-tight text-white sm:text-[30px]">
+                Read Aloud
+              </h1>
+              <p className="mt-2 text-sm text-white/70 sm:text-base">
+                Danh sách toàn bộ đoạn <span className="font-semibold text-[#ffac7b]">Read Aloud</span>.
+              </p>
+            </div>
+          </div>
+
+          <Tabs
+            items={[
+              { key: "ra-list", label: "Read Aloud List" },
+              { key: "ra-add", label: "Add Read Aloud" },
+              { key: "wfd", label: "Write From Dictation" },
+              { key: "rs", label: "Repeat Sentence" },
+              { key: "rs-add", label: "Add Repeat Sentence" },
+            ]}
+            activeKey="ra-list"
+            onChange={(key) => {
+              if (key === "ra-add") {
+                void router.push("/AddReadAloud");
+                return;
+              }
+              if (key === "wfd") {
+                void router.push("/add-audio-sample");
+                return;
+              }
+              if (key === "rs") {
+                void router.push("/RepeatSentence");
+                return;
+              }
+              if (key === "rs-add") {
+                void router.push("/AddRepeatSentence");
+                return;
+              }
+              void router.push("/readaloud");
+            }}
+          />
+        </Card>
+
+        <Card className="space-y-4">
+          <h2 className="text-base font-semibold text-white sm:text-lg">Bộ lọc danh sách Read Aloud</h2>
+
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Input
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              placeholder="Tìm theo nội dung, ID, bản dịch hoặc document id..."
+            />
+            <Button
+              variant="secondary"
+              onClick={() => {
+                void fetchReadAloud();
+              }}
+              disabled={isLoading}
+              className="w-full sm:w-auto"
+            >
+              {isLoading ? "Refreshing..." : "Refresh"}
+            </Button>
+          </div>
+
+          <div className="glass rounded-card grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-3 text-center">
+              <p className="text-xs uppercase tracking-wide text-white/55">Total Visible</p>
+              <p className="mt-1 text-2xl font-bold text-[#ffac7b]">{stats.total}</p>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-[#fc5d01]/10 p-3 text-center">
+              <p className="text-xs uppercase tracking-wide text-white/55">With ID</p>
+              <p className="mt-1 text-2xl font-bold text-[#ffd2b5]">{stats.withId}</p>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-sky-400/10 p-3 text-center">
+              <p className="text-xs uppercase tracking-wide text-white/55">With Translation</p>
+              <p className="mt-1 text-2xl font-bold text-sky-200">{stats.withTranslation}</p>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-violet-400/10 p-3 text-center">
+              <p className="text-xs uppercase tracking-wide text-white/55">After Filter</p>
+              <p className="mt-1 text-2xl font-bold text-violet-200">{stats.filtered}</p>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-semibold text-white sm:text-lg">
+              Danh sách đoạn ({filteredItems.length})
+            </h2>
+          </div>
+
+          {isLoading ? (
+            <p className="text-sm text-white/70">Loading read aloud...</p>
+          ) : errorMessage ? (
+            <div className="rounded-2xl border border-rose-300/30 bg-rose-500/10 px-4 py-3">
+              <p className="text-sm text-rose-200">{errorMessage}</p>
+            </div>
+          ) : filteredItems.length === 0 ? (
+            <div className="rounded-2xl border border-white/15 bg-white/5 px-4 py-10 text-center">
+              <p className="text-white/85">Không có đoạn Read Aloud nào phù hợp.</p>
+            </div>
+          ) : (
+            <div className="max-h-[70vh] space-y-3 overflow-y-auto pr-1">
+              {filteredItems.map((item) => (
+                <article
+                  key={item.id}
+                  className="glass-hover rounded-2xl border border-white/15 bg-white/[0.08] p-4"
+                >
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex flex-wrap gap-2">
+                      {item.ID && (
+                        <span className="rounded-full border border-[#fc5d01]/35 bg-[#fc5d01]/15 px-3 py-1 text-xs font-semibold text-[#ffcfad]">
+                          {item.ID}
+                        </span>
+                      )}
+
+                      <span className="rounded-full border border-emerald-300/35 bg-emerald-400/15 px-3 py-1 text-xs font-semibold text-emerald-200">
+                        Visible
+                      </span>
+
+                      {item.questionType && (
+                        <span className="rounded-full border border-violet-300/30 bg-violet-400/15 px-3 py-1 text-xs font-semibold text-violet-200">
+                          {item.questionType}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <p className="mt-3 whitespace-pre-wrap break-words text-sm text-white/90 sm:text-base">
+                    {item.text}
+                  </p>
+
+                  {item.vietnameseTranslation && (
+                    <p className="mt-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/75">
+                      VN: {item.vietnameseTranslation}
+                    </p>
+                  )}
+                </article>
+              ))}
+            </div>
+          )}
+        </Card>
+      </main>
+    </AppShellBackground>
   );
 };
 
-export default Home;
+export default ReadAloudPage;

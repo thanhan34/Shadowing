@@ -10,6 +10,7 @@ type NavItem = {
 
 const MAIN_NAV_ITEMS: NavItem[] = [
   { label: "Shadowing", href: "/shadow" },
+  { label: "Read Aloud", href: "/readaloud" },
   { label: "Retell Lecture", href: "/retell-lecture" },
   { label: "Describe Image", href: "/describe-image-shadowing" },
   { label: "Essay Library", href: "/essays" },
