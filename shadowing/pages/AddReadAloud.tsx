@@ -45,9 +45,32 @@ const normalizeTaskId = (value: string) =>
   value.trim().replace(/\s+/g, " ").replace(/read\s*aloud/gi, TASK_SUFFIX).toUpperCase();
 
 const extractNumbersFromBulkText = (value: string) => {
+  const lines = value
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  // Ưu tiên format mới kiểu:
+  // #921 Volcano Behaviors
+  // #921ShadowMedium
+  // Undone
+  // -> chỉ lấy số ở dòng tiêu đề đầu tiên để tránh bắt nhầm các dòng trạng thái/phân loại.
+  const titleLineMatches = lines
+    .map((line) => line.match(/^#(\d+)\s+.+$/))
+    .filter((match): match is RegExpMatchArray => Boolean(match));
+
+  if (titleLineMatches.length > 0) {
+    return Array.from(new Set(titleLineMatches.map((match) => match[1])));
+  }
+
   const strictMatches = Array.from(value.matchAll(/#(\d+)\s*(?:RA|Read\s*Aloud)/gi));
-  const flexibleMatches =
-    strictMatches.length > 0 ? strictMatches : Array.from(value.matchAll(/#(\d+)/g));
+  if (strictMatches.length > 0) {
+    return Array.from(new Set(strictMatches.map((match) => match[1])));
+  }
+
+  const flexibleMatches = lines
+    .map((line) => line.match(/^#(\d+)/))
+    .filter((match): match is RegExpMatchArray => Boolean(match));
 
   return Array.from(new Set(flexibleMatches.map((match) => match[1])));
 };
@@ -90,7 +113,7 @@ const AddReadAloud: React.FC = () => {
 
     const numbers = extractNumbersFromBulkText(bulkText);
     if (numbers.length === 0) {
-      appendMessage("Không tìm thấy mã hợp lệ. Dùng định dạng #number RA hoặc #number Read Aloud.", "error");
+      appendMessage("Không tìm thấy mã hợp lệ. Hỗ trợ cả format cũ (#number RA / #number Read Aloud) và format mới 3 dòng (#number Title, #numberShadow..., Undone).", "error");
       return;
     }
 
@@ -247,7 +270,7 @@ const AddReadAloud: React.FC = () => {
 
         <Card className="space-y-4">
           <h2 className="text-base font-semibold text-white sm:text-lg">Bước 1: Dán nội dung để trích xuất mã RA</h2>
-          <Input multiline value={bulkText} onChange={(e) => setBulkText(e.target.value)} placeholder="Ví dụ: #1201 RA hoặc #1201 Read Aloud" rows={6} />
+          <Input multiline value={bulkText} onChange={(e) => setBulkText(e.target.value)} placeholder="Ví dụ: #1201 RA, #1201 Read Aloud hoặc format 3 dòng như #1201 Title / #1201ShadowEasy / Undone" rows={6} />
           <div>
             <Button onClick={extractTextFromBulk} disabled={!bulkText.trim()} className="w-full sm:w-auto">Extract RA Numbers</Button>
           </div>
