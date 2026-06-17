@@ -8,6 +8,11 @@ import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import Tabs from "../components/ui/Tabs";
+import {
+  HighlightedReadAloudText,
+  HighlightToggle,
+  useReadAloudHighlightRules,
+} from "../components/readaloud/ReadAloudHighlightTools";
 
 interface ReadAloudItem {
   id: string;
@@ -25,18 +30,10 @@ type ChunkingFilter = "with" | "without";
 
 const hasChunking = (text: string) => text.includes("/");
 
-const renderChunkedText = (text: string) =>
-  text.split(/(\/)/g).map((segment, index) => {
-    if (segment === "/") {
-      return (
-        <span key={`slash-${index}`} className="font-semibold text-[#fc5d01]">
-          /
-        </span>
-      );
-    }
-
-    return <span key={`text-${index}`}>{segment}</span>;
-  });
+const getStringQuery = (value: string | string[] | undefined) => {
+  if (Array.isArray(value)) return value[0] ?? "";
+  return value ?? "";
+};
 
 const extractIdNumber = (id?: string) => {
   if (!id) return Number.MAX_SAFE_INTEGER;
@@ -58,11 +55,18 @@ const sortReadAloud = (a: ReadAloudItem, b: ReadAloudItem) => {
 };
 
 const ReadAloudPage: React.FC = () => {
+  const router = useRouter();
   const [items, setItems] = useState<ReadAloudItem[]>([]);
   const [searchText, setSearchText] = useState("");
   const [chunkingFilter, setChunkingFilter] = useState<ChunkingFilter>("with");
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const {
+    rules: highlightRules,
+    setRules: setHighlightRules,
+    isHighlightEnabled,
+    setIsHighlightEnabled,
+  } = useReadAloudHighlightRules();
 
   const fetchReadAloud = useCallback(async () => {
     setIsLoading(true);
@@ -95,6 +99,21 @@ const ReadAloudPage: React.FC = () => {
   useEffect(() => {
     void fetchReadAloud();
   }, [fetchReadAloud]);
+
+  useEffect(() => {
+    if (!router.isReady) return;
+
+    const chunkingQuery = getStringQuery(router.query.chunking);
+    const searchQuery = getStringQuery(router.query.search);
+
+    if (chunkingQuery === "with" || chunkingQuery === "without") {
+      setChunkingFilter(chunkingQuery);
+    }
+
+    if (searchQuery) {
+      setSearchText(searchQuery);
+    }
+  }, [router.isReady, router.query.chunking, router.query.search]);
 
   const filteredItems = useMemo(() => {
     const keyword = searchText.trim().toLowerCase();
@@ -129,6 +148,17 @@ const ReadAloudPage: React.FC = () => {
     };
   }, [items, filteredItems.length]);
 
+  const openReadAloudDetail = (item: ReadAloudItem) => {
+    void router.push({
+      pathname: "/readaloud/[id]",
+      query: {
+        id: item.id,
+        chunking: chunkingFilter,
+        ...(searchText.trim() ? { search: searchText.trim() } : {}),
+      },
+    });
+  };
+
   return (
     <AppShellBackground>
       <Head>
@@ -148,6 +178,13 @@ const ReadAloudPage: React.FC = () => {
             </div>
           </div>
 
+        </Card>
+
+        <Card className="space-y-4">
+          <HighlightToggle
+            enabled={isHighlightEnabled}
+            onEnabledChange={setIsHighlightEnabled}
+          />
         </Card>
 
         <Card className="space-y-4">
@@ -211,6 +248,7 @@ const ReadAloudPage: React.FC = () => {
             <h2 className="text-base font-semibold text-white sm:text-lg">
               Danh sách đoạn ({filteredItems.length})
             </h2>
+            <p className="hidden text-xs text-white/55 sm:block">Bấm vào một đoạn để mở trang chi tiết</p>
           </div>
 
           {isLoading ? (
@@ -226,40 +264,58 @@ const ReadAloudPage: React.FC = () => {
           ) : (
             <div className="max-h-[70vh] space-y-3 overflow-y-auto pr-1">
               {filteredItems.map((item) => (
-                <article
-                  key={item.id}
-                  className="glass-hover rounded-2xl border border-white/15 bg-white/[0.08] p-4"
-                >
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex flex-wrap gap-2">
-                      {item.ID && (
-                        <span className="rounded-full border border-[#fc5d01]/35 bg-[#fc5d01]/15 px-3 py-1 text-xs font-semibold text-[#ffcfad]">
-                          {item.ID}
+                    <article
+                      key={item.id}
+                      onClick={() => openReadAloudDetail(item)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          openReadAloudDetail(item);
+                        }
+                      }}
+                      className="glass-hover cursor-pointer rounded-2xl border border-white/15 bg-white/[0.08] p-4 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fc5d01]/60"
+                      aria-label={`Mở trang chi tiết đoạn ${item.ID ?? item.id}`}
+                    >
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex flex-wrap gap-2">
+                          {item.ID && (
+                            <span className="rounded-full border border-[#fc5d01]/35 bg-[#fc5d01]/15 px-3 py-1 text-xs font-semibold text-[#ffcfad]">
+                              {item.ID}
+                            </span>
+                          )}
+
+                          <span className="rounded-full border border-emerald-300/35 bg-emerald-400/15 px-3 py-1 text-xs font-semibold text-emerald-200">
+                            Visible
+                          </span>
+
+                          {item.questionType && (
+                            <span className="rounded-full border border-violet-300/30 bg-violet-400/15 px-3 py-1 text-xs font-semibold text-violet-200">
+                              {item.questionType}
+                            </span>
+                          )}
+                        </div>
+
+                        <span className="text-xs font-semibold text-white/45">
+                          Bấm để xem chi tiết
                         </span>
+                      </div>
+
+                      <p className="mt-3 whitespace-pre-wrap break-words text-sm text-white/90 sm:text-base">
+                        {isHighlightEnabled ? (
+                          <HighlightedReadAloudText text={item.text} rules={highlightRules} />
+                        ) : (
+                          item.text
+                        )}
+                      </p>
+
+                      {item.vietnameseTranslation && (
+                        <p className="mt-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/75">
+                          VN: {item.vietnameseTranslation}
+                        </p>
                       )}
-
-                      <span className="rounded-full border border-emerald-300/35 bg-emerald-400/15 px-3 py-1 text-xs font-semibold text-emerald-200">
-                        Visible
-                      </span>
-
-                      {item.questionType && (
-                        <span className="rounded-full border border-violet-300/30 bg-violet-400/15 px-3 py-1 text-xs font-semibold text-violet-200">
-                          {item.questionType}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <p className="mt-3 whitespace-pre-wrap break-words text-sm text-white/90 sm:text-base">
-                    {renderChunkedText(item.text)}
-                  </p>
-
-                  {item.vietnameseTranslation && (
-                    <p className="mt-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/75">
-                      VN: {item.vietnameseTranslation}
-                    </p>
-                  )}
-                </article>
+                    </article>
               ))}
             </div>
           )}

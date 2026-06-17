@@ -17,6 +17,10 @@ import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import TaskAdminTabs from "../components/ui/TaskAdminTabs";
+import {
+  HighlightRulesMenu,
+  useReadAloudHighlightRules,
+} from "../components/readaloud/ReadAloudHighlightTools";
 
 type MessageType = "success" | "info" | "warning" | "error";
 
@@ -88,6 +92,7 @@ const AddReadAloud: React.FC = () => {
   const [isCompleting, setIsCompleting] = useState(false);
   const [completionProgress, setCompletionProgress] = useState(0);
   const [allDocsSnapshot, setAllDocsSnapshot] = useState<QuerySnapshot<DocumentData> | null>(null);
+  const { rules: highlightRules, setRules: setHighlightRules } = useReadAloudHighlightRules();
 
   const messageTone = useMemo(
     () => ({ success: "text-emerald-300", info: "text-sky-300", warning: "text-amber-300", error: "text-rose-300" }),
@@ -266,6 +271,10 @@ const AddReadAloud: React.FC = () => {
 
           <TaskAdminTabs activeKey="ra-add" />
 
+        </Card>
+
+        <Card className="space-y-4">
+          <HighlightRulesMenu rules={highlightRules} onRulesChange={setHighlightRules} />
         </Card>
 
         <Card className="space-y-4">
