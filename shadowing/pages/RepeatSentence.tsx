@@ -17,6 +17,7 @@ interface RepeatSentenceItem {
   isHidden?: boolean;
   questionType?: string;
   vietnameseTranslation?: string;
+  displayOrder?: number;
 }
 
 const TARGET_COLLECTION = "repeatsentence";
@@ -31,6 +32,15 @@ const extractIdNumber = (id?: string) => {
 };
 
 const sortRepeatSentences = (a: RepeatSentenceItem, b: RepeatSentenceItem) => {
+  const aDisplayOrder =
+    typeof a.displayOrder === "number" ? a.displayOrder : Number.MAX_SAFE_INTEGER;
+  const bDisplayOrder =
+    typeof b.displayOrder === "number" ? b.displayOrder : Number.MAX_SAFE_INTEGER;
+
+  if (aDisplayOrder !== bDisplayOrder) {
+    return aDisplayOrder - bDisplayOrder;
+  }
+
   const aNumber = extractIdNumber(a.ID);
   const bNumber = extractIdNumber(b.ID);
 

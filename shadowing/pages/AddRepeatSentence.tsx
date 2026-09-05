@@ -39,6 +39,7 @@ interface AudioSample {
   isHidden?: boolean;
   vietnameseTranslation?: string;
   questionType?: string;
+  displayOrder?: number;
 }
 
 const TARGET_COLLECTION = "repeatsentence";
@@ -63,6 +64,16 @@ const extractNumbersFromBulkText = (value: string) => {
 
   return Array.from(new Set(flexibleMatches.map((match) => match[1])));
 };
+
+const getSearchNumbers = (value: string) =>
+  Array.from(
+    new Set(
+      value
+        .split(",")
+        .map((number) => number.trim())
+        .filter(Boolean)
+    )
+  );
 
 const AddRepeatSentence: React.FC = () => {
   const router = useRouter();
@@ -135,10 +146,7 @@ const AddRepeatSentence: React.FC = () => {
     setSearchResults({ existing: [], missing: [] });
 
     try {
-      const numberList = searchNumbers
-        .split(",")
-        .map((n) => n.trim())
-        .filter(Boolean);
+      const numberList = getSearchNumbers(searchNumbers);
 
       if (numberList.length === 0) {
         appendMessage("Vui lòng nhập danh sách số hợp lệ để tìm kiếm.", "error");
@@ -218,9 +226,22 @@ const AddRepeatSentence: React.FC = () => {
       };
 
       const docRef = await addDoc(collection(db, TARGET_COLLECTION), questionData);
+      const searchOrderById = new Map(
+        getSearchNumbers(searchNumbers).map((number, index) => [
+          normalizeTaskId(formatTaskId(number)),
+          index,
+        ])
+      );
 
       setSearchResults((prev) => ({
-        existing: [...prev.existing, { ...questionData, id: docRef.id }],
+        existing: [...prev.existing, { ...questionData, id: docRef.id }].sort((a, b) => {
+          const aOrder = searchOrderById.get(normalizeTaskId(a.ID ?? ""));
+          const bOrder = searchOrderById.get(normalizeTaskId(b.ID ?? ""));
+          return (
+            (aOrder ?? Number.MAX_SAFE_INTEGER) -
+            (bOrder ?? Number.MAX_SAFE_INTEGER)
+          );
+        }),
         missing: prev.missing.filter((num) => num !== selectedMissing),
       }));
 
@@ -257,6 +278,12 @@ const AddRepeatSentence: React.FC = () => {
 
     try {
       const foundDocIds = new Set(searchResults.existing.map((item) => item.id).filter(Boolean));
+      const displayOrderById = new Map(
+        getSearchNumbers(searchNumbers).map((number, index) => [
+          normalizeTaskId(formatTaskId(number)),
+          index,
+        ])
+      );
       const totalDocs = Math.max(allDocsSnapshot.docs.length, 1);
       let processedDocs = 0;
       let hiddenCount = 0;
@@ -264,7 +291,11 @@ const AddRepeatSentence: React.FC = () => {
       for (const question of searchResults.existing) {
         if (!question.id) continue;
         const ref = doc(db, TARGET_COLLECTION, question.id);
-        await updateDoc(ref, { isHidden: false });
+        const displayOrder = displayOrderById.get(normalizeTaskId(question.ID ?? ""));
+        await updateDoc(ref, {
+          isHidden: false,
+          ...(displayOrder !== undefined ? { displayOrder } : {}),
+        });
         processedDocs += 1;
         setCompletionProgress(Math.round((processedDocs / totalDocs) * 100));
       }
@@ -280,7 +311,7 @@ const AddRepeatSentence: React.FC = () => {
 
       setCompletionProgress(100);
       appendMessage(
-        `Complete: ${searchResults.existing.length} câu hiển thị (isHidden=false), ${hiddenCount} câu đã ẩn (isHidden=true).`,
+        `Complete: ${searchResults.existing.length} câu hiển thị theo đúng thứ tự đã tìm kiếm, ${hiddenCount} câu đã ẩn (isHidden=true).`,
         "success"
       );
     } catch (error) {
