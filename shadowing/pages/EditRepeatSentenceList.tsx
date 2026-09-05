@@ -334,6 +334,12 @@ const EditRepeatSentenceList: React.FC = () => {
                       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                         <p className="text-xs uppercase tracking-wide text-white/55">Sentence #{index + 1}</p>
                         <div className="flex flex-wrap gap-2">
+                          {typeof item.displayOrder === "number" && (
+                            <span className="rounded-full border border-violet-300/35 bg-violet-400/15 px-3 py-1 text-xs font-semibold text-violet-200">
+                              Order {item.displayOrder + 1}
+                            </span>
+                          )}
+
                           {item.ID && (
                             <span className="rounded-full border border-[#fc5d01]/35 bg-[#fc5d01]/15 px-3 py-1 text-xs font-semibold text-[#ffd2b5]">
                               {item.ID}

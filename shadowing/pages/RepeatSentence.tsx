@@ -247,6 +247,12 @@ const RepeatSentence: React.FC = () => {
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">                   
 
                     <div className="flex flex-wrap gap-2">
+                      {typeof sentence.displayOrder === "number" && (
+                        <span className="rounded-full border border-violet-300/35 bg-violet-400/15 px-3 py-1 text-xs font-semibold text-violet-200">
+                          Order {sentence.displayOrder + 1}
+                        </span>
+                      )}
+
                       {sentence.ID && (
                         <span className="rounded-full border border-[#fc5d01]/35 bg-[#fc5d01]/15 px-3 py-1 text-xs font-semibold text-[#ffcfad]">
                           {sentence.ID}
