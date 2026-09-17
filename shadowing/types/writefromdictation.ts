@@ -1,6 +1,7 @@
 import { Timestamp } from "firebase/firestore";
 
 export interface AudioSample {
+  id: string;
   audio: { [key: string]: string };
   text: string;
   occurrence: number;

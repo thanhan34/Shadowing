@@ -50,8 +50,10 @@ const WriteFromDictation: React.FC = () => {
     loading,
     filterOption,
     topicFilter,
+    remainingRandomSentenceCount,
     handleNext,
     handleBack,
+    handleRandomSentence,
     handlePlayAll,
     handleAudioEnd,
     handleSelectIndexChange,
@@ -244,8 +246,14 @@ const WriteFromDictation: React.FC = () => {
 
       <div className="w-full max-w-2xl mx-auto">
         {/* ── FILTER / SORT controls (shared across both modes) ── */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-3">
-          <div className="mb-0 md:mr-4 w-full">
+        <div
+          className={`mb-4 grid grid-cols-1 items-end gap-3 sm:grid-cols-2 ${
+            pageMode === "practice"
+              ? "lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto]"
+              : "lg:grid-cols-3"
+          }`}
+        >
+          <div className="w-full min-w-0">
             <label htmlFor="sorting-select" className="block mb-1 font-medium text-gray-700 dark:text-white/80 text-sm">
               Sort By:
             </label>
@@ -253,7 +261,7 @@ const WriteFromDictation: React.FC = () => {
               id="sorting-select"
               value={sortingOption}
               onChange={(event) => handleSortingChange(event.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-[#fc5d01] focus:border-transparent text-black"
+              className="h-11 w-full min-w-0 border border-gray-300 rounded-lg px-3 shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-[#fc5d01] focus:border-transparent text-black"
             >
               <option value="alphabetical">Alphabetical</option>
               <option value="occurrence">Occurrence (Highest to Lowest)</option>
@@ -261,7 +269,7 @@ const WriteFromDictation: React.FC = () => {
               <option value="easyToDifficult">Easy to Difficult (Shortest to Longest Text)</option>
             </select>
           </div>
-          <div className="mb-0 md:mr-4 w-full">
+          <div className="w-full min-w-0">
             <label htmlFor="filter-select" className="block mb-1 font-medium text-gray-700 dark:text-white/80 text-sm">
               Filter:
             </label>
@@ -269,14 +277,14 @@ const WriteFromDictation: React.FC = () => {
               id="filter-select"
               value={filterOption}
               onChange={(event) => handleFilterChange(event.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-[#fc5d01] focus:border-transparent text-black"
+              className="h-11 w-full min-w-0 border border-gray-300 rounded-lg px-3 shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-[#fc5d01] focus:border-transparent text-black"
             >
               <option value="All">All</option>
               <option value="New">New</option>
               <option value="Still Important">Still Important</option>
             </select>
           </div>
-          <div className="mb-0 md:mr-4 w-full">
+          <div className="w-full min-w-0">
             <label htmlFor="topic-filter" className="block mb-1 font-medium text-gray-700 dark:text-white/80 text-sm">
               Topic:
             </label>
@@ -284,7 +292,7 @@ const WriteFromDictation: React.FC = () => {
               id="topic-filter"
               value={topicFilter}
               onChange={(event) => handleTopicFilterChange(event.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-[#fc5d01] focus:border-transparent text-black"
+              className="h-11 w-full min-w-0 border border-gray-300 rounded-lg px-3 shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-[#fc5d01] focus:border-transparent text-black"
             >
               {DEFAULT_TOPICS.map((topic) => (
                 <option key={topic} value={topic}>
@@ -293,6 +301,34 @@ const WriteFromDictation: React.FC = () => {
               ))}
             </select>
           </div>
+          {pageMode === "practice" && (
+            <div className="w-full min-w-0 sm:col-span-2 lg:col-span-1 lg:w-auto">
+              <div className="mb-1 flex items-center justify-between gap-2 text-sm font-medium text-gray-700 dark:text-white/80">
+                <span>Câu ngẫu nhiên:</span>
+                <span className="whitespace-nowrap text-xs font-normal text-gray-600 dark:text-white/60">
+                  {remainingRandomSentenceCount}/{sortedAudioSamples.length} chưa nghe
+                </span>
+              </div>
+              <Button
+                type="button"
+                onClick={handleRandomSentence}
+                disabled={remainingRandomSentenceCount === 0}
+                title={remainingRandomSentenceCount === 0
+                  ? "Bạn đã nghe hết các câu trong bộ lọc hiện tại"
+                  : `Nghe một câu chưa phát trong ${topicFilter === "All" ? "tất cả chủ đề" : topicFilter}`}
+                className="flex h-11 w-full items-center justify-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-sm lg:w-auto"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M16 3h5v5" />
+                  <path d="M4 20 21 3" />
+                  <path d="M21 16v5h-5" />
+                  <path d="m15 15 6 6" />
+                  <path d="M4 4 9 9" />
+                </svg>
+                Nghe ngẫu nhiên
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* ══════════════════════════════════════

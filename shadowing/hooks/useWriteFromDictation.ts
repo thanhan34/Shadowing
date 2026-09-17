@@ -32,6 +32,8 @@ export const useWriteFromDictation = () => {
   const [backgroundImage, setBackgroundImage] = useState("");
   const [filterOption, setFilterOption] = useState<string>("All");
   const [topicFilter, setTopicFilter] = useState<string>("All");
+  const heardSentenceIdsRef = useRef<Set<string>>(new Set());
+  const [heardSentenceRevision, setHeardSentenceRevision] = useState(0);
 
   useEffect(() => {
     setBackgroundImage(getNextImage());
@@ -45,7 +47,10 @@ export const useWriteFromDictation = () => {
         const dataQuery: Query<DocumentData> = query(collectionRef, where("isHidden", "==", false));
 
         const querySnapshot = await getDocs(dataQuery);
-        const data: AudioSample[] = querySnapshot.docs.map((doc) => doc.data() as AudioSample);
+        const data: AudioSample[] = querySnapshot.docs.map((doc) => ({
+          ...(doc.data() as Omit<AudioSample, "id">),
+          id: doc.id,
+        }));
 
         setAudioSamples(data);
         setCurrentIndex(0);
@@ -102,6 +107,26 @@ export const useWriteFromDictation = () => {
 
   const currentAudioSample = sortedAudioSamples[currentIndex];
 
+  const markSentenceAsHeard = useCallback((sampleId: string) => {
+    if (heardSentenceIdsRef.current.has(sampleId)) return;
+
+    heardSentenceIdsRef.current.add(sampleId);
+    setHeardSentenceRevision((revision) => revision + 1);
+  }, []);
+
+  useEffect(() => {
+    if (currentAudioSample) {
+      markSentenceAsHeard(currentAudioSample.id);
+    }
+  }, [currentAudioSample, markSentenceAsHeard]);
+
+  const remainingRandomSentenceCount = useMemo(
+    () => sortedAudioSamples.filter(
+      (sample) => !heardSentenceIdsRef.current.has(sample.id)
+    ).length,
+    [heardSentenceRevision, sortedAudioSamples]
+  );
+
   const resetAnswerState = useCallback((resetInput: boolean) => {
     if (resetInput) {
       setInputText("");
@@ -138,6 +163,33 @@ export const useWriteFromDictation = () => {
     );
     setShowAnswer(alwaysShowAnswer);
   }, [sortedAudioSamples.length, alwaysShowAnswer, audioRef, resetAnswerState]);
+
+  const handleRandomSentence = useCallback(async () => {
+    if (currentAudioSample) {
+      markSentenceAsHeard(currentAudioSample.id);
+    }
+
+    const availableIndices = sortedAudioSamples.reduce<number[]>((indices, sample, index) => {
+      if (!heardSentenceIdsRef.current.has(sample.id)) {
+        indices.push(index);
+      }
+      return indices;
+    }, []);
+
+    if (availableIndices.length === 0) return;
+
+    const nextIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+    const nextSample = sortedAudioSamples[nextIndex];
+    markSentenceAsHeard(nextSample.id);
+
+    if (audioRef.current) {
+      await audioRef.current.stop();
+    }
+
+    resetAnswerState(true);
+    setShowAnswer(alwaysShowAnswer);
+    setCurrentIndex(nextIndex);
+  }, [alwaysShowAnswer, currentAudioSample, markSentenceAsHeard, resetAnswerState, sortedAudioSamples]);
 
   const handlePlayAll = useCallback(() => {
     setIsAutoplay((prev) => !prev);
@@ -191,15 +243,24 @@ export const useWriteFromDictation = () => {
 
   const handleSortingChange = useCallback((option: string) => {
     setSortingOption(option);
-  }, []);
+    setCurrentIndex(0);
+    resetAnswerState(true);
+    setShowAnswer(alwaysShowAnswer);
+  }, [alwaysShowAnswer, resetAnswerState]);
 
   const handleFilterChange = useCallback((option: string) => {
     setFilterOption(option);
-  }, []);
+    setCurrentIndex(0);
+    resetAnswerState(true);
+    setShowAnswer(alwaysShowAnswer);
+  }, [alwaysShowAnswer, resetAnswerState]);
 
   const handleTopicFilterChange = useCallback((topic: string) => {
     setTopicFilter(topic);
-  }, []);
+    setCurrentIndex(0);
+    resetAnswerState(true);
+    setShowAnswer(alwaysShowAnswer);
+  }, [alwaysShowAnswer, resetAnswerState]);
 
   const handlePlaybackRateChange = useCallback((newRate: number) => {
     setPlaybackRate(newRate);
@@ -288,8 +349,10 @@ export const useWriteFromDictation = () => {
     loading,
     filterOption,
     topicFilter,
+    remainingRandomSentenceCount,
     handleNext,
     handleBack,
+    handleRandomSentence,
     handlePlayAll,
     handleAudioEnd,
     handleSelectIndexChange,
