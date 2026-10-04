@@ -23,6 +23,8 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import TaskAdminTabs from '../components/ui/TaskAdminTabs';
 
+const AUDIO_VOICES: string[] = ['Jenny', 'Ryan', 'Natasha'];
+
 interface AudioSample {
   id: string;
   audio: { [key: string]: string };
@@ -229,7 +231,7 @@ const SampleCard: React.FC<SampleCardProps> = ({
           <div>
             <label className="mb-1 block text-xs text-white/70">Audio Status</label>
             <div className="flex flex-wrap gap-2">
-              {['Brian', 'Joanna', 'Olivia'].map((voice) => {
+              {AUDIO_VOICES.map((voice) => {
                 const hasAudio = sample.audio?.[voice] && sample.audio[voice].trim() !== '';
                 return (
                   <span
@@ -311,9 +313,9 @@ const EditAudioSamplePage: React.FC = () => {
               ...docData,
               id: docSnapshot.id,
               audio: {
-                Brian: audio.Brian || '',
-                Joanna: audio.Joanna || '',
-                Olivia: audio.Olivia || '',
+                Jenny: audio.Jenny || '',
+                Ryan: audio.Ryan || '',
+                Natasha: audio.Natasha || '',
                 ...audio,
               },
             } as AudioSample;
@@ -339,7 +341,7 @@ const EditAudioSamplePage: React.FC = () => {
       const needsVietnameseTranslation =
         !sample.vietnameseTranslation || sample.vietnameseTranslation.trim() === '';
 
-      const hasMissingAudio = ['Brian', 'Joanna', 'Olivia'].some(
+      const hasMissingAudio = AUDIO_VOICES.some(
         (voice) => !sample.audio?.[voice] || !sample.audio[voice].trim()
       );
 
@@ -397,7 +399,7 @@ const EditAudioSamplePage: React.FC = () => {
         const updatedAudio = { ...sample.audio };
         let hasUpdates = false;
 
-        ['Brian', 'Joanna', 'Olivia'].forEach((voice) => {
+        AUDIO_VOICES.forEach((voice) => {
           if (!updatedAudio[voice] || !updatedAudio[voice].trim()) {
             const existingUrl = findExistingAudioUrl(sample.text, voice);
             if (existingUrl) {
@@ -457,16 +459,11 @@ const EditAudioSamplePage: React.FC = () => {
         const keep = sorted[0];
         const remove = sorted.slice(1);
 
-        type VoiceType = 'Brian' | 'Joanna' | 'Olivia';
-        const mergedAudio: Record<VoiceType, string> = {
-          Brian: keep.data.audio?.Brian || '',
-          Joanna: keep.data.audio?.Joanna || '',
-          Olivia: keep.data.audio?.Olivia || '',
-        };
+        const mergedAudio: Record<string, string> = { ...keep.data.audio };
 
         remove.forEach((dupDoc) => {
           const audio = dupDoc.data.audio || {};
-          (Object.entries(audio) as [VoiceType, string][]).forEach(([voice, url]) => {
+          Object.entries(audio).forEach(([voice, url]) => {
             if (url && !mergedAudio[voice]) {
               mergedAudio[voice] = url;
             }
@@ -490,18 +487,20 @@ const EditAudioSamplePage: React.FC = () => {
   }, []);
 
   const parseTextFromFilename = (filename: string): { text: string; voice: string } | null => {
-    const withoutExt = filename.replace(/\.mp3$/, '');
+    if (!/\.mp3$/i.test(filename)) return null;
+    const withoutExt = filename.replace(/\.mp3$/i, '');
     const withoutNumber = withoutExt.replace(/^\d+_/, '');
     const parts = withoutNumber.split('_');
 
     if (parts.length < 2) return null;
 
-    const voice = parts[0];
-    if (!['Brian', 'Joanna', 'Olivia'].includes(voice)) {
+    const voice = AUDIO_VOICES.find((name) => name.toLowerCase() === parts[0].toLowerCase());
+    if (!voice) {
       return null;
     }
 
-    const text = parts.slice(1).join(' ');
+    const text = parts.slice(1).join(' ').trim();
+    if (!text) return null;
     return { text, voice };
   };
 
@@ -542,7 +541,7 @@ const EditAudioSamplePage: React.FC = () => {
 
         try {
           const samplesWithMissingAudio = audioSamples.filter((sample) => {
-            return ['Brian', 'Joanna', 'Olivia'].some(
+            return AUDIO_VOICES.some(
               (voice) => !sample.audio?.[voice] || !sample.audio[voice].trim()
             );
           });
@@ -568,7 +567,7 @@ const EditAudioSamplePage: React.FC = () => {
 
               const cleaned = value
                 .toLowerCase()
-                .replace(/^(brian|joanna|olivia)\s+/i, '')
+                .replace(/^(jenny|ryan|natasha)\s+/i, '')
                 .replace(/[.,!?]/g, '')
                 .replace(/\s+/g, ' ')
                 .trim();
@@ -610,13 +609,9 @@ const EditAudioSamplePage: React.FC = () => {
             continue;
           }
 
-          const updatedAudio = {
-            Brian: sample.audio?.Brian || '',
-            Joanna: sample.audio?.Joanna || '',
-            Olivia: sample.audio?.Olivia || '',
-          };
+          const updatedAudio: Record<string, string> = { ...sample.audio };
 
-          const missingVoices = ['Brian', 'Joanna', 'Olivia'].filter(
+          const missingVoices = AUDIO_VOICES.filter(
             (voice) => !sample.audio?.[voice] || !sample.audio[voice].trim()
           );
 
@@ -690,9 +685,9 @@ const EditAudioSamplePage: React.FC = () => {
 
       const currentAudio = data.audio || {};
       data.audio = {
-        Brian: currentAudio.Brian || '',
-        Joanna: currentAudio.Joanna || '',
-        Olivia: currentAudio.Olivia || '',
+        Jenny: currentAudio.Jenny || '',
+        Ryan: currentAudio.Ryan || '',
+        Natasha: currentAudio.Natasha || '',
         ...currentAudio,
       };
 
@@ -747,9 +742,9 @@ const EditAudioSamplePage: React.FC = () => {
 
         const currentAudio = currentSample.audio || {};
         const updatedAudio = {
-          Brian: currentAudio.Brian || '',
-          Joanna: currentAudio.Joanna || '',
-          Olivia: currentAudio.Olivia || '',
+          Jenny: currentAudio.Jenny || '',
+          Ryan: currentAudio.Ryan || '',
+          Natasha: currentAudio.Natasha || '',
           ...currentAudio,
           [uploadingFor]: url,
         };
@@ -782,17 +777,17 @@ const EditAudioSamplePage: React.FC = () => {
   const exportToExcel = useCallback(() => {
     const worksheet = XLSX.utils.json_to_sheet(
       filteredSamples.map((sample) => {
-        const brianHasAudio = sample.audio?.Brian && sample.audio.Brian.trim() !== '';
-        const joannaHasAudio = sample.audio?.Joanna && sample.audio.Joanna.trim() !== '';
-        const oliviaHasAudio = sample.audio?.Olivia && sample.audio.Olivia.trim() !== '';
+        const jennyHasAudio = sample.audio?.Jenny && sample.audio.Jenny.trim() !== '';
+        const ryanHasAudio = sample.audio?.Ryan && sample.audio.Ryan.trim() !== '';
+        const natashaHasAudio = sample.audio?.Natasha && sample.audio.Natasha.trim() !== '';
 
         return {
           'English Text': sample.text,
           'Vietnamese Translation': sample.vietnameseTranslation || '',
           Topic: sample.topic || 'General',
-          'Has Brian Audio': brianHasAudio ? 'Yes' : 'No',
-          'Has Joanna Audio': joannaHasAudio ? 'Yes' : 'No',
-          'Has Olivia Audio': oliviaHasAudio ? 'Yes' : 'No',
+          'Has Jenny Audio': jennyHasAudio ? 'Yes' : 'No',
+          'Has Ryan Audio': ryanHasAudio ? 'Yes' : 'No',
+          'Has Natasha Audio': natashaHasAudio ? 'Yes' : 'No',
           Missing:
             filterMode === 'translations'
               ? 'Translation'
@@ -1017,9 +1012,9 @@ const EditAudioSamplePage: React.FC = () => {
 
           const currentAudio = currentSample.audio || {};
           const updatedAudio = {
-            Brian: currentAudio.Brian || '',
-            Joanna: currentAudio.Joanna || '',
-            Olivia: currentAudio.Olivia || '',
+            Jenny: currentAudio.Jenny || '',
+            Ryan: currentAudio.Ryan || '',
+            Natasha: currentAudio.Natasha || '',
             ...currentAudio,
             [voice]: e.target.value,
           };
@@ -1137,7 +1132,7 @@ const EditAudioSamplePage: React.FC = () => {
               {filteredSamples.map((sample, index) => {
                 const needsTranslation =
                   !sample.vietnameseTranslation || sample.vietnameseTranslation.trim() === '';
-                const hasMissingAudio = ['Brian', 'Joanna', 'Olivia'].some(
+                const hasMissingAudio = AUDIO_VOICES.some(
                   (voice) => !sample.audio?.[voice] || !sample.audio[voice].trim()
                 );
                 const needsTopic = !sample.topic || sample.topic.trim() === '';
@@ -1258,7 +1253,7 @@ const EditAudioSamplePage: React.FC = () => {
 
                   <div className="space-y-3">
                     <label className="block text-xs text-white/70">Audio URLs</label>
-                    {['Brian', 'Joanna', 'Olivia'].map(renderAudioField)}
+                    {AUDIO_VOICES.map(renderAudioField)}
                   </div>
 
                   <div className="flex flex-col gap-2 sm:flex-row">
@@ -1463,6 +1458,8 @@ const EditAudioSamplePage: React.FC = () => {
           <p className="text-sm text-white/70">
             Chọn nhiều file mp3 cùng lúc. Format filename:{' '}
             <span className="font-semibold text-[#ffac7b]">number_Voice_Text.mp3</span>
+            . Chỉ hỗ trợ Jenny, Ryan, Natasha. Ví dụ: 1_Jenny_The weather is nice today.mp3.
+            Chỉ bổ sung giọng còn thiếu; audio đã có sẽ được giữ nguyên.
           </p>
 
           <div>

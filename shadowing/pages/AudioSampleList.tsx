@@ -25,6 +25,7 @@ type VisibilityFilter = "all" | "visible" | "hidden";
 interface AudioSample {
   id: string;
   text: string;
+  vietnameseTranslation?: string;
   occurrence: number;
   isHidden?: boolean;
   audio: Record<VoiceType, string>;
@@ -76,6 +77,7 @@ const AudioSampleList: React.FC = () => {
             return {
               id: docSnapshot.id,
               text: data.text ?? "",
+              vietnameseTranslation: data.vietnameseTranslation ?? "",
               occurrence: Number(data.occurrence ?? 0),
               isHidden: data.isHidden ?? false,
               audio: {
@@ -146,6 +148,7 @@ const AudioSampleList: React.FC = () => {
 
       await updateDoc(sampleRef, {
         text: sample.text,
+        vietnameseTranslation: sample.vietnameseTranslation ?? "",
         isHidden: sample.isHidden ?? false,
         audio: {
           Brian: sample.audio.Brian ?? "",
@@ -268,7 +271,7 @@ const AudioSampleList: React.FC = () => {
                 Audio Samples List
               </h1>
               <p className="mt-2 text-sm text-white/70 sm:text-base">
-                Chỉnh sửa nhanh toàn bộ nội dung, trạng thái hiển thị và link audio của Write From Dictation.
+                Chỉnh sửa nhanh toàn bộ nội dung, bản dịch tiếng Việt, trạng thái hiển thị và link audio của Write From Dictation.
               </p>
               <p className="mt-1 text-xs text-white/55 sm:text-[13px]">
                 Collection hiện tại: <span className="font-semibold text-[#ffac7b]">writefromdictation</span>
@@ -365,6 +368,29 @@ const AudioSampleList: React.FC = () => {
                             text: e.target.value,
                           }))
                         }
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor={`translation-${sample.id}`}
+                        className="mb-1 block text-xs text-white/70"
+                      >
+                        Vietnamese Translation
+                      </label>
+                      <Input
+                        id={`translation-${sample.id}`}
+                        multiline
+                        rows={3}
+                        value={sample.vietnameseTranslation ?? ""}
+                        onChange={(e) =>
+                          updateSampleInState(sample.id, (prev) => ({
+                            ...prev,
+                            vietnameseTranslation: e.target.value,
+                          }))
+                        }
+                        placeholder="Nhập bản dịch tiếng Việt..."
+                        disabled={savingId === sample.id}
                       />
                     </div>
 
