@@ -1,4 +1,4 @@
-import { Show, SignInButton, SignUpButton, UserButton, useAuth } from '@clerk/nextjs';
+import { Show, SignInButton, UserButton, useAuth } from '@clerk/nextjs';
 import Link from 'next/link';
 import { User } from 'react-feather';
 
@@ -7,11 +7,9 @@ export default function AuthControls() {
   return <div className="flex shrink-0 flex-nowrap items-center justify-end gap-2 whitespace-nowrap text-sm">
     {!isLoaded && <>
       <Link href="/sign-in" className="ui-button-secondary min-h-[44px]">Đăng nhập</Link>
-      <Link href="/sign-up" className="ui-button-primary min-h-[44px]">Đăng ký</Link>
     </>}
     <Show when="signed-out">
       <SignInButton><button className="ui-button-secondary min-h-[44px]">Đăng nhập</button></SignInButton>
-      <SignUpButton><button className="ui-button-primary min-h-[44px]">Đăng ký</button></SignUpButton>
     </Show>
     <Show when="signed-in">
       <Link href="/pending-approval" className="ui-button-secondary inline-flex min-h-[44px] items-center justify-center">
