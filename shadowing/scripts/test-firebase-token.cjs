@@ -27,6 +27,14 @@ async function check(failure, admin = true, provisioned = false, support = false
         }) }) },
       };
     } };
+    if (name.endsWith('firebaseDiagnostics')) {
+      const diagnosticFile = path.resolve(__dirname, '../lib/firebaseDiagnostics.ts');
+      const diagnosticModule = new Module(diagnosticFile, module);
+      diagnosticModule._compile(ts.transpileModule(fs.readFileSync(diagnosticFile, 'utf8'), {
+        compilerOptions: { module: ts.ModuleKind.CommonJS },
+      }).outputText, diagnosticFile);
+      return diagnosticModule.exports;
+    }
     return require(name);
   };
   loaded._compile(code, filename);

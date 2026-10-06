@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { requireAccess } from '../../lib/serverAccess';
 import { firebaseAdmin } from '../../lib/firebaseAdmin';
+import { firebaseCredentialPresence, firebaseDiagnostic } from '../../lib/firebaseDiagnostics';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   res.setHeader('Cache-Control', 'no-store');
@@ -30,9 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.json({ token });
   } catch (error) {
     // Never log raw SDK errors: they can contain request headers or credentials.
-    const rawCode = error && typeof error === 'object' && 'code' in error ? String(error.code) : 'unknown';
-    const code = /^[a-zA-Z0-9/_-]{1,80}$/.test(rawCode) ? rawCode : 'unknown';
-    console.error('[firebase-token]', { stage, code });
+    console.error('[firebase-token]', { stage, ...firebaseDiagnostic(error), ...firebaseCredentialPresence() });
     const messages: Record<string, string> = {
       CLERK_ACCESS: 'Không thể xác minh phiên Clerk. Thử đăng xuất rồi đăng nhập lại.',
       FIREBASE_INIT: 'Không thể khởi tạo Firebase Admin. Kiểm tra credentials phía server.',
