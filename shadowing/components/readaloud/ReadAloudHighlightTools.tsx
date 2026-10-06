@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { doc, onSnapshot, serverTimestamp, setDoc } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../../firebase";
 import Button from "../ui/Button";
 import Input from "../ui/Input";
@@ -59,7 +59,10 @@ export const useReadAloudHighlightRules = () => {
     const unsubscribe = onSnapshot(
       doc(db, FIRESTORE_COLLECTION, FIRESTORE_DOC_ID),
       (snapshot) => {
-        const firebaseRules = snapshot.data()?.rules;
+        const saved = window.localStorage.getItem('readAloudPersonalHighlightRules');
+        let personalRules: unknown;
+        try { personalRules = saved ? JSON.parse(saved) : null; } catch { personalRules = null; }
+        const firebaseRules = Array.isArray(personalRules) ? personalRules : snapshot.data()?.rules;
         if (Array.isArray(firebaseRules)) {
           setRules(
             firebaseRules
@@ -89,14 +92,8 @@ export const useReadAloudHighlightRules = () => {
           ? nextRulesAction(currentRules)
           : nextRulesAction;
 
-      void setDoc(
-        doc(db, FIRESTORE_COLLECTION, FIRESTORE_DOC_ID),
-        {
-          rules: nextRules,
-          updatedAt: serverTimestamp(),
-        },
-        { merge: true }
-      );
+      // Personal preferences must not mutate shared course configuration.
+      window.localStorage.setItem('readAloudPersonalHighlightRules', JSON.stringify(nextRules));
 
       return nextRules;
     });

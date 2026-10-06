@@ -1,0 +1,63 @@
+const fs = require('node:fs');
+const path = require('node:path');
+const Module = require('node:module');
+const assert = require('node:assert/strict');
+const ts = require('typescript');
+const cache = {};
+function load(relative) {
+  const filename = path.resolve(__dirname, '..', relative);
+  if (cache[filename]) return cache[filename];
+  const m = new Module(filename, module);
+  m.require = name => name.startsWith('.') ? load(path.relative(path.resolve(__dirname, '..'), path.resolve(path.dirname(filename), name + '.ts'))) : require(name);
+  m._compile(ts.transpileModule(fs.readFileSync(filename, 'utf8'), { compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.CommonJS } }).outputText, filename);
+  return cache[filename] = m.exports;
+}
+const { advanceMastery, updateMasterySummary, emptyMasterySummary, summarizeMastery } = load('lib/wfd/mastery.ts');
+const { evaluateUserNotifications, inQuietHours, localClock } = load('lib/notifications/notificationEngine.ts');
+const { defaultPreferences } = load('lib/notifications/types.ts');
+const now = Date.parse('2026-10-06T01:00:00Z');
+let q = advanceMastery(undefined, true, now);
+assert.equal(q.mastered, false);
+assert.equal(q.nextReviewAt, now + 86400000);
+assert.equal(advanceMastery(q, true, now + 10000).stage, 0);
+q = advanceMastery(q, true, q.nextReviewAt);
+assert.equal(q.stage, 1);
+q = advanceMastery(q, true, q.nextReviewAt);
+assert.equal(q.mastered, true);
+assert.equal(advanceMastery(q, false, q.nextReviewAt).mastered, false);
+let summary = updateMasterySummary(emptyMasterySummary(), undefined, q, now);
+assert.equal(summarizeMastery(summary, 10, q.nextReviewAt + 86400000).overdueReviewCount, 1);
+const next = advanceMastery(q, false, q.nextReviewAt);
+summary = updateMasterySummary(summary, q, next, q.nextReviewAt);
+assert.equal(summary.masteredCount, 0);
+assert.equal(Object.keys(summary.buckets).length, 1);
+const base = { userId: 'u1', currentTime: now,
+  notificationPreferences: { ...defaultPreferences, enabled: true },
+  notificationHistory: { dateKey: '', reservedCount: 0, lastReservedAt: 0, dedupeKeys: [], milestoneHighWater: 0 },
+  userStats: { dueReviewCount: 18, overdueReviewCount: 0, reviewedToday: false, goal: 20, practiced: 18, currentStreak: 12, masteryRate: 0, masteredCount: 0, total: 320 } };
+const evaluate = (changes = {}) => evaluateUserNotifications({ ...base, ...changes });
+assert.equal(evaluate().candidate.type, 'due_review');
+assert.equal(evaluate({ userStats: { ...base.userStats, overdueReviewCount: 12 } }).candidate.type, 'overdue_review');
+assert.equal(evaluate({ userStats: { ...base.userStats, reviewedToday: true } }).shouldSend, false);
+assert.equal(evaluate({ userStats: { ...base.userStats, dueReviewCount: 0 } }).shouldSend, false);
+const evening = Date.parse('2026-10-06T12:00:00Z');
+assert.equal(evaluate({ currentTime: evening }).candidate.type, 'streak_warning');
+assert.equal(evaluate({ currentTime: evening, userStats: { ...base.userStats, currentStreak: 0 } }).candidate.type, 'daily_goal');
+assert.equal(evaluate({ currentTime: evening, userStats: { ...base.userStats, practiced: 20 } }).shouldSend, false);
+assert.equal(evaluate({ currentTime: evening, userStats: { ...base.userStats, currentStreak: 0, practiced: 2, goal: 50 } }).shouldSend, false);
+assert.equal(evaluate({ currentTime: Date.parse('2026-10-06T16:00:00Z') }).reason, 'quiet-hours');
+assert.equal(evaluate({ notificationPreferences: { ...base.notificationPreferences, enabled: false } }).reason, 'disabled');
+assert.equal(evaluate({ notificationHistory: { ...base.notificationHistory, dateKey: '2026-10-06', reservedCount: 1 } }).reason, 'daily-limit');
+assert.equal(evaluate({ notificationHistory: { ...base.notificationHistory, dedupeKeys: ['due_review:u1:2026-10-06'] } }).shouldSend, false);
+assert.equal(evaluate({ notificationHistory: { ...base.notificationHistory, lastReservedAt: now - 1000 } }).reason, 'spacing');
+const milestone = { ...base.userStats, dueReviewCount: 0, masteryRate: 80, masteredCount: 256 };
+assert.equal(evaluate({ userStats: milestone }).candidate.milestone, 80);
+assert.equal(evaluate({ userStats: { ...milestone, masteryRate: 81 }, notificationHistory: { ...base.notificationHistory, milestoneHighWater: 80 } }).shouldSend, false);
+assert.equal(localClock(Date.parse('2026-10-05T17:00:00Z'), 'Asia/Ho_Chi_Minh').dateKey, '2026-10-06');
+assert.equal(inQuietHours(7 * 60, defaultPreferences.quietHours), false);
+assert.equal(inQuietHours(22 * 60, defaultPreferences.quietHours), true);
+assert.equal(inQuietHours(12 * 60, { enabled: true, start: '11:00', end: '13:00' }), true);
+const rules = fs.readFileSync(path.resolve(__dirname, '../firestore.rules'), 'utf8');
+assert.equal((rules.match(/collection != '_notifications'/g) || []).length, 2);
+assert.equal((rules.match(/collection != '_notificationTokenOwners'/g) || []).length, 2);
+console.log('WFD notification engine: mastery intervals, early review, lapse, buckets, due/overdue, priority, daily goal, streak, quiet hours, dedupe, quota, milestone high-water and rule exclusions passed. Pure-unit/static tests; not an FCM/emulator test.');

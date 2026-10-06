@@ -1,3 +1,4 @@
+import { loadAudioData } from '../lib/retell-lecture';
 import { GetServerSideProps } from 'next';
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
@@ -44,7 +45,8 @@ const RetellLecture: React.FC<RetellLectureProps> = ({ initialData }) => {
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
-      </Head>      <Link href="/" className="flex justify-center">
+      </Head>
+      <Link href="/" className="flex justify-center">
         <Image src="/logo1.png" alt="Logo" width={150} height={150} className="sm:w-40 sm:h-40 lg:w-48 lg:h-48" />
       </Link>
       <h1 className="mb-2 text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-gray-600 dark:text-white">

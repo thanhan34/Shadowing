@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ChevronDown, ExternalLink, Menu, X } from "react-feather";
+import AuthControls from './AuthControls';
+import AdminNavigation from './AdminNavigation';
 
 type NavItem = {
   label: string;
@@ -16,6 +18,7 @@ const MAIN_NAV_ITEMS: NavItem[] = [
   { label: "Essay Library", href: "/essays" },
   { label: "Write From Dictation", href: "/writefromdictation" },
   { label: "Repeat Sentence", href: "/RepeatSentence" },
+  { label: "🔔 Thông báo", href: "/settings/notifications" },
 ];
 
 const USEFUL_LINKS: NavItem[] = [
@@ -69,7 +72,7 @@ const Navigation: React.FC = () => {
   };
 
   const desktopLinkClass = (href: string) =>
-    `relative rounded-xl px-3 py-2 text-sm font-semibold transition-all duration-200 ${
+    `relative whitespace-nowrap rounded-xl px-2 py-3 text-sm font-semibold transition-all duration-200 ${
       isActive(href)
         ? "text-white"
         : "text-white/60 hover:text-white hover:-translate-y-0.5"
@@ -90,13 +93,13 @@ const Navigation: React.FC = () => {
       {/* Ambient glow from top */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,rgba(252,93,1,0.06),transparent)]" />
 
-      <div className="relative mx-auto w-full max-w-7xl px-4 py-3">
+      <div className="relative mx-auto w-full max-w-[1800px] px-2 py-3 sm:px-4">
         {/* Floating pill */}
         <div className="relative overflow-visible rounded-2xl border border-white/[0.08] bg-white/[0.04] shadow-[0_2px_24px_-8px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.08)]">
           {/* Inner highlight */}
           <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
-          <div className="flex items-center gap-3 px-3 py-2">
+          <div className="flex flex-nowrap items-center gap-2 px-2 py-2 sm:gap-3 sm:px-3">
             {/* ── Logo ── */}
             <Link
               href="/"
@@ -109,7 +112,7 @@ const Navigation: React.FC = () => {
             </Link>
 
             {/* ── Desktop nav ── */}
-            <div className="hidden flex-1 items-center lg:flex">
+            <div className="hidden min-w-0 flex-1 items-center 2xl:flex">
               {MAIN_NAV_ITEMS.map((item) => (
                 <Link
                   key={item.href}
@@ -130,14 +133,14 @@ const Navigation: React.FC = () => {
             </div>
 
             {/* Spacer for mobile */}
-            <div className="flex-1 lg:hidden" />
+            <div className="flex-1 2xl:hidden" />
 
             {/* ── Useful Links dropdown ── */}
-            <div ref={usefulMenuRef} className="relative hidden lg:block">
+            <div ref={usefulMenuRef} className="relative hidden shrink-0 2xl:block">
               <button
                 type="button"
                 onClick={() => setIsUsefulMenuOpen((prev) => !prev)}
-                className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-semibold transition-all duration-200 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fc5d01]/60 ${
+                className={`inline-flex min-h-[44px] items-center gap-1.5 whitespace-nowrap rounded-xl border px-3 py-2 text-sm font-semibold transition-all duration-200 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fc5d01]/60 ${
                   isUsefulMenuOpen
                     ? "border-[#fc5d01]/40 bg-[#fc5d01]/10 text-white shadow-[0_0_16px_-6px_rgba(252,93,1,0.5)]"
                     : "border-white/[0.08] bg-white/[0.04] text-white/60 hover:-translate-y-0.5 hover:border-white/15 hover:bg-white/[0.07] hover:text-white"
@@ -175,16 +178,23 @@ const Navigation: React.FC = () => {
               )}
             </div>
 
+            <div className="flex shrink-0 items-center gap-2 whitespace-nowrap">
+              <AdminNavigation />
+              <AuthControls />
+            </div>
+
             {/* ── Mobile menu button ── */}
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-              className={`inline-flex h-9 items-center gap-2 rounded-xl border px-3 text-sm font-semibold transition-all duration-200 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fc5d01]/60 lg:hidden ${
+              className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border text-sm font-semibold transition-all duration-200 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fc5d01]/60 2xl:hidden ${
                 isMobileMenuOpen
                   ? "border-[#fc5d01]/40 bg-[#fc5d01]/10 text-white"
                   : "border-white/[0.08] bg-white/[0.04] text-white/60 hover:border-white/15 hover:bg-white/[0.07] hover:text-white"
               }`}
               aria-label="Toggle menu"
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="mobile-navigation"
             >
               {isMobileMenuOpen ? <X size={16} /> : <Menu size={16} />}
             </button>
@@ -194,7 +204,7 @@ const Navigation: React.FC = () => {
 
       {/* ── Mobile dropdown ── */}
       {isMobileMenuOpen && (
-        <div className="relative mx-auto w-full max-w-7xl px-4 pb-4 lg:hidden">
+        <div id="mobile-navigation" className="relative mx-auto max-h-[calc(100dvh-88px)] w-full max-w-[1800px] overflow-y-auto px-4 pb-4 2xl:hidden">
           <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-black/30 shadow-[0_16px_48px_-12px_rgba(0,0,0,0.5)] backdrop-blur-2xl">
             <div className="h-px w-full bg-gradient-to-r from-transparent via-[#fc5d01]/40 to-transparent" />
 

@@ -116,10 +116,9 @@ const Shadow: React.FC<ShadowProps> = ({ initialData }) => {
 };
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
-  const host = process.env.VERCEL_URL || process.env.NEXT_PUBLIC_BASE_URL || 'localhost:3000';
-  const res = await fetch(`${protocol}://${host}/api/shadowing`);
-  const data: Paragraph[] = await res.json();
+  const { firebaseAdmin } = await import('../lib/firebaseAdmin');
+  const snapshot = await firebaseAdmin().db.collection('shadowing').orderBy('name').get();
+  const data = snapshot.docs.map(doc => ({ id: doc.id, text: doc.get('text') || '', url: doc.get('url') || '', name: doc.get('name') || '' }));
   return {
     props: {
       initialData: data,

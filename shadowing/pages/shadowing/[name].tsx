@@ -1,5 +1,4 @@
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "../../firebase";
+import { firebaseAdmin } from '../../lib/firebaseAdmin';
 import ShadowingSentence from "../../components/ShadowingSentence";
 import AppShellBackground from "../../components/ui/AppShellBackground";
 
@@ -26,9 +25,7 @@ export async function getServerSideProps(context: { params: { name: string } }) 
   const { name } = params;
 
   try {
-    const querySnapshot = await getDocs(
-      query(collection(db, "shadowing"), where("name", "==", name))
-    );
+    const querySnapshot = await firebaseAdmin().db.collection('shadowing').where('name', '==', name).get();
 
     if (querySnapshot.empty) {
       return {

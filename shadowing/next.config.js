@@ -1,9 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  experimental: {
-    appDir: true
-  },
+  distDir: process.env.NEXT_BUILD_DIR || '.next',
+  outputFileTracingRoot: process.cwd(),
   async redirects() {
     return [
       {

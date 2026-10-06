@@ -10,6 +10,9 @@
 
 # next.js
 /.next/
+/.next-clerk-check/
+/.next-wfd-check/
+/.next-notifications-check/
 /out/
 
 # production

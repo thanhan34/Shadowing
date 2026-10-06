@@ -2,7 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import AudioPlayer from "@/components/AudioPlayer";
 import Head from "next/head";
-import { useState } from "react";
+import { useRouter } from 'next/router';
+import { notificationRequest } from '../lib/notifications/client';
+import { useEffect, useRef, useState } from "react";
+import { useWfdGamification } from "../hooks/useWfdGamification";
+import GamificationPanel from "../components/writefromdictation/GamificationPanel";
 import { DEFAULT_TOPICS } from "../types/writefromdictation";
 import AnswerSummary from "../components/writefromdictation/AnswerSummary";
 import FlashcardMode from "../components/writefromdictation/FlashcardMode";
@@ -23,7 +27,23 @@ const REPORT_ISSUE_OPTIONS: ReportIssueType[] = [
 ];
 
 const WriteFromDictation: React.FC = () => {
+  const router = useRouter();
+  const reviewMode = router.query.mode === 'review';
+  const [reviewIds, setReviewIds] = useState<string[]>([]);
+  const [reviewStatus, setReviewStatus] = useState('');
+  useEffect(() => {
+    if (!reviewMode) return;
+    let active = true;
+    setReviewIds([]); setReviewStatus('Đang tải câu đến hạn ôn…');
+    notificationRequest('mastery').then(data => {
+      if (active) { setReviewIds(data.reviewIds); setReviewStatus(data.reviewIds.length ? `${data.reviewIds.length} câu đến hạn khi bắt đầu phiên ôn.` : 'Bạn đã hoàn thành các câu đến hạn ôn.'); }
+    }).catch(e => { if (active) setReviewStatus(e.message); });
+    return () => { active = false; };
+  }, [reviewMode]);
   const [pageMode, setPageMode] = useState<PageMode>("practice");
+  const game = useWfdGamification();
+  const [sessionSummary, setSessionSummary] = useState(false);
+  const attemptSubmitted = useRef(false);
   const [isReportPanelOpen, setIsReportPanelOpen] = useState(false);
   const [selectedIssues, setSelectedIssues] = useState<ReportIssueType[]>([]);
   const [reportNote, setReportNote] = useState("");
@@ -69,7 +89,27 @@ const WriteFromDictation: React.FC = () => {
     handleRepeat,
     toggleRepeatMode,
     handleExportCSV
-  } = useWriteFromDictation();
+  } = useWriteFromDictation(reviewMode ? reviewIds : undefined);
+  const questionId = currentAudioSample?.id;
+  const prepareAttempt = game.prepare;
+  const resetAttemptTicket = game.resetTicket;
+  const preparedContext = useRef('');
+  useEffect(() => {
+    const context = `${pageMode}:${questionId || ''}`;
+    if (preparedContext.current === context) return;
+    preparedContext.current = context;
+    resetAttemptTicket();
+    attemptSubmitted.current = false;
+    if (questionId && pageMode === 'practice') prepareAttempt(questionId);
+  }, [questionId, pageMode, prepareAttempt, resetAttemptTicket]);
+  const submitAnswer = () => {
+    // Existing scoring and answer reveal remain available even if the reward API fails.
+    handleAnswerButtonClick();
+    if (questionId && !attemptSubmitted.current && !alwaysShowAnswer && inputText.trim()) {
+      attemptSubmitted.current = true;
+      void game.submit(questionId, inputText);
+    }
+  };
   const {
     handlePreventCopyPaste,
     handlePreventContextMenu,
@@ -186,6 +226,12 @@ const WriteFromDictation: React.FC = () => {
       </h1>
 
       {/* ── Mode Toggle Tabs ── */}
+      <Card className="w-full max-w-4xl space-y-3 p-4 text-textGlass-primary">
+        <div className="flex flex-wrap gap-4"><Link className="accent-ring rounded-btn p-3 text-primary" href="/writefromdictation/mastery">Tiến độ Mastery</Link><Link className="accent-ring rounded-btn p-3 text-primary" href={reviewMode ? '/writefromdictation' : '/writefromdictation?mode=review'}>{reviewMode ? 'Luyện toàn bộ câu' : 'Ôn câu đến hạn'}</Link></div>
+        {reviewMode && <p role="status">{reviewStatus}</p>}
+      </Card>
+      <GamificationPanel game={game} summary={sessionSummary} onCloseSummary={() => setSessionSummary(false)} />
+      {pageMode === 'practice' && game.session.practiced > 0 && <Button variant="secondary" onClick={() => setSessionSummary(true)}>Kết thúc session</Button>}
       <div
         className="flex rounded-2xl p-1 gap-1"
         style={{
@@ -213,7 +259,7 @@ const WriteFromDictation: React.FC = () => {
           Practice
         </button>
         <button
-          onClick={() => setPageMode("flashcard")}
+          onClick={() => { if (pageMode === 'practice' && game.session.practiced > 0) setSessionSummary(true); setPageMode("flashcard"); }}
           className="relative flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-250"
           style={
             pageMode === "flashcard"
@@ -640,7 +686,7 @@ const WriteFromDictation: React.FC = () => {
               </button>
               <button
                 className="w-full rounded-lg bg-yellow-500 px-4 py-2 text-white shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-yellow-400/50 shadow-xl"
-                onClick={handleRepeat}
+                onClick={() => { attemptSubmitted.current = false; game.resetTicket(); if (questionId) game.prepare(questionId); void handleRepeat(); }}
               >
                 Repeat
               </button>
@@ -665,7 +711,7 @@ const WriteFromDictation: React.FC = () => {
               </button>
               <button
                 className="w-full rounded-lg bg-red-500 px-4 py-2 text-white shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-red-400/50 shadow-xl"
-                onClick={handleAnswerButtonClick}
+                onClick={submitAnswer}
               >
                 Answer
               </button>

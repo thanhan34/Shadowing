@@ -2,8 +2,16 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if true;  // Allow all operations for development
+    function approved() {
+      return request.auth != null && get(/databases/$(database)/documents/_access/$(request.auth.uid)).data.approved == true;
+    }
+    function staff() {
+      return approved() && (get(/databases/$(database)/documents/_access/$(request.auth.uid)).data.get('admin', false) == true || get(/databases/$(database)/documents/_access/$(request.auth.uid)).data.get('support', false) == true);
+    }
+    match /{collection}/{document=**} {
+      // Notification APIs enforce owner access. No direct client access, including staff.
+      allow read: if collection != '_access' && collection != '_wfd' && collection != '_notifications' && collection != '_notificationTokenOwners' && approved();
+      allow write: if collection != '_access' && collection != '_wfd' && collection != '_notifications' && collection != '_notificationTokenOwners' && staff();
     }
   }
 }

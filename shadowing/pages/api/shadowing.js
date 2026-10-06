@@ -1,10 +1,11 @@
-import { collection, getDocs, query, orderBy, limit, startAfter } from "firebase/firestore";
-import { db } from "../../firebase";
+import { firebaseAdmin } from '../../lib/firebaseAdmin';
+import { requireAccess } from '../../lib/serverAccess';
 
 export default async function handler(req, res) {
   try {
+    if (!await requireAccess(req, res)) return;
     // Fetch all shadowing documents
-    const querySnapshot = await getDocs(query(collection(db, "shadowing"), orderBy("name")));
+    const querySnapshot = await firebaseAdmin().db.collection('shadowing').orderBy('name').get();
     const paragraphData = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       text: doc.get("text"),

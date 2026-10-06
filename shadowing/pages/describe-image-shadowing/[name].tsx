@@ -1,3 +1,4 @@
+import { loadAudioData } from '../../lib/describe-image-shadowing';
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import DescribeImageShadowingComponent from '../../components/DescribeImageShadowingComponent';
@@ -38,10 +39,7 @@ export async function getServerSideProps(context: { params: { name: string } }) 
   const { name } = params;
 
   try {
-    const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
-    const host = process.env.VERCEL_URL || process.env.NEXT_PUBLIC_BASE_URL || 'localhost:3000';
-    const res = await fetch(`${protocol}://${host}/api/describe-image-shadowing`);
-    const describeImageData = await res.json();
+  const describeImageData = loadAudioData();
 
     return {
       props: {

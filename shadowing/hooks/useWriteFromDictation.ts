@@ -13,7 +13,7 @@ const resetScoreState = () => ({
   wordStatuses: [] as Array<{ word: string; status: "correct" | "incorrect" | "missing" }>
 });
 
-export const useWriteFromDictation = () => {
+export const useWriteFromDictation = (reviewIds?: string[]) => {
   const [audioSamples, setAudioSamples] = useState<AudioSample[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoplay, setIsAutoplay] = useState(false);
@@ -65,7 +65,7 @@ export const useWriteFromDictation = () => {
   }, []);
 
   const filteredAudioSamples = useMemo(() => {
-    let filtered = audioSamples;
+    let filtered = reviewIds ? audioSamples.filter(sample => reviewIds.includes(sample.id)) : audioSamples;
 
     switch (filterOption) {
       case "New":
@@ -86,7 +86,7 @@ export const useWriteFromDictation = () => {
     }
 
     return filtered;
-  }, [audioSamples, filterOption, topicFilter]);
+  }, [audioSamples, filterOption, topicFilter, reviewIds]);
 
   const sortedAudioSamples = useMemo(() => {
     return [...filteredAudioSamples].sort((a, b) => {
@@ -106,6 +106,7 @@ export const useWriteFromDictation = () => {
   }, [filteredAudioSamples, sortingOption]);
 
   const currentAudioSample = sortedAudioSamples[currentIndex];
+  useEffect(() => { setCurrentIndex(0); }, [reviewIds]);
 
   const markSentenceAsHeard = useCallback((sampleId: string) => {
     if (heardSentenceIdsRef.current.has(sampleId)) return;
