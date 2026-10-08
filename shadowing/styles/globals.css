@@ -304,6 +304,40 @@ body {
 }
 
 
+/* Student management extends the shared glass, text, radius and accent tokens. */
+.students-admin {
+  --students-table-heading: rgba(255, 255, 255, 0.03);
+  --students-row-hover: rgba(255, 255, 255, 0.04);
+}
+.students-stat-primary {
+  border-color: rgba(252, 93, 1, 0.25);
+  background: radial-gradient(ellipse at top right, rgba(252, 93, 1, 0.1), transparent 75%), var(--glass-bg);
+}
+.students-admin .students-directory { padding: 0; }
+.students-admin .students-search { padding-left: 48px; }
+.students-table { border-collapse: collapse; }
+.students-table th { padding: 16px 24px; background: var(--students-table-heading); color: var(--text-glass-muted); font-size: 12px; font-weight: 500; }
+.students-table td { padding: 20px 24px; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+.students-table td:first-child { width: 32%; }
+.students-table td:nth-child(2), .students-table td:nth-child(3) { white-space: nowrap; }
+.students-table tbody tr { transition: background 180ms ease; }
+.students-table tbody tr:hover { background: var(--students-row-hover); }
+.students-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid var(--glass-border); border-radius: 999px; background: var(--glass-bg); color: var(--text-glass-secondary); font-size: 12px; white-space: nowrap; }
+.students-badge-approved { border-color: rgba(252, 93, 1, 0.25); background: rgba(252, 93, 1, 0.08); color: var(--wfd-peach); }
+.students-mobile-label { display: none; }
+@media (max-width: 1023px) {
+  .students-table, .students-table tbody { display: block; }
+  .students-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .students-table tbody tr { display: block; padding: 16px; border-top: 1px solid rgba(255, 255, 255, 0.1); }
+  .students-table td { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 8px 0; border: 0; }
+  .students-table td:first-child { width: 100%; padding-bottom: 16px; }
+  .students-table td:last-child { justify-content: flex-end; padding-top: 16px; }
+  .students-mobile-label { display: inline; font-size: 12px; color: var(--text-glass-muted); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .students-admin *, .students-table tbody tr { transition: none; }
+}
+
 .ra-weak {
   color: darkgray;
 }
