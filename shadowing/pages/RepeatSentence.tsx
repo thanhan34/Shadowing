@@ -7,6 +7,7 @@ import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import Tabs from "../components/ui/Tabs";
+import { BookOpen, Search, RefreshCw, Sliders, ArrowRight } from "react-feather";
 
 interface RepeatSentenceItem {
   id: string;
@@ -72,6 +73,7 @@ const RepeatSentence: React.FC = () => {
   const [chunkingFilter, setChunkingFilter] = useState<ChunkingFilter>("with");
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [largeText, setLargeText] = useState(false);
 
   const fetchRepeatSentences = useCallback(async () => {
     setIsLoading(true);
@@ -144,143 +146,67 @@ const RepeatSentence: React.FC = () => {
   }, [repeatSentences, filteredRepeatSentences.length]);
 
   return (
-    <AppShellBackground>
-      <Head>
-        <title>Repeat Sentence</title>
-      </Head>
-
-      <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-4 px-4 pb-10 pt-24 sm:gap-6 sm:px-6 lg:pt-28">
-        <Card strong className="space-y-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-[24px] font-bold leading-tight text-white sm:text-[30px]">
-                Repeat Sentence
-              </h1>
-              <p className="mt-2 text-sm text-white/70 sm:text-base">
-                Danh sách toàn bộ câu <span className="font-semibold text-[#ffac7b]">Repeat Sentence.</span>
-              </p>
-              
-            </div>
+    <AppShellBackground className="rs-page">
+      <Head><title>Repeat Sentence | Thư viện luyện tập</title></Head>
+      <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-6 px-4 pb-12 pt-24 sm:px-6 lg:pt-28">
+        <Card strong className="rs-hero">
+          <div className="min-w-0">
+            <p className="rs-eyebrow"><BookOpen size={16} aria-hidden="true" /> PTE / SPEAKING LIBRARY</p>
+            <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">Repeat <span className="rs-accent">Sentence.</span></h1>
+            <p className="mt-3 max-w-xl text-base leading-7 text-white/80">Nhớ theo cụm. Nói trọn câu.<br />Một không gian gọn gàng để đọc, ghi nhớ và luyện nói mỗi ngày.</p>
+          </div>
+          <div className="rs-hero-note">
+            <span className="rs-eyebrow">MỖI CÂU, MỘT BƯỚC TIẾN</span>
+            <div className="my-4 flex items-center gap-3 text-sm font-semibold"><span>Đọc</span><ArrowRight size={16} aria-hidden="true" /><span>Ghi nhớ</span><ArrowRight size={16} aria-hidden="true" /><span>Nói lại</span></div>
+            <p className="text-sm leading-6 text-white/80">Dấu <span className="rs-accent font-bold">/</span> chia câu thành các cụm ý để bạn luyện từng phần dễ hơn.</p>
           </div>
         </Card>
 
         <Card className="space-y-4">
-          <h2 className="text-base font-semibold text-white sm:text-lg">Bộ lọc danh sách Repeat Sentence</h2>
-
-          <div className="space-y-2">
-            <p className="text-xs uppercase tracking-wide text-white/60">Chunking Toggle</p>
-            <Tabs
-              items={[
-                { key: "with", label: "With Chunking" },
-                { key: "without", label: "Without Chunking" },
-              ]}
-              activeKey={chunkingFilter}
-              onChange={(key) => setChunkingFilter(key as ChunkingFilter)}
-            />
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-lg font-semibold">Góc luyện tập</h2>
+            <span className="rs-badge">{isLoading ? 'Đang tải thư viện…' : errorMessage ? 'Chưa tải được thư viện' : stats.total + ' câu trong thư viện'}</span>
           </div>
-
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Input
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              placeholder="Tìm theo nội dung câu, ID hoặc document id..."
-            />
-            <Button
-              variant="secondary"
-              onClick={() => {
-                void fetchRepeatSentences();
-              }}
-              disabled={isLoading}
-              className="w-full sm:w-auto"
-            >
-              {isLoading ? "Refreshing..." : "Refresh"}
-            </Button>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <div className="min-w-0 flex-1">
+              <label htmlFor="rs-search" className="mb-2 block text-sm font-medium text-white/80">Tìm câu luyện tập</label>
+              <div className="relative"><Search className="rs-search-icon" size={18} aria-hidden="true" /><Input id="rs-search" type="search" value={searchText} onChange={e => setSearchText(e.target.value)} placeholder="Nhập nội dung hoặc mã câu…" className="rs-search" /></div>
+            </div>
+            <Button variant="secondary" disabled={isLoading} onClick={() => void fetchRepeatSentences()} className="rs-refresh"><RefreshCw size={16} aria-hidden="true" />{isLoading ? 'Đang tải…' : 'Tải lại'}</Button>
           </div>
-
-          <div className="glass rounded-card grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-3 text-center">
-              <p className="text-xs uppercase tracking-wide text-white/55">Total Visible</p>
-              <p className="mt-1 text-2xl font-bold text-[#ffac7b]">{stats.total}</p>
+          <Tabs items={[{ key: 'with', label: 'Có chia cụm' }, { key: 'without', label: 'Không chia cụm' }]} activeKey={chunkingFilter} onChange={key => setChunkingFilter(key as ChunkingFilter)} />
+          <details className="rs-settings">
+            <summary><span className="flex items-center gap-2"><Sliders size={16} aria-hidden="true" />Cài đặt hiển thị</span><span className="rs-chevron" aria-hidden="true">⌄</span></summary>
+            <div className="space-y-3 border-t border-white/15 p-4">
+              <label className="flex min-h-11 cursor-pointer items-center gap-3 text-sm"><input type="checkbox" checked={largeText} onChange={e => setLargeText(e.target.checked)} className="h-5 w-5 accent-[#fc5d01]" />Chữ lớn để luyện đọc</label>
+              <p className="text-sm leading-6 text-white/80">{stats.withChunking} câu có chia cụm · {stats.withoutChunking} câu không chia cụm. Mở “Nghĩa tiếng Việt” ở từng câu khi cần gợi ý.</p>
             </div>
-
-            <div className="rounded-2xl border border-white/10 bg-[#fc5d01]/10 p-3 text-center">
-              <p className="text-xs uppercase tracking-wide text-white/55">With Chunking</p>
-              <p className="mt-1 text-2xl font-bold text-[#ffd2b5]">{stats.withChunking}</p>
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-sky-400/10 p-3 text-center">
-              <p className="text-xs uppercase tracking-wide text-white/55">Without Chunking</p>
-              <p className="mt-1 text-2xl font-bold text-sky-200">{stats.withoutChunking}</p>
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-violet-400/10 p-3 text-center">
-              <p className="text-xs uppercase tracking-wide text-white/55">After Filter</p>
-              <p className="mt-1 text-2xl font-bold text-violet-200">{stats.filtered}</p>
-            </div>
-          </div>
+          </details>
         </Card>
 
-        <Card className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-semibold text-white sm:text-lg">
-              Danh sách câu ({filteredRepeatSentences.length})
-            </h2>
+        <section aria-labelledby="rs-results-heading" aria-busy={isLoading}>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2 px-1">
+            <h2 id="rs-results-heading" className="text-lg font-semibold">Danh sách câu <span className="ml-2 text-sm font-normal text-white/80">/ {chunkingFilter === 'with' ? 'Có chia cụm' : 'Không chia cụm'}</span></h2>
+            <p role="status" className="text-sm text-white/80">{isLoading ? 'Đang tải…' : errorMessage ? 'Tải dữ liệu thất bại' : stats.filtered + ' kết quả'}</p>
           </div>
-
           {isLoading ? (
-            <p className="text-sm text-white/70">Loading repeat sentence...</p>
+            <div className="space-y-4"><span className="sr-only">Đang tải câu Repeat Sentence</span>{[0, 1, 2].map(i => <Card key={i} className="rs-skeleton" aria-hidden="true"><div className="h-5 w-24 rounded bg-white/10" /><div className="mt-6 h-5 w-full rounded bg-white/10" /><div className="mt-3 h-5 w-2/3 rounded bg-white/10" /></Card>)}</div>
           ) : errorMessage ? (
-            <div className="rounded-2xl border border-rose-300/30 bg-rose-500/10 px-4 py-3">
-              <p className="text-sm text-rose-200">{errorMessage}</p>
-            </div>
+            <Card><div role="alert"><h3 className="text-lg font-semibold">Chưa thể tải thư viện</h3><p className="mt-2 break-words text-sm leading-6 text-white/80">{errorMessage}</p></div><Button className="mt-4" onClick={() => void fetchRepeatSentences()}>Thử lại</Button></Card>
           ) : filteredRepeatSentences.length === 0 ? (
-            <div className="rounded-2xl border border-white/15 bg-white/5 px-4 py-10 text-center">
-              <p className="text-white/85">Không có câu Repeat Sentence nào phù hợp.</p>
-            </div>
+            <Card className="py-10 text-center"><Search size={28} className="mx-auto mb-4 rs-accent" aria-hidden="true" /><h3 className="text-lg font-semibold">Chưa tìm thấy câu phù hợp</h3><p className="mt-2 text-sm leading-6 text-white/80">Thử từ khóa khác hoặc chuyển nhóm chia cụm.</p>{searchText && <Button variant="secondary" className="mt-4" onClick={() => setSearchText('')}>Xóa tìm kiếm</Button>}</Card>
           ) : (
-            <div className="max-h-[70vh] space-y-3 overflow-y-auto pr-1">
+            <div className="space-y-4">
               {filteredRepeatSentences.map((sentence, index) => (
-                <article
-                  key={sentence.id}
-                  className="glass-hover rounded-2xl border border-white/15 bg-white/[0.08] p-4"
-                >
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">                   
-
-                    <div className="flex flex-wrap gap-2">
-                      {typeof sentence.displayOrder === "number" && (
-                        <span className="rounded-full border border-violet-300/35 bg-violet-400/15 px-3 py-1 text-xs font-semibold text-violet-200">
-                          Order {sentence.displayOrder + 1}
-                        </span>
-                      )}
-
-                      {sentence.ID && (
-                        <span className="rounded-full border border-[#fc5d01]/35 bg-[#fc5d01]/15 px-3 py-1 text-xs font-semibold text-[#ffcfad]">
-                          {sentence.ID}
-                        </span>
-                      )}
-
-                      <span className="rounded-full border border-emerald-300/35 bg-emerald-400/15 px-3 py-1 text-xs font-semibold text-emerald-200">
-                        Visible
-                      </span>
-                    </div>
-                  </div>
-
-                  <p className="mt-2 text-sm text-white/90 sm:text-base whitespace-pre-wrap break-words">
-                    {renderChunkedText(sentence.text)}
-                  </p>
-
-                  
-
-                  {sentence.vietnameseTranslation && (
-                    <p className="mt-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/75">
-                      VN: {sentence.vietnameseTranslation}
-                    </p>
-                  )}
+                <article key={sentence.id} className="rs-sentence">
+                  <div className="rs-sentence-meta"><span className="rs-sentence-number">{String(index + 1).padStart(2, '0')}</span><span className="rs-badge">{sentence.ID || 'Repeat Sentence'}</span><span className="ml-auto text-xs text-white/80">{hasChunking(sentence.text) ? 'Có chia cụm' : 'Câu liền mạch'}</span></div>
+                  <p className={largeText ? 'rs-sentence-text rs-text-large' : 'rs-sentence-text'} lang="en">{renderChunkedText(sentence.text)}</p>
+                  {sentence.vietnameseTranslation && <details className="rs-translation"><summary>Nghĩa tiếng Việt <span className="rs-chevron" aria-hidden="true">⌄</span></summary><p lang="vi" className="pb-4 text-base leading-7 text-white/80">{sentence.vietnameseTranslation}</p></details>}
                 </article>
               ))}
             </div>
           )}
-        </Card>
+        </section>
       </main>
     </AppShellBackground>
   );
