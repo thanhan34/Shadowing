@@ -144,7 +144,7 @@ const FlashcardMode: React.FC<FlashcardModeProps> = ({ samples, selectedVoice })
         >
           <div className="text-5xl mb-4">🎉</div>
           <h2 className="text-2xl font-bold text-white mb-2">Session Complete!</h2>
-          <p className="text-white/60 mb-6 text-sm">You reviewed all {samples.length} flashcards</p>
+          <p className="text-white/80 mb-6 text-sm">You reviewed all {samples.length} flashcards</p>
 
           {/* Stats */}
           <div className="grid grid-cols-3 gap-4 mb-8">
@@ -157,8 +157,8 @@ const FlashcardMode: React.FC<FlashcardModeProps> = ({ samples, selectedVoice })
               <div className="text-xs text-orange-300 mt-1">Still Learning</div>
             </div>
             <div className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)" }}>
-              <div className="text-3xl font-bold text-white/50">{unseenCount}</div>
-              <div className="text-xs text-white/40 mt-1">Skipped</div>
+              <div className="text-3xl font-bold text-white/80">{unseenCount}</div>
+              <div className="text-xs text-white/80 mt-1">Skipped</div>
             </div>
           </div>
 
@@ -236,7 +236,7 @@ const FlashcardMode: React.FC<FlashcardModeProps> = ({ samples, selectedVoice })
               <span className="w-2 h-2 rounded-full bg-[#fc5d01] inline-block" />
               Still learning: {learningCount}
             </span>
-            <span className="flex items-center gap-1.5 text-xs px-3 py-1 rounded-full" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.5)" }}>
+            <span className="flex items-center gap-1.5 text-xs px-3 py-1 rounded-full" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.8)" }}>
               <span className="w-2 h-2 rounded-full bg-white/30 inline-block" />
               Unseen: {unseenCount}
             </span>
@@ -314,7 +314,7 @@ const FlashcardMode: React.FC<FlashcardModeProps> = ({ samples, selectedVoice })
                 style={{
                   background: "rgba(255,255,255,0.06)",
                   border: "1px solid rgba(255,255,255,0.12)",
-                  color: "rgba(255,255,255,0.45)",
+                  color: "rgba(255,255,255,0.8)",
                 }}
               >
                 ×{currentCard.occurrence}
@@ -323,17 +323,17 @@ const FlashcardMode: React.FC<FlashcardModeProps> = ({ samples, selectedVoice })
 
             {/* FRONT: Vietnamese translation */}
             <div className="text-center space-y-3">
-              <p className="text-xs font-medium tracking-widest uppercase" style={{ color: "rgba(252,93,1,0.8)" }}>
+              <p className="text-xs font-medium tracking-widest uppercase" style={{ color: "#fedac2" }}>
                 Vietnamese Translation
               </p>
               <p className="text-xl md:text-2xl font-semibold text-white leading-relaxed text-center">
                 {currentCard?.vietnameseTranslation || (
-                  <span className="text-white/40 italic text-base">No translation available</span>
+                  <span className="text-white/80 italic text-base">No translation available</span>
                 )}
               </p>
             </div>
 
-            <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs text-white/30 pointer-events-none">
+            <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs text-white/80 pointer-events-none">
               Tap to reveal English sentence
             </p>
           </div>
@@ -353,12 +353,12 @@ const FlashcardMode: React.FC<FlashcardModeProps> = ({ samples, selectedVoice })
             }}
           >
             <div className="text-center space-y-4">
-              <p className="text-xs font-medium mb-1 tracking-widest uppercase" style={{ color: "rgba(255,255,255,0.45)" }}>
+              <p className="text-xs font-medium mb-1 tracking-widest uppercase" style={{ color: "rgba(255,255,255,0.8)" }}>
                 English Sentence
               </p>
               {currentCard?.vietnameseTranslation && (
                 <>
-                  <p className="text-sm leading-relaxed" style={{ color: "rgba(252,93,1,0.75)" }}>
+                  <p className="text-sm leading-relaxed" style={{ color: "#fedac2" }}>
                     {currentCard.vietnameseTranslation}
                   </p>
                   <div className="w-12 h-px mx-auto" style={{ background: "rgba(255,255,255,0.2)" }} />
@@ -368,7 +368,7 @@ const FlashcardMode: React.FC<FlashcardModeProps> = ({ samples, selectedVoice })
                 {currentCard?.text || "—"}
               </p>
             </div>
-            <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs text-white/30 pointer-events-none">
+            <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs text-white/80 pointer-events-none">
               Tap to flip back
             </p>
           </div>

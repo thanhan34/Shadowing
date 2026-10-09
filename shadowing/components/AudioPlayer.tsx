@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
+import React, { useRef, useEffect, useId, forwardRef, useImperativeHandle } from 'react';
 
 interface CustomAudioRef {
   play: () => Promise<void>;
@@ -15,6 +15,7 @@ interface AudioPlayerProps {
   onPlaybackRateChange: (newRate: number) => void;
   questionType: string;
   vietnameseTranslation?: string;
+  variant?: 'default' | 'dictation';
 }
 
 const AudioPlayer = forwardRef<CustomAudioRef, AudioPlayerProps>(({
@@ -26,9 +27,11 @@ const AudioPlayer = forwardRef<CustomAudioRef, AudioPlayerProps>(({
   playbackRate,
   onPlaybackRateChange, 
   questionType,
-  vietnameseTranslation
+  vietnameseTranslation,
+  variant = 'default'
 }, ref) => {
   const audioElementRef = useRef<HTMLAudioElement>(null);
+  const speedId = useId();
 
   useImperativeHandle(ref, () => ({
     play: async () => {
@@ -44,7 +47,7 @@ const AudioPlayer = forwardRef<CustomAudioRef, AudioPlayerProps>(({
       }
       return Promise.resolve();
     }
-  }), [audio, playbackRate]);
+  }), [playbackRate]);
 
   useEffect(() => {
     if (audioElementRef.current) {
@@ -65,7 +68,8 @@ const AudioPlayer = forwardRef<CustomAudioRef, AudioPlayerProps>(({
   };
 
   return (
-    <div className="flex flex-col w-full max-w-2xl px-6 py-8 bg-white bg-opacity-30 backdrop-blur-lg rounded-xl shadow-lg border border-gray-200">
+    <div className={variant === 'dictation' ? 'wfd-audio-panel' : 'flex flex-col w-full max-w-2xl px-6 py-8 bg-white bg-opacity-30 backdrop-blur-lg rounded-xl shadow-lg border border-gray-200'}>
+      {variant === 'dictation' && <h2 className="mb-4 text-lg font-semibold">01 · Nghe câu mẫu</h2>}
       {questionType && (
         <div className="mb-4">
           <p className="text-lg font-medium text-gray-800">Số lần xuất hiện: {occurrence} | {questionType}</p>
@@ -80,10 +84,13 @@ const AudioPlayer = forwardRef<CustomAudioRef, AudioPlayerProps>(({
           className="w-full h-12"
         />
       </div>
-      <div className="flex flex-col md:flex-row justify-between items-center mb-4 w-full">
+      <details className={variant === 'dictation' ? 'wfd-settings-disclosure mb-4' : 'mb-4'} open={variant === 'dictation' ? undefined : true}>
+        <summary className={variant === 'dictation' ? 'wfd-settings-summary' : 'sr-only'}>Tốc độ phát · {playbackRate}x</summary>
+      <div className="flex flex-col md:flex-row justify-between items-center p-4 w-full">
         <div className="mb-4 md:mb-0 md:mr-4 w-full">
-          <label className="block mb-1 font-medium text-gray-700">Playback Speed:</label>
+          <label htmlFor={speedId} className="block mb-1 font-medium text-gray-700">Playback Speed:</label>
           <select
+            id={speedId}
             className="w-full p-2 border border-gray-300 rounded-lg shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             onChange={handlePlaybackRateChange}
             value={playbackRate.toString()}
@@ -96,12 +103,13 @@ const AudioPlayer = forwardRef<CustomAudioRef, AudioPlayerProps>(({
           </select>
         </div>
       </div>
+      </details>
       {showAnswer && text && (
         <div className="mb-4 w-full">
-          <p className="p-4 bg-blue-50 border border-blue-200 rounded text-gray-800 text-lg">{text}</p>
+          <p className={variant === 'dictation' ? 'wfd-reference-answer' : 'p-4 bg-blue-50 border border-blue-200 rounded text-gray-800 text-lg'}>{text}</p>
           {vietnameseTranslation && (
-            <p className="p-4 mt-2 bg-[#fedac2] border border-[#fc5d01] rounded text-gray-800 text-lg">
-              <span className="font-bold text-[#fc5d01]">Nghĩa tiếng Việt:</span> {vietnameseTranslation}
+            <p className={variant === 'dictation' ? 'wfd-translation' : 'p-4 mt-2 bg-[#fedac2] border border-[#fc5d01] rounded text-gray-800 text-lg'}>
+              <span className={variant === 'dictation' ? 'font-semibold text-lightBackground' : 'font-bold text-[#fc5d01]'}>Nghĩa tiếng Việt:</span> {vietnameseTranslation}
             </p>
           )}
         </div>

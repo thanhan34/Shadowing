@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Tabs from "../components/ui/Tabs";
 import Link from "next/link";
 import AudioPlayer from "@/components/AudioPlayer";
 import Head from "next/head";
@@ -6,6 +6,7 @@ import { useRouter } from 'next/router';
 import { notificationRequest } from '../lib/notifications/client';
 import { useEffect, useRef, useState } from "react";
 import { useWfdGamification } from "../hooks/useWfdGamification";
+import { useStaffAccess } from '../hooks/useStaffAccess';
 import GamificationPanel from "../components/writefromdictation/GamificationPanel";
 import { DEFAULT_TOPICS } from "../types/writefromdictation";
 import AnswerSummary from "../components/writefromdictation/AnswerSummary";
@@ -15,6 +16,7 @@ import { useAnswerInputGuards } from "../hooks/useAnswerInputGuards";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
+import { Headphones, ArrowUpRight, Target, BookOpen, ChevronLeft, ChevronRight, Play, RotateCcw, Repeat, List, Square, CheckCircle, Download } from 'react-feather';
 
 type PageMode = "practice" | "flashcard";
 type ReportIssueType = "Sai audio" | "Sai topic" | "Sai bản dịch" | "Lỗi khác";
@@ -27,6 +29,7 @@ const REPORT_ISSUE_OPTIONS: ReportIssueType[] = [
 ];
 
 const WriteFromDictation: React.FC = () => {
+  const canExportCSV = useStaffAccess();
   const router = useRouter();
   const reviewMode = router.query.mode === 'review';
   const [reviewIds, setReviewIds] = useState<string[]>([]);
@@ -175,7 +178,8 @@ const WriteFromDictation: React.FC = () => {
         type: "success",
         message: "Đã gửi báo cáo lỗi lên Discord thành công.",
       });
-      resetReportForm();
+      setSelectedIssues([]);
+      setReportNote("");
     } catch (error) {
       setReportStatus({
         type: "error",
@@ -188,21 +192,17 @@ const WriteFromDictation: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center"
-        style={{ background: "linear-gradient(135deg, #1a0a00 0%, #2d1200 50%, #0d0d0d 100%)" }}>
-        <div className="flex flex-col items-center gap-4">
+      <div className="wfd-page flex min-h-screen items-center justify-center" style={{ background: "linear-gradient(135deg, #1a0a00 0%, #2d1200 50%, #0d0d0d 100%)" }}>
+        <div className="flex flex-col items-center gap-4" role="status">
           <div className="w-12 h-12 rounded-full border-2 border-[#fc5d01] border-t-transparent animate-spin" />
-          <p className="text-white/60 text-sm">Loading flashcards…</p>
+          <p className="text-white/80 text-sm">Đang tải bài luyện Write From Dictation…</p>
         </div>
       </div>
     );
   }
 
   return (
-    <main
-      className="bg-cover bg-center flex mx-auto min-h-screen flex-col items-center min-w-screen p-6 space-y-5 w-full backdrop-blur-lg"
-      style={{ backgroundImage: `url(${backgroundImage})` }}
-    >
+    <div className="wfd-background min-h-screen w-full bg-cover bg-center" style={{ backgroundImage: `url(${backgroundImage})` }}><main className="wfd-page wfd-studio mx-auto min-h-screen w-full max-w-7xl px-4 pb-24 pt-32 sm:px-6 lg:pt-40">
       <Head>
         <title>Write From Dictation - PTE Intensive</title>
         <meta
@@ -217,91 +217,52 @@ const WriteFromDictation: React.FC = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <Link href="/" className="flex justify-center mb-4">
-        <Image src="/logo1.png" alt="Logo" width={200} height={200} />
-      </Link>
-
-      <h1 className="mb-2 text-2xl font-bold tracking-tight text-gray-800 dark:text-white">
-        Write From Dictation
-      </h1>
+      <header className="wfd-header w-full">
+        <div className="wfd-hero-copy">
+          <p className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-lightBackground"><Headphones size={16} aria-hidden="true" /> PTE Intensive / Listening Studio</p>
+          <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Write From<br /><span className="text-lightBackground">Dictation.</span></h1>
+          <p className="mt-4 max-w-lg text-sm leading-7 text-white/80">Một câu nghe. Từng từ chính xác.<br />Không gian riêng để bạn tập trung và tiến bộ mỗi ngày.</p>
+          <div className="mt-6 flex flex-wrap items-center gap-3"><span className="wfd-count">{sortedAudioSamples.length} câu trong bộ lọc</span><span className="text-xs text-white/80">Listening + Writing</span></div>
+        </div>
+        <div className="wfd-sound-art" aria-hidden="true"><span className="wfd-art-label">FOCUS ON EVERY WORD</span><div className="wfd-waveform">{Array.from({ length: 27 }, (_, index) => <span key={index} />)}</div><div className="wfd-art-footer"><span>LISTEN CLOSELY</span><Headphones size={24} /><span>WRITE CLEARLY</span></div></div>
+      </header>
 
       {/* ── Mode Toggle Tabs ── */}
-      <Card className="w-full max-w-4xl space-y-3 p-4 text-textGlass-primary">
-        <div className="flex flex-wrap gap-4"><Link className="accent-ring rounded-btn p-3 text-primary" href="/writefromdictation/mastery">Tiến độ Mastery</Link><Link className="accent-ring rounded-btn p-3 text-primary" href={reviewMode ? '/writefromdictation' : '/writefromdictation?mode=review'}>{reviewMode ? 'Luyện toàn bộ câu' : 'Ôn câu đến hạn'}</Link></div>
+      <aside className="wfd-sidebar" aria-label="Tiến độ và công cụ học tập">
+      <Card className="w-full space-y-3 text-textGlass-primary">
+        <p className="text-xs font-semibold uppercase tracking-widest text-white/80">Góc học tập của bạn</p>
+        <div className="space-y-2"><Link className="wfd-studio-link" href="/writefromdictation/mastery"><BookOpen size={18} aria-hidden="true" /><span>Tiến độ Mastery</span><ArrowUpRight size={16} aria-hidden="true" /></Link><Link className="wfd-studio-link" href={reviewMode ? '/writefromdictation' : '/writefromdictation?mode=review'}><Target size={18} aria-hidden="true" /><span>{reviewMode ? 'Luyện toàn bộ câu' : 'Ôn câu đến hạn'}</span><ArrowUpRight size={16} aria-hidden="true" /></Link></div>
         {reviewMode && <p role="status">{reviewStatus}</p>}
       </Card>
       <GamificationPanel game={game} summary={sessionSummary} onCloseSummary={() => setSessionSummary(false)} />
       {pageMode === 'practice' && game.session.practiced > 0 && <Button variant="secondary" onClick={() => setSessionSummary(true)}>Kết thúc session</Button>}
-      <div
-        className="flex rounded-2xl p-1 gap-1"
-        style={{
-          background: "rgba(255,255,255,0.08)",
-          border: "1px solid rgba(255,255,255,0.14)",
-          backdropFilter: "blur(16px)",
-        }}
-      >
-        <button
-          onClick={() => setPageMode("practice")}
-          className="relative flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-250"
-          style={
-            pageMode === "practice"
-              ? {
-                  background: "linear-gradient(135deg, #fc5d01, #fd7f33)",
-                  color: "#fff",
-                  boxShadow: "0 0 16px rgba(252,93,1,0.45)",
-                }
-              : { color: "rgba(255,255,255,0.55)" }
-          }
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-          </svg>
-          Practice
-        </button>
-        <button
-          onClick={() => { if (pageMode === 'practice' && game.session.practiced > 0) setSessionSummary(true); setPageMode("flashcard"); }}
-          className="relative flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-250"
-          style={
-            pageMode === "flashcard"
-              ? {
-                  background: "linear-gradient(135deg, #fc5d01, #fd7f33)",
-                  color: "#fff",
-                  boxShadow: "0 0 16px rgba(252,93,1,0.45)",
-                }
-              : { color: "rgba(255,255,255,0.55)" }
-          }
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-          </svg>
-          Flashcard
-          {sortedAudioSamples.length > 0 && (
-            <span
-              className="ml-1 text-xs px-1.5 py-0.5 rounded-full font-medium"
-              style={
-                pageMode === "flashcard"
-                  ? { background: "rgba(255,255,255,0.25)", color: "#fff" }
-                  : { background: "rgba(252,93,1,0.25)", color: "#fdba74" }
-              }
-            >
-              {sortedAudioSamples.length}
-            </span>
-          )}
-        </button>
-      </div>
+      <Card className="wfd-studio-tip"><p className="mb-3 text-xs font-semibold uppercase tracking-widest text-lightBackground">Một chút chiến thuật</p><h2 className="text-lg font-semibold">Nghe ý, nhớ cụm từ.</h2><p className="mt-3 text-sm leading-7 text-white/80">Lượt đầu, nắm ý chính. Lượt tiếp theo, chú ý các cụm từ và đuôi số nhiều. Đọc lại câu trước khi kiểm tra đáp án.</p><div className="mt-4 flex gap-2" aria-hidden="true"><span className="wfd-tip-dot" /><span className="wfd-tip-dot" /><span className="wfd-tip-dot" /></div></Card>
+      </aside>
+      <section className="wfd-practice-column" aria-label="Bài luyện Write From Dictation">
+      <div className="wfd-mode-bar w-full"><Tabs items={[{ key: 'practice', label: 'Luyện nghe & viết' }, { key: 'flashcard', label: 'Ôn bằng flashcard' }]} activeKey={pageMode} onChange={mode => {
+        if (mode === 'flashcard' && pageMode === 'practice' && game.session.practiced > 0) setSessionSummary(true);
+        setPageMode(mode as PageMode);
+      }} /><p className="text-sm text-white/80">{pageMode === 'practice' ? 'Nghe · Viết · Kiểm tra' : 'Lật thẻ · Ghi nhớ · Ôn tập'}</p></div>
 
-      <div className="w-full max-w-2xl mx-auto">
+      <div className="wfd-workspace w-full">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-white/15 pb-4">
+          <div><p className="mb-2 text-xs font-semibold uppercase tracking-widest text-lightBackground">{pageMode === 'practice' ? 'Your practice desk' : 'Your memory deck'}</p><h2 className="text-xl font-semibold">{pageMode === 'practice' ? 'Lắng nghe. Viết lại. Tiến bộ.' : 'Lật thẻ, nhớ lâu hơn.'}</h2></div>
+          {pageMode === 'practice' && currentAudioSample && <span className="wfd-count">Câu {currentQuestionNumber} / {sortedAudioSamples.length}</span>}
+        </div>
+        <details className="wfd-settings-disclosure mb-6">
+          <summary className="wfd-settings-summary"><span><strong>Cài đặt luyện tập</strong><span className="mt-1 block text-xs font-normal text-white/80">Bộ lọc, giọng đọc và hiển thị đáp án</span></span><span className="wfd-disclosure-chevron" aria-hidden="true">⌄</span></summary>
+          <div className="wfd-settings-body">
         {/* ── FILTER / SORT controls (shared across both modes) ── */}
         <div
-          className={`mb-4 grid grid-cols-1 items-end gap-3 sm:grid-cols-2 ${
+          className={`wfd-filters mb-6 grid grid-cols-1 items-end gap-3 sm:grid-cols-2 ${
             pageMode === "practice"
-              ? "lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto]"
+              ? "lg:grid-cols-2"
               : "lg:grid-cols-3"
           }`}
         >
           <div className="w-full min-w-0">
             <label htmlFor="sorting-select" className="block mb-1 font-medium text-gray-700 dark:text-white/80 text-sm">
-              Sort By:
+              Sắp xếp:
             </label>
             <select
               id="sorting-select"
@@ -317,7 +278,7 @@ const WriteFromDictation: React.FC = () => {
           </div>
           <div className="w-full min-w-0">
             <label htmlFor="filter-select" className="block mb-1 font-medium text-gray-700 dark:text-white/80 text-sm">
-              Filter:
+              Bộ lọc:
             </label>
             <select
               id="filter-select"
@@ -332,7 +293,7 @@ const WriteFromDictation: React.FC = () => {
           </div>
           <div className="w-full min-w-0">
             <label htmlFor="topic-filter" className="block mb-1 font-medium text-gray-700 dark:text-white/80 text-sm">
-              Topic:
+              Chủ đề:
             </label>
             <select
               id="topic-filter"
@@ -377,6 +338,62 @@ const WriteFromDictation: React.FC = () => {
           )}
         </div>
 
+
+            <div className="wfd-settings mb-4 mt-6 grid gap-4 sm:grid-cols-2">
+              <div hidden={pageMode !== 'practice'} className="mb-4 md:mb-0 md:mr-4 w-full">
+                <label htmlFor="audio-select" className="block mb-1 font-medium text-gray-700">
+                  Chọn câu:
+                </label>
+                <select
+                  id="audio-select"
+                  value={currentIndex}
+                  onChange={(event) => handleSelectIndexChange(parseInt(event.target.value, 10))}
+                  className="w-full p-2 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+                  disabled={sortedAudioSamples.length === 0}
+                >
+                  {sortedAudioSamples.map((sample, index) => (
+                    <option key={index} value={index}>
+                      Audio {index + 1}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="mb-4 md:mb-0 md:mr-4 w-full">
+                <label htmlFor="voice-select" className="block mb-1 font-medium text-gray-700">
+                  Giọng đọc:
+                </label>
+                <select
+                  id="voice-select"
+                  value={selectedVoice}
+                  onChange={(event) => handleVoiceChange(event.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+                >
+                  {sortedAudioSamples.length > 0 &&
+                    Object.keys(sortedAudioSamples[pageMode === 'flashcard' ? 0 : currentIndex]?.audio ?? {}).map((voice, index) => (
+                      <option key={index} value={voice}>
+                        {voice}
+                      </option>
+                    ))}
+                </select>
+              </div>
+            </div>
+            {pageMode === 'practice' && <div className="flex items-center mb-4">
+              <input
+                type="checkbox"
+                id="showAnswer"
+                checked={alwaysShowAnswer}
+                onChange={(event) => handleAlwaysShowAnswerChange(event.target.checked)}
+                className="mr-2"
+              />
+              <label htmlFor="showAnswer" className="text-white">
+                Luôn hiện đáp án
+              </label>
+            </div>}
+
+          </div>
+        </details>
+        {(filterOption !== 'All' || topicFilter !== 'All' || alwaysShowAnswer) && <p className="mb-4 text-xs leading-6 text-lightBackground">Đang áp dụng: {filterOption !== 'All' ? filterOption + ' · ' : ''}{topicFilter !== 'All' ? topicFilter + ' · ' : ''}{alwaysShowAnswer ? 'Luôn hiện đáp án · ' : ''}Thay đổi trong Cài đặt luyện tập.</p>}
+
         {/* ══════════════════════════════════════
             FLASHCARD MODE
         ══════════════════════════════════════ */}
@@ -390,26 +407,6 @@ const WriteFromDictation: React.FC = () => {
               boxShadow: "0 8px 32px rgba(0,0,0,0.28)",
             }}
           >
-            {/* Voice selector for flashcard mode */}
-            <div className="mb-5">
-              <label htmlFor="voice-select-fc" className="block mb-1 font-medium text-white/70 text-sm">
-                Audio Voice:
-              </label>
-              <select
-                id="voice-select-fc"
-                value={selectedVoice}
-                onChange={(event) => handleVoiceChange(event.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-[#fc5d01] focus:border-transparent text-black"
-              >
-                {sortedAudioSamples.length > 0 &&
-                  Object.keys(sortedAudioSamples[0]?.audio ?? {}).map((voice, index) => (
-                    <option key={index} value={voice}>
-                      {voice}
-                    </option>
-                  ))}
-              </select>
-            </div>
-
             <FlashcardMode samples={sortedAudioSamples} selectedVoice={selectedVoice} />
           </div>
         )}
@@ -419,8 +416,10 @@ const WriteFromDictation: React.FC = () => {
         ══════════════════════════════════════ */}
         {pageMode === "practice" && (
           <>
+            {!currentAudioSample && <Card><p role="status" className="py-8 text-center">Không có câu phù hợp. Hãy thử thay đổi bộ lọc hoặc chủ đề.</p></Card>}
             {sortedAudioSamples.length > 0 && currentAudioSample && (
               <AudioPlayer
+                variant="dictation"
                 ref={audioRef}
                 occurrence={currentAudioSample.occurrence}
                 questionType={currentAudioSample.questionType}
@@ -444,7 +443,7 @@ const WriteFromDictation: React.FC = () => {
                       setReportStatus(null);
                       setIsReportPanelOpen((prev) => !prev);
                     }}
-                    className="accent-ring glass glass-hover relative flex h-14 w-14 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/90 shadow-[0_12px_30px_rgba(0,0,0,0.35),0_0_22px_rgba(252,93,1,0.18)] backdrop-blur-[20px]"
+                    className="wfd-report-trigger accent-ring glass glass-hover relative flex h-14 w-14 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/90 shadow-[0_12px_30px_rgba(0,0,0,0.35),0_0_22px_rgba(252,93,1,0.18)] backdrop-blur-[20px]"
                   >
                     <svg
                       className="h-6 w-6"
@@ -599,8 +598,14 @@ const WriteFromDictation: React.FC = () => {
               </>
             )}
 
-            <div className="mt-4 w-full">
+            <div className="wfd-writing mt-6 w-full">
+              <label htmlFor="txtInput" className="mb-2 block text-lg font-semibold">02 · Viết lại câu bạn nghe được</label>
+              <p id="wfd-input-hint" className="mb-4 text-sm text-white/80">Nhập đầy đủ câu bằng tiếng Anh, sau đó chọn “Kiểm tra đáp án”.</p>
               <textarea
+                aria-describedby="wfd-input-hint"
+                placeholder="Type the sentence you hear…"
+                disabled={!currentAudioSample}
+                spellCheck={false}
                 id="txtInput"
                 rows={5}
                 className="w-full p-4 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
@@ -614,118 +619,37 @@ const WriteFromDictation: React.FC = () => {
                 onDragOver={handlePreventDragDrop}
               ></textarea>
             </div>
-            <div className="flex flex-col md:flex-row justify-between items-center mb-4 mt-4">
-              <div className="mb-4 md:mb-0 md:mr-4 w-full">
-                <label htmlFor="audio-select" className="block mb-1 font-medium text-gray-700">
-                  Select Audio:
-                </label>
-                <select
-                  id="audio-select"
-                  value={currentIndex}
-                  onChange={(event) => handleSelectIndexChange(parseInt(event.target.value, 10))}
-                  className="w-full p-2 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
-                  disabled={sortedAudioSamples.length === 0}
-                >
-                  {sortedAudioSamples.map((sample, index) => (
-                    <option key={index} value={index}>
-                      Audio {index + 1}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="mb-4 md:mb-0 md:mr-4 w-full">
-                <label htmlFor="voice-select" className="block mb-1 font-medium text-gray-700">
-                  Select Voice:
-                </label>
-                <select
-                  id="voice-select"
-                  value={selectedVoice}
-                  onChange={(event) => handleVoiceChange(event.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
-                >
-                  {sortedAudioSamples.length > 0 &&
-                    Object.keys(sortedAudioSamples[currentIndex]?.audio).map((voice, index) => (
-                      <option key={index} value={voice}>
-                        {voice}
-                      </option>
-                    ))}
-                </select>
-              </div>
-            </div>
-            <div className="flex items-center mb-4">
-              <input
-                type="checkbox"
-                id="showAnswer"
-                checked={alwaysShowAnswer}
-                onChange={(event) => handleAlwaysShowAnswerChange(event.target.checked)}
-                className="mr-2"
-              />
-              <label htmlFor="showAnswer" className="text-white">
-                Always show answer
-              </label>
-            </div>
             <AnswerSummary
               score={score}
               maxScore={maxScore}
               showAnswer={showAnswer}
               wordStatuses={wordStatuses}
             />
-            <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-              <button
-                className="w-full rounded-lg bg-[#fd7f33] px-4 py-2 text-white shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-[#fdbc94]/50 shadow-xl"
-                onClick={handleBack}
-                disabled={sortedAudioSamples.length === 0}
-              >
-                Back
-              </button>
-              <button
-                className="w-full rounded-lg bg-purple-500 px-4 py-2 text-white shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-purple-400/50 shadow-xl"
-                onClick={handlePlay}
-              >
-                Play
-              </button>
-              <button
-                className="w-full rounded-lg bg-yellow-500 px-4 py-2 text-white shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-yellow-400/50 shadow-xl"
-                onClick={() => { attemptSubmitted.current = false; game.resetTicket(); if (questionId) game.prepare(questionId); void handleRepeat(); }}
-              >
-                Repeat
-              </button>
-              <button
-                className={`w-full rounded-lg px-4 py-2 text-white shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-[#fdbc94]/50 shadow-xl ${isRepeatMode ? "bg-[#fc5d01]" : "bg-[#fd7f33]"}`}
-                onClick={toggleRepeatMode}
-              >
-                {isRepeatMode ? "Stop Looping" : "Loop Current"}
-              </button>
-              <button
-                className="w-full rounded-lg bg-blue-500 px-4 py-2 text-white shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-blue-400/50 shadow-xl"
-                onClick={handleNext}
-                disabled={sortedAudioSamples.length === 0}
-              >
-                Next
-              </button>
-              <button
-                className="w-full rounded-lg bg-green-500 px-4 py-2 text-white shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-green-400/50 shadow-xl"
-                onClick={handlePlayAll}
-              >
-                {isAutoplay ? "Stop" : "Play All"}
-              </button>
-              <button
-                className="w-full rounded-lg bg-red-500 px-4 py-2 text-white shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-red-400/50 shadow-xl"
-                onClick={submitAnswer}
-              >
-                Answer
-              </button>
-              <button
-                className="w-full rounded-lg bg-orange-500 px-4 py-2 text-white shadow-md transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-orange-400/50 shadow-xl"
-                onClick={handleExportCSV}
-              >
-                Export CSV
-              </button>
-            </div>
+            <section className="wfd-actions mt-6" aria-label="Điều khiển luyện tập">
+              <div className="wfd-controls-heading"><span className="flex items-center gap-2"><Headphones size={16} aria-hidden="true" /> LISTENING CONSOLE</span><span className="wfd-console-counter">{currentAudioSample ? `Câu ${currentQuestionNumber} / ${sortedAudioSamples.length}` : 'Chưa có câu'}</span></div>
+              <div className="wfd-transport" role="group" aria-label="Phát audio và chuyển câu">
+                <Button variant="secondary" className="wfd-control" onClick={handleBack} disabled={!sortedAudioSamples.length}><ChevronLeft size={18} aria-hidden="true" /><span>Câu trước</span></Button>
+                <Button variant="secondary" className="wfd-control wfd-play-control" disabled={!currentAudioSample} onClick={handlePlay}><span className="wfd-play-disc"><Play size={24} aria-hidden="true" /></span><span>Phát audio</span></Button>
+                <Button variant="secondary" className="wfd-control" onClick={handleNext} disabled={!sortedAudioSamples.length}><span>Câu tiếp</span><ChevronRight size={18} aria-hidden="true" /></Button>
+              </div>
+              <details className="wfd-settings-disclosure mt-3">
+                <summary className="wfd-settings-summary"><span>Chế độ nghe thêm{isRepeatMode || isAutoplay ? ' · Đang bật' : ''}</span><span className="wfd-disclosure-chevron" aria-hidden="true">⌄</span></summary>
+              <div className="wfd-listening-options" role="group" aria-label="Tùy chọn nghe">
+                <Button variant="secondary" className="wfd-control" disabled={!currentAudioSample} onClick={() => { attemptSubmitted.current = false; game.resetTicket(); if (questionId) game.prepare(questionId); void handleRepeat(); }}><RotateCcw size={16} aria-hidden="true" /><span>Luyện lại</span></Button>
+                <Button variant="secondary" className="wfd-control" aria-pressed={isRepeatMode} disabled={!currentAudioSample} onClick={toggleRepeatMode}><Repeat size={16} aria-hidden="true" /><span>Lặp câu</span><span className="wfd-toggle-state">{isRepeatMode ? 'Bật' : 'Tắt'}</span></Button>
+                <Button variant="secondary" className="wfd-control" aria-pressed={isAutoplay} disabled={!currentAudioSample} onClick={handlePlayAll}>{isAutoplay ? <Square size={16} aria-hidden="true" /> : <List size={16} aria-hidden="true" />}<span>{isAutoplay ? 'Dừng phát tất cả' : 'Phát tất cả'}</span></Button>
+              </div>
+              </details>
+              <div className="wfd-submit-row">
+                <Button className="wfd-control wfd-submit-control" disabled={!currentAudioSample} onClick={submitAnswer}><CheckCircle size={19} aria-hidden="true" /><span>Kiểm tra đáp án</span><ChevronRight size={18} aria-hidden="true" /></Button>
+              </div>
+              {canExportCSV && <div className="wfd-staff-tools"><span className="text-xs text-white/80">Công cụ quản trị</span><Button variant="secondary" className="wfd-control wfd-export-control" disabled={!currentAudioSample} onClick={() => { if (canExportCSV) handleExportCSV(); }}><Download size={16} aria-hidden="true" /><span>Xuất CSV</span></Button></div>}
+            </section>
           </>
         )}
       </div>
-    </main>
+      </section>
+    </main></div>
   );
 };
 

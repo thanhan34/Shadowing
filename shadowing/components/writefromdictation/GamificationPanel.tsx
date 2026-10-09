@@ -29,6 +29,23 @@ export function Leaderboard({ data }: { data: Dashboard }) {
   </Card>;
 }
 
+export function WeeklyTopThree({ data }: { data: Dashboard }) {
+  const leaders = data.leaderboard.filter(row => row.rank >= 1 && row.rank <= 3).sort((a, b) => a.rank - b.rank).slice(0, 3);
+  return <section className="wfd-weekly-top mt-6 border-t border-white/10 pt-4" aria-label="Top 3 Weekly Rank">
+    <h3 className="text-sm font-semibold text-white">🏆 Top 3 · Weekly Rank</h3>
+    <p className="mt-1 text-xs leading-5 text-white/70">Tuần bắt đầu {data.week}</p>
+    {leaders.length ? <ol className="mt-4 space-y-2">{leaders.map(row => {
+      const isMe = row.userId === data.me?.userId;
+      return <li key={row.userId} value={row.rank} className={`flex min-w-0 items-center gap-2 rounded-2xl border p-3 ${isMe ? 'border-primary/40 bg-primary/10' : 'border-white/10 bg-appBg-deep2'}`}>
+        <span className="shrink-0 text-lg" aria-label={`Hạng ${row.rank}`}>{['🥇', '🥈', '🥉'][row.rank - 1]}</span>
+        {row.avatar ? <Image unoptimized src={row.avatar} alt="" width={32} height={32} className="h-8 w-8 shrink-0 rounded-full object-cover" referrerPolicy="no-referrer" /> : <span aria-hidden="true" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/10 text-xs font-semibold text-white">{(row.name.trim() || 'H').charAt(0).toUpperCase()}</span>}
+        <div className="min-w-0 flex-1"><p className="break-words text-sm font-medium leading-5 text-white">{row.name || 'Học viên'}</p><p className="mt-1 text-xs tabular-nums text-lightBackground">{row.xp.toLocaleString('vi-VN')} XP{isMe && <span className="ml-2 rounded-full border border-primary/30 px-2 py-0.5 font-semibold">Bạn</span>}</p></div>
+      </li>;
+    })}</ol> : <p className="mt-4 rounded-2xl border border-white/10 bg-appBg-deep2 p-3 text-sm leading-6 text-white/80">Chưa có xếp hạng tuần này. Hãy bắt đầu luyện tập!</p>}
+    <Link href="/wfd/leaderboard" className="accent-ring mt-3 flex min-h-[44px] items-center justify-between gap-2 rounded-xl border border-transparent px-3 text-sm font-medium text-lightBackground transition hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/5 hover:shadow-glass active:translate-y-0.5 active:shadow-none">Xem bảng xếp hạng<span aria-hidden="true">→</span></Link>
+  </section>;
+}
+
 export default function GamificationPanel({ game, summary, onCloseSummary }: {
   game: ReturnType<typeof useWfdGamification>; summary: boolean; onCloseSummary: () => void;
 }) {
@@ -43,7 +60,7 @@ export default function GamificationPanel({ game, summary, onCloseSummary }: {
     if (!showDialog) dialog.current?.close();
   }, [showDialog]);
   const close = () => { game.setCelebrations([]); onCloseSummary(); };
-  return <div className="w-full max-w-5xl space-y-4 text-white/90">
+  return <div className="wfd-journey w-full space-y-4 text-white/90">
     {game.error && <Card><p role="alert">{game.error}</p><div className="mt-3 flex flex-wrap gap-3"><Button variant="secondary" onClick={() => void game.refresh()}>Tải lại</Button>{game.hasRetry && <Button disabled={game.pending} onClick={game.retrySubmit}>Đồng bộ lại attempt</Button>}</div></Card>}
     {!data && !game.error && <Card><p role="status">Đang tải tiến độ WFD…</p></Card>}
     {data && <>
@@ -59,6 +76,7 @@ export default function GamificationPanel({ game, summary, onCloseSummary }: {
           {detail === 'xp' && <p>Tuần này: {data.me?.xp || 0} XP · +5 XP/lượt hợp lệ, bonus accuracy +1/+3/+5, mastery lần đầu +2. Tối đa 5 lượt nhận XP/câu/ngày.</p>}
           {detail === 'rank' && <Link href="/wfd/leaderboard" className="inline-block min-h-[44px] p-3 text-primaryHover accent-ring rounded-lg">Xem bảng xếp hạng đầy đủ →</Link>}
         </div>
+        <WeeklyTopThree data={data} />
         <details className="mt-4 border-t border-white/10 pt-4"><summary className="min-h-[44px] cursor-pointer accent-ring rounded-lg p-2">Settings · Daily Goal</summary>
           <label className="block text-sm" htmlFor="wfd-goal">Mục tiêu từ ngày mai</label><select id="wfd-goal" className="ui-input mt-2" value={data.profile.goal} disabled={saving} onChange={async e => {
             setSaving(true); setSettingMessage('');
