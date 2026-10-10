@@ -20,10 +20,11 @@ const { filterAdminGroups, AdminNavigationLinks } = load('components/AdminNaviga
 assert.equal(filterAdminGroups('').length, 4);
 assert.equal(filterAdminGroups('  DUYET HOC VIEN  ')[0].items[0].href, '/admin/students');
 assert.equal(filterAdminGroups('khong-ton-tai').length, 0);
-assert.equal(filterAdminGroups('WFD')[0].items.length, 4);
+assert.equal(filterAdminGroups('WFD')[0].items.length, 5);
 const render = query => renderToStaticMarkup(React.createElement(AdminNavigationLinks, { groups: filterAdminGroups(query), pathname: '/admin/students', onNavigate() {} }));
 assert.equal((render('').match(/aria-current="page"/g) || []).length, 1);
-assert.equal((render('').match(/href=/g) || []).length, 15);
+assert.equal((render('').match(/href=/g) || []).length, 16);
+assert.ok(render('WFD').includes('href="/admin/wfd-mastery"'));
 assert.ok(render('WFD').includes('href="/admin/wfd-challenges"'));
 assert.ok(render('khong-ton-tai').includes('role="status"'));
 assert.ok(!render('Essay').includes('href="/admin/students"'));

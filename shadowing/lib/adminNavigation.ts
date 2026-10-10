@@ -5,6 +5,7 @@ export const ADMIN_NAV_GROUPS = [
     { href: '/sentence', label: 'Xử lý câu Shadowing' },
   ] },
   { label: 'Write From Dictation', items: [
+    { href: '/admin/wfd-mastery', label: 'WFD Mastery học viên' },
     { href: '/add-audio-sample', label: 'Thêm mẫu WFD' },
     { href: '/admin/wfd-challenges', label: 'WFD Weekly Challenge' },
     { href: '/AddAudioSample', label: 'Nhập mẫu WFD (bản khác)' },

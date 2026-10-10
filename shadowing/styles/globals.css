@@ -76,6 +76,13 @@
 .wfd-progress::-webkit-progress-bar { background: var(--glass-bg); border-radius: 999px; }
 .wfd-progress::-webkit-progress-value { background: linear-gradient(90deg, var(--accent), var(--accent-hover)); border-radius: 999px; }
 .wfd-progress::-moz-progress-bar { background: var(--accent); border-radius: 999px; }
+/* Admin mastery extends the existing glass, typography and accent tokens. */
+.mastery-metric { padding: 16px; border: 1px solid var(--glass-border); border-radius: var(--radius-button); background: var(--glass-bg); }
+.mastery-table { width: 100%; min-width: 800px; border-collapse: collapse; text-align: left; font-size: 14px; }
+.mastery-table th { color: var(--text-glass-secondary); font-size: 12px; font-weight: 600; }
+.mastery-table th, .mastery-table td { padding: 16px; border-bottom: 1px solid var(--glass-border); }
+.mastery-table td:first-child { max-width: 280px; overflow-wrap: anywhere; }
+.mastery-table tbody tr:hover { background: var(--glass-bg); }
 .wfd-dialog { width: min(92vw, 560px); padding: 24px; border-radius: var(--radius-card); color: var(--text-glass-primary); background: var(--bg-deep-2); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow-strong); }
 .wfd-dialog::backdrop { background: rgba(0, 0, 0, .7); backdrop-filter: blur(8px); }
 
