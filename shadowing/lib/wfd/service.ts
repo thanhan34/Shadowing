@@ -143,7 +143,7 @@ export async function submitAttempt(uid: string, identity: { name: string; avata
 export async function getDashboard(uid: string) {
   const { day, week } = calendar();
   const pRef = userRef(uid);
-  // Read-only transaction gives one consistent snapshot for the personal row and top ten.
+  // Keep every weekly participant, including zero-XP attempts, in the same ranking snapshot.
   return firebaseAdmin().db.runTransaction(async tx => {
     const [profileDoc, dayDoc, entries, challengeDoc, progressDoc, snapshot, challengeAwards] = await Promise.all([
       tx.get(pRef), tx.get(pRef.collection('days').doc(day)), tx.get(weekRef(week).collection('entries')),
@@ -159,7 +159,7 @@ export async function getDashboard(uid: string) {
     const me = ranked.find(entry => entry.userId === uid) || null;
     const above = me && me.rank > 1 ? ranked[me.rank - 2] : null;
     return { day, week, profile, today: { goal: profile.goal, practiced: 0, rewarded: false, ...dayDoc.data() },
-      leaderboard: ranked.slice(0, 10), me, previousRank: snapshot.data()?.rank || null,
+      leaderboard: ranked, me, previousRank: snapshot.data()?.rank || null,
       nextRank: above ? { name: above.name, xpNeeded: above.xp - me!.xp + 1 } : null,
       challengeAwards: challengeAwards.docs.map(doc => ({ week: doc.id, title: doc.data().badgeTitle, unlockedAt: doc.data().unlockedAt })).filter(b => b.title),
       challenge: challengeDoc.exists ? { ...challengeDoc.data(), progress: progressDoc.data()?.value || 0, rewarded: progressDoc.data()?.rewarded || false } : null,

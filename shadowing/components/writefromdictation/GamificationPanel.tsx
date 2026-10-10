@@ -7,10 +7,10 @@ import { GOALS } from '../../lib/wfd/rules';
 import { Dashboard, useWfdGamification, wfdRequest } from '../../hooks/useWfdGamification';
 
 export function Leaderboard({ data }: { data: Dashboard }) {
-  const rows = [...data.leaderboard];
-  if (data.me && data.me.rank > 10) rows.push(data.me);
+  const rows = data.leaderboard;
   return <Card><h2 className="text-xl font-semibold">Weekly Leaderboard</h2>
     <p className="mt-2 text-sm text-white/70">Tuần bắt đầu {data.week} · Thứ Hai–Chủ nhật · Asia/Ho_Chi_Minh</p>
+    <p className="mt-2 text-sm text-white/70">{rows.length} người tham gia · Hiển thị toàn bộ, không giới hạn Top 10.</p>
     <div className="mt-4 overflow-x-auto"><table className="w-full text-left text-sm">
       <caption className="sr-only">Xếp hạng theo XP, độ chính xác, ít attempt hơn và thời điểm đạt XP.</caption>
       <thead className="text-white/70"><tr>{['Rank', 'Student', 'XP', 'Practiced', 'Accuracy', 'Streak'].map(label => <th key={label} className="p-3">{label}</th>)}</tr></thead>

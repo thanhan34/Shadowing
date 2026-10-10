@@ -38,7 +38,12 @@ function load(filename) {
   return instance.exports;
 }
 async function main() {
-  const { WeeklyTopThree } = load(path.join(root, 'components/writefromdictation/GamificationPanel.tsx'));
+  const { WeeklyTopThree, Leaderboard } = load(path.join(root, 'components/writefromdictation/GamificationPanel.tsx'));
+  const participants = Array.from({ length: 25 }, (_, i) => ({ rank: i + 1, userId: `participant-${i}`, name: `Participant ${i}`, avatar: '', xp: i === 24 ? 0 : 100 - i, practiced: 1, accuracy: 100, currentStreak: 1 }));
+  const fullHtml = renderToStaticMarkup(React.createElement(Leaderboard, { data: { week: '2026-10-05', leaderboard: participants, me: participants[20], previousRank: null, nextRank: null } }));
+  assert.equal((fullHtml.match(/<tbody>[\s\S]*<\/tbody>/)[0].match(/<tr /g) || []).length, 25);
+  assert.equal((fullHtml.match(/>YOU<\/strong>/g) || []).length, 1, 'Personal row outside top ten must not be duplicated');
+  assert.ok(fullHtml.includes('Participant 24'), 'Last participant with zero XP remains visible');
   const leaders = [4, 2, 1, 3].map(rank => ({ rank, userId: `user-${rank}`, name: `Học viên ${rank}`, avatar: '', xp: 1000 - rank }));
   const leaderboardData = { week: '2026-10-05', leaderboard: leaders, me: leaders[1] };
   const renderTop = data => renderToStaticMarkup(React.createElement(WeeklyTopThree, { data }));

@@ -115,5 +115,21 @@ async function attempt(q = 'q1', answer = 'this is a test') {
   const context = { accuracy: 95, topic: 'Education', xp: 8, firstDay: true, mastery: true };
   for (const [type, expected] of [['questions', 1], ['xp', 8], ['topic', 1], ['accuracy', 1], ['days', 1], ['mastery', 1]]) assert.equal(rules.challengeIncrement({ ...challenge, type, topic: 'Education' }, context), expected);
   await assert.rejects(() => service.submitAttempt('another-user', identity, first.attemptId, 'this is a test'), /không hợp lệ/);
+  const weeklyPath = '_wfd/weeks/items/2026-10-05/entries';
+  for (let i = 0; i < 24; i++) store.set(`${weeklyPath}/participant-${i}`, {
+    userId: `participant-${i}`, name: `Participant ${i}`, avatar: '', xp: i === 23 ? 0 : 10000 + i,
+    accuracySum: i === 23 ? 0 : 100, practiced: i === 23 ? 0 : 1, attempts: 1,
+    reachedAt: i, currentStreak: 0, lastCompletedDate: '',
+  });
+  const full = await service.getDashboard(uid);
+  assert.equal(full.leaderboard.length, 25, 'Every weekly participant must be returned, not just top ten');
+  assert.equal(new Set(full.leaderboard.map(row => row.userId)).size, 25);
+  assert.deepEqual(full.leaderboard.map(row => row.rank), Array.from({ length: 25 }, (_, i) => i + 1));
+  assert.ok(full.me.rank > 10);
+  assert.equal(full.leaderboard.filter(row => row.userId === uid).length, 1);
+  assert.equal(full.leaderboard.at(-1).userId, 'participant-23', 'Zero-XP participation must remain visible');
+  assert.equal(full.leaderboard.at(-1).accuracy, 0);
+  clock = Date.parse('2026-10-12T01:00:00Z');
+  assert.equal((await service.getDashboard(uid)).leaderboard.length, 0, 'Previous-week participants do not carry into a new week');
   console.log('WFD gamification: XP, timezone, caps, duplicate/concurrent replay, daily goal, streak, badges, challenges, rankings and ownership passed (in-memory transaction harness).');
 })().catch(error => { console.error(error); process.exitCode = 1; }).finally(() => { Date.now = realNow; });
