@@ -106,7 +106,18 @@ export const useWriteFromDictation = (reviewIds?: string[]) => {
   }, [filteredAudioSamples, sortingOption]);
 
   const currentAudioSample = sortedAudioSamples[currentIndex];
-  useEffect(() => { setCurrentIndex(0); }, [reviewIds]);
+  useEffect(() => {
+    setCurrentIndex(0);
+    setFilterOption('All');
+    setTopicFilter('All');
+    setInputText('');
+    setScore(0);
+    setMaxScore(0);
+    setWordStatuses([]);
+    setShowAnswer(false);
+    setIsAutoplay(false);
+    setIsRepeatMode(false);
+  }, [reviewIds]);
 
   const markSentenceAsHeard = useCallback((sampleId: string) => {
     if (heardSentenceIdsRef.current.has(sampleId)) return;
@@ -211,20 +222,11 @@ export const useWriteFromDictation = (reviewIds?: string[]) => {
     }
   }, [isAutoplay, isRepeatMode, handleNext]);
 
-  useEffect(() => {
-    if (sortedAudioSamples.length > 0 && audioRef.current) {
-      audioRef.current.play();
-    }
-  }, [sortedAudioSamples, currentIndex]);
-
   const handleSelectIndexChange = useCallback(async (newIndex: number) => {
     if (audioRef.current) {
       await audioRef.current.stop();
     }
     setCurrentIndex(newIndex);
-    if (audioRef.current) {
-      await audioRef.current.play();
-    }
     setShowAnswer(alwaysShowAnswer);
     resetAnswerState(true);
   }, [audioRef, alwaysShowAnswer, resetAnswerState]);

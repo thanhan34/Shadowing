@@ -1,4 +1,5 @@
-import React, { useRef, useEffect, useId, forwardRef, useImperativeHandle } from 'react';
+import React, { useRef, useEffect, useId, useState, useCallback, forwardRef, useImperativeHandle } from 'react';
+import Button from './ui/Button';
 
 interface CustomAudioRef {
   play: () => Promise<void>;
@@ -32,22 +33,36 @@ const AudioPlayer = forwardRef<CustomAudioRef, AudioPlayerProps>(({
 }, ref) => {
   const audioElementRef = useRef<HTMLAudioElement>(null);
   const speedId = useId();
+  const [playbackError, setPlaybackError] = useState('');
+  const playRequest = useRef(0);
+  const play = useCallback(async () => {
+    const element = audioElementRef.current;
+    if (!element) return;
+    const request = ++playRequest.current;
+    if (!audio) { setPlaybackError('Câu này chưa có audio. Vui lòng chọn giọng đọc hoặc câu khác.'); return; }
+    try {
+      element.playbackRate = playbackRate;
+      await element.play();
+      if (request === playRequest.current) setPlaybackError('');
+    } catch (error) {
+      if (request !== playRequest.current || (error as Error).name === 'AbortError') return;
+      setPlaybackError((error as Error).name === 'NotAllowedError'
+        ? 'Trình duyệt chưa cho phép tự phát. Bấm “Phát audio” để nghe câu này.'
+        : 'Không phát được audio. Hãy thử lại hoặc chọn giọng đọc khác.');
+    }
+  }, [audio, playbackRate]);
 
   useImperativeHandle(ref, () => ({
-    play: async () => {
-      if (audioElementRef.current) {
-        audioElementRef.current.playbackRate = playbackRate;
-        await audioElementRef.current.play();
-      }
-    },
+    play,
     stop: async () => {
+      playRequest.current++;
       if (audioElementRef.current) {
         audioElementRef.current.pause();
         audioElementRef.current.currentTime = 0;
       }
       return Promise.resolve();
     }
-  }), [playbackRate]);
+  }), [play]);
 
   useEffect(() => {
     if (audioElementRef.current) {
@@ -56,10 +71,15 @@ const AudioPlayer = forwardRef<CustomAudioRef, AudioPlayerProps>(({
   }, [playbackRate]);
 
   useEffect(() => {
-    if (audioElementRef.current) {
-      audioElementRef.current.load();
-      audioElementRef.current.play();
-    }
+    setPlaybackError('');
+    const element = audioElementRef.current;
+    element?.load();
+    // Source changes own autoplay; changing speed must not restart playback.
+    void play();
+    // This ref is a request counter, not a DOM ref; invalidate pending promises.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => { playRequest.current++; element?.pause(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audio]);
 
   const handlePlaybackRateChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -81,9 +101,12 @@ const AudioPlayer = forwardRef<CustomAudioRef, AudioPlayerProps>(({
           controls
           src={audio}
           onEnded={onEnded}
+          onPlaying={() => setPlaybackError('')}
+          onError={() => setPlaybackError('Không tải được audio. Hãy thử lại hoặc chọn giọng đọc khác.')}
           className="w-full h-12"
         />
       </div>
+      {playbackError && <div className="mb-4 space-y-3"><p role="status" className="text-sm">{playbackError}</p><Button variant="secondary" onClick={() => { if (audioElementRef.current?.error) audioElementRef.current.load(); void play(); }}>Phát audio</Button></div>}
       <details className={variant === 'dictation' ? 'wfd-settings-disclosure mb-4' : 'mb-4'} open={variant === 'dictation' ? undefined : true}>
         <summary className={variant === 'dictation' ? 'wfd-settings-summary' : 'sr-only'}>Tốc độ phát · {playbackRate}x</summary>
       <div className="flex flex-col md:flex-row justify-between items-center p-4 w-full">

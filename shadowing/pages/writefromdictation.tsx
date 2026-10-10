@@ -34,16 +34,21 @@ const WriteFromDictation: React.FC = () => {
   const reviewMode = router.query.mode === 'review';
   const [reviewIds, setReviewIds] = useState<string[]>([]);
   const [reviewStatus, setReviewStatus] = useState('');
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const [reviewError, setReviewError] = useState(false);
+  const [reviewRevision, setReviewRevision] = useState(0);
   useEffect(() => {
     if (!reviewMode) return;
     let active = true;
-    setReviewIds([]); setReviewStatus('Đang tải câu đến hạn ôn…');
+    setReviewIds([]); setReviewLoading(true); setReviewError(false); setReviewStatus('Đang tải câu đến hạn ôn…');
     notificationRequest('mastery').then(data => {
-      if (active) { setReviewIds(data.reviewIds); setReviewStatus(data.reviewIds.length ? `${data.reviewIds.length} câu đến hạn khi bắt đầu phiên ôn.` : 'Bạn đã hoàn thành các câu đến hạn ôn.'); }
-    }).catch(e => { if (active) setReviewStatus(e.message); });
+      if (active) { setReviewIds(data.reviewIds); setReviewStatus(data.reviewIds.length ? `${data.reviewIds.length} câu đến hạn khi bắt đầu phiên ôn.` : 'Hiện chưa có câu đến hạn ôn. Bạn có thể tiếp tục luyện toàn bộ câu và quay lại khi đến lịch ôn.'); }
+    }).catch(e => { if (active) { setReviewStatus(e.message); setReviewError(true); } })
+      .finally(() => { if (active) setReviewLoading(false); });
     return () => { active = false; };
-  }, [reviewMode]);
+  }, [reviewMode, reviewRevision]);
   const [pageMode, setPageMode] = useState<PageMode>("practice");
+  useEffect(() => { if (reviewMode) setPageMode('practice'); }, [reviewMode]);
   const game = useWfdGamification();
   const [sessionSummary, setSessionSummary] = useState(false);
   const attemptSubmitted = useRef(false);
@@ -232,7 +237,7 @@ const WriteFromDictation: React.FC = () => {
       <Card className="w-full space-y-3 text-textGlass-primary">
         <p className="text-xs font-semibold uppercase tracking-widest text-white/80">Góc học tập của bạn</p>
         <div className="space-y-2"><Link className="wfd-studio-link" href="/writefromdictation/mastery"><BookOpen size={18} aria-hidden="true" /><span>Tiến độ Mastery</span><ArrowUpRight size={16} aria-hidden="true" /></Link><Link className="wfd-studio-link" href={reviewMode ? '/writefromdictation' : '/writefromdictation?mode=review'}><Target size={18} aria-hidden="true" /><span>{reviewMode ? 'Luyện toàn bộ câu' : 'Ôn câu đến hạn'}</span><ArrowUpRight size={16} aria-hidden="true" /></Link></div>
-        {reviewMode && <p role="status">{reviewStatus}</p>}
+        {reviewMode && <><p role={reviewError ? 'alert' : 'status'}>{reviewStatus}</p><Button variant="secondary" disabled={reviewLoading} onClick={() => setReviewRevision(value => value + 1)}>{reviewError ? 'Thử tải lại câu ôn' : 'Làm mới câu đến hạn'}</Button></>}
       </Card>
       <GamificationPanel game={game} summary={sessionSummary} onCloseSummary={() => setSessionSummary(false)} />
       {pageMode === 'practice' && game.session.practiced > 0 && <Button variant="secondary" onClick={() => setSessionSummary(true)}>Kết thúc session</Button>}
@@ -416,14 +421,15 @@ const WriteFromDictation: React.FC = () => {
         ══════════════════════════════════════ */}
         {pageMode === "practice" && (
           <>
-            {!currentAudioSample && <Card><p role="status" className="py-8 text-center">Không có câu phù hợp. Hãy thử thay đổi bộ lọc hoặc chủ đề.</p></Card>}
+            {!currentAudioSample && <Card><p role="status" className="py-8 text-center">{reviewMode && (reviewLoading || reviewError || !reviewIds.length) ? reviewStatus || 'Đang tải câu đến hạn ôn…' : 'Không có câu phù hợp. Hãy thử thay đổi bộ lọc hoặc chủ đề.'}</p></Card>}
             {sortedAudioSamples.length > 0 && currentAudioSample && (
               <AudioPlayer
                 variant="dictation"
                 ref={audioRef}
                 occurrence={currentAudioSample.occurrence}
                 questionType={currentAudioSample.questionType}
-                audio={currentAudioSample.audio[selectedVoice]}
+                key={currentAudioSample.id}
+                audio={currentAudioSample.audio[selectedVoice] || Object.values(currentAudioSample.audio).find(Boolean) || ''}
                 text={currentAudioSample.text}
                 vietnameseTranslation={currentAudioSample.vietnameseTranslation}
                 onEnded={handleAudioEnd}
