@@ -32,7 +32,7 @@ const handler = load('pages/api/admin/wfd-mastery.ts', {
   '../../../lib/serverAccess': { requireAccess: async (req, res, staff) => {
     assert.equal(staff, true); res.setHeader('Cache-Control', 'no-store');
     if (!allowed) { res.status(403).json({ error: 'denied' }); return null; }
-    return { client: { users: { getUser: async () => user, getUserList: async args => { listArgs = args; return { data: [user], totalCount: 1 }; } } } };
+    return { access: { admin: true }, client: { users: { getUser: async () => user, getUserList: async args => { listArgs = args; return { data: [user], totalCount: 1 }; } } } };
   } },
   '../../../lib/firebaseAdmin': { firebaseAdmin: () => ({ db }) },
   '../../../lib/wfd/adminMastery': statsModule,

@@ -31,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         stats: adminMasteryStats(questions, ids, now),
       } };
     }));
-    if (userId) return res.json({ student: rows[0].student, now,
+    if (userId) return res.json({ student: rows[0].student, now, canEdit: session.access.admin,
       questions: active.docs.map(doc => ({ id: doc.id, text: String(doc.data().text || ''), progress: rows[0].questions[doc.id] || null })),
     });
     return res.json({ users: rows.map(row => row.student), total: result!.totalCount, now });

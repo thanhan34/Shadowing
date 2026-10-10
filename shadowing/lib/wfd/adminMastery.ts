@@ -18,6 +18,7 @@ export interface MasteryStudent {
   id: string; name: string; email: string; role: string; stats: AdminMasteryStats;
 }
 export interface MasteryDetail {
+  canEdit: boolean;
   student: MasteryStudent;
   questions: { id: string; text: string; progress: MasteryQuestion | null }[];
   now: number;

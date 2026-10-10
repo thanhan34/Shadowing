@@ -39,4 +39,6 @@ assert.ok(render({ error: 'Failure' }).includes('role="alert"'));
 assert.ok(render({ selected: user.id, data: detail }).includes('Example sentence.'));
 assert.ok(!render({ selected: user.id, data: detail, qFilter: 'new' }).includes('Example sentence.'));
 assert.ok(render({ selected: user.id, data: detail, qFilter: 'new' }).includes('New sentence.'));
+assert.ok(!render({ selected: user.id, data: { ...detail, canEdit: false } }).includes('Chỉnh mastery'));
+assert.ok(render({ selected: user.id, data: { ...detail, canEdit: true } }).includes('Chỉnh mastery'));
 console.log('Admin WFD mastery UI: overview, detail, filters, loading, errors and empty states passed (server-rendered).');
