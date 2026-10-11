@@ -5,6 +5,8 @@ import { cn } from "../../lib/cn";
 export interface TabItem {
   key: string;
   label: string;
+  marker?: string;
+  description?: string;
 }
 
 interface TabsProps {
@@ -27,6 +29,8 @@ const Tabs: React.FC<TabsProps> = ({ items, activeKey, onChange, className }) =>
             onClick={() => onChange(item.key)}
             role="tab"
             aria-selected={isActive}
+            data-marker={item.marker}
+            data-description={item.description}
           >
             {item.label}
           </Button>

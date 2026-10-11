@@ -16,6 +16,7 @@ const MAIN_NAV_ITEMS: NavItem[] = [
   { label: "Retell Lecture", href: "/retell-lecture" },
   { label: "Describe Image", href: "/describe-image-shadowing" },
   { label: "Essay Library", href: "/essays" },
+  { label: "Ngữ pháp", href: "/grammar" },
   { label: "Write From Dictation", href: "/writefromdictation" },
   { label: "Repeat Sentence", href: "/RepeatSentence" },
   { label: "🔔 Thông báo", href: "/settings/notifications" },

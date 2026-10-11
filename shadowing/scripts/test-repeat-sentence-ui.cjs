@@ -36,6 +36,11 @@ async function main() {
   };
   const html = render();
   assert.ok(html.includes('Students should'));
+  assert.ok(html.includes('rs-rhythm-art'));
+  assert.ok(html.includes('rs-library-stats'));
+  assert.ok(html.includes('href="#rs-practice"'));
+  assert.ok(html.includes('rs-sentence-footer'));
+  assert.ok(html.includes('7 từ'));
   assert.ok(!html.includes('A sentence without chunking.'));
   assert.ok(render('', 'without').includes('A sentence without chunking.'));
   assert.ok(render('missing').includes('Chưa tìm thấy câu phù hợp'));
@@ -56,6 +61,8 @@ async function main() {
       await page.click('.rs-translation summary');
       assert.equal(await page.$$eval('details[open]', els => els.length), 2);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `Overflow at ${width}`);
+      assert.ok(await page.$eval('.rs-start-link', node => node.getBoundingClientRect().height >= 44));
+      assert.equal(await page.$$eval('.rs-rhythm-bars i', nodes => nodes.length), 24);
       const colors = await page.$eval('.ui-tab-active', el => ({ text: getComputedStyle(el).color, background: getComputedStyle(el).backgroundColor }));
       assert.deepEqual(colors, { text: 'rgb(255, 255, 255)', background: 'rgb(252, 93, 1)' });
       await page.click('.rs-settings summary');

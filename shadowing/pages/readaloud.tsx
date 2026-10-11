@@ -159,20 +159,31 @@ const ReadAloudPage: React.FC = () => {
             <p className="rs-eyebrow"><BookOpen size={16} aria-hidden="true" /> PTE / READING STUDIO</p>
             <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">Read <span className="rs-accent">Aloud.</span></h1>
             <p className="mt-3 max-w-xl text-base leading-7 text-white/80">Đọc rõ từng âm. Kết nối từng ý.<br />Chọn một đoạn văn và bắt đầu luyện đọc theo nhịp của bạn.</p>
+            <a href="#ra-library" className="ui-button-primary accent-ring ra-library-link">Khám phá bài luyện <ArrowRight size={16} aria-hidden="true" /></a>
+            <div className="ra-library-stats" aria-label="Thống kê thư viện">
+              <div><strong>{isLoading || errorMessage ? '—' : stats.total}</strong><span>Đoạn văn</span></div>
+              <div><strong>{isLoading || errorMessage ? '—' : stats.withChunking}</strong><span>Có chia cụm</span></div>
+              <div><strong>{isLoading || errorMessage ? '—' : stats.withoutChunking}</strong><span>Đọc liền mạch</span></div>
+            </div>
           </div>
-          <div className="rs-hero-note">
-            <span className="rs-eyebrow">TẬP TRUNG VÀO CÁCH ĐỌC</span>
-            <div className="my-4 flex flex-wrap items-center gap-3 text-sm font-semibold"><span>Đọc hiểu</span><ArrowRight size={16} aria-hidden="true" /><span>Chia cụm</span><ArrowRight size={16} aria-hidden="true" /><span>Đọc thành tiếng</span></div>
-            <p className="text-sm leading-6 text-white/80">Dùng dấu <span className="rs-accent font-bold">/</span> để nhận biết cụm ý. Mở bài luyện để xem nội dung chi tiết và thực hành.</p>
+          <div className="ra-hero-visual">
+            <div className="ra-demo-card">
+              <div className="ra-demo-heading"><span className="rs-eyebrow">FIND YOUR READING FLOW</span><BookOpen size={20} aria-hidden="true" /></div>
+              <p className="ra-demo-text" lang="en">Read with <em>clarity.</em><br /><span className="ra-demo-pause" aria-label="Ngắt cụm">/</span> Speak with <em>confidence.</em></p>
+              <div className="ra-reading-wave" aria-hidden="true">{Array.from({ length: 24 }, (_, index) => <span key={index} />)}</div>
+              <p className="ra-demo-caption">Minh họa nhịp đọc · Ngắt cụm, không ngắt ý</p>
+            </div>
+            <div className="ra-reading-steps"><span><b>01</b> Đọc hiểu</span><span><b>02</b> Chia cụm</span><span><b>03</b> Đọc rõ</span></div>
           </div>
         </Card>
-        <Card className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold">Chọn bài luyện đọc</h2><span className="rs-badge">{isLoading ? 'Đang tải thư viện…' : errorMessage ? 'Chưa tải được thư viện' : stats.total + ' đoạn trong thư viện'}</span></div>
+        <div id="ra-library" className="ra-practice-anchor">
+        <Card className="space-y-4 ra-practice-tools">
+          <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="rs-eyebrow mb-2">YOUR PRACTICE SPACE</p><h2 className="text-lg font-semibold">Chọn bài luyện đọc</h2></div><span className="rs-badge">{isLoading ? 'Đang tải thư viện…' : errorMessage ? 'Chưa tải được thư viện' : stats.total + ' đoạn trong thư viện'}</span></div>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
             <div className="min-w-0 flex-1"><label htmlFor="ra-search" className="mb-2 block text-sm font-medium text-white/80">Tìm đoạn văn</label><div className="relative"><Search className="rs-search-icon" size={18} aria-hidden="true" /><Input id="ra-search" type="search" value={searchText} onChange={e => setSearchText(e.target.value)} placeholder="Tìm nội dung, mã bài hoặc bản dịch…" className="rs-search" /></div></div>
             <Button variant="secondary" disabled={isLoading} onClick={() => void fetchReadAloud()} className="rs-refresh"><RefreshCw size={16} aria-hidden="true" />{isLoading ? 'Đang tải…' : 'Tải lại'}</Button>
           </div>
-          <Tabs items={[{ key: 'with', label: 'Có chia cụm' }, { key: 'without', label: 'Không chia cụm' }]} activeKey={chunkingFilter} onChange={key => setChunkingFilter(key as ChunkingFilter)} />
+          <div className="ra-filter-row"><Tabs items={[{ key: 'with', label: 'Có chia cụm' }, { key: 'without', label: 'Không chia cụm' }]} activeKey={chunkingFilter} onChange={key => setChunkingFilter(key as ChunkingFilter)} /><p>{chunkingFilter === 'with' ? 'Theo cụm ý · Giữ nhịp đọc tự nhiên' : 'Liền mạch · Tự xác định điểm ngắt'}</p></div>
           <details className="rs-settings">
             <summary><span className="flex flex-wrap items-center gap-2"><Sliders size={16} aria-hidden="true" />Cài đặt hiển thị <span className="text-xs">· Tô màu âm: {isHighlightEnabled ? 'Bật' : 'Tắt'}</span></span><span className="rs-chevron" aria-hidden="true">⌄</span></summary>
             <div className="space-y-3 border-t border-white/15 p-4">
@@ -182,6 +193,7 @@ const ReadAloudPage: React.FC = () => {
             </div>
           </details>
         </Card>
+        </div>
         <section aria-labelledby="ra-results-heading" aria-busy={isLoading}>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2 px-1"><h2 id="ra-results-heading" className="text-lg font-semibold">Thư viện đoạn đọc <span className="ml-2 text-sm font-normal text-white/80">/ {chunkingFilter === 'with' ? 'Có chia cụm' : 'Không chia cụm'}</span></h2><p role="status" className="text-sm text-white/80">{isLoading ? 'Đang tải…' : errorMessage ? 'Tải dữ liệu thất bại' : stats.filtered + ' kết quả'}</p></div>
           {isLoading ? (
@@ -196,7 +208,7 @@ const ReadAloudPage: React.FC = () => {
                 <div className="rs-sentence-meta"><span className="rs-sentence-number">{String(index + 1).padStart(2, '0')}</span><span className="rs-badge">{item.ID || 'Read Aloud'}</span>{item.questionType && <span className="rs-badge">{item.questionType}</span>}<span className="ml-auto text-xs text-white/80">{item.text.replace(/\//g, ' ').trim().split(/\s+/).filter(Boolean).length} từ</span></div>
                 <p className={largeText ? 'rs-sentence-text rs-text-large' : 'rs-sentence-text'} lang="en">{isHighlightEnabled ? <HighlightedReadAloudText text={item.text} rules={highlightRules} /> : item.text}</p>
                 {item.vietnameseTranslation && <details className="rs-translation"><summary>Nghĩa tiếng Việt <span className="rs-chevron" aria-hidden="true">⌄</span></summary><p lang="vi" className="pb-4 text-base leading-7 text-white/80">{item.vietnameseTranslation}</p></details>}
-                <div className="ra-card-footer"><span className="text-xs text-white/80">{hasChunking(item.text) ? 'Luyện đọc theo cụm ý' : 'Luyện đọc liền mạch'}</span><Link className="ui-button-primary accent-ring ra-open-lesson" href={{ pathname: '/readaloud/[id]', query: { id: item.id, chunking: chunkingFilter, ...(searchText.trim() ? { search: searchText.trim() } : {}) } }} aria-label={'Mở bài luyện ' + (item.ID || item.id)}>Mở bài luyện<ArrowRight size={16} aria-hidden="true" /></Link></div>
+                <div className="ra-card-footer"><span className="ra-reading-mode"><BookOpen size={16} aria-hidden="true" />{hasChunking(item.text) ? 'Luyện đọc theo cụm ý' : 'Luyện đọc liền mạch'}</span><Link className="ui-button-primary accent-ring ra-open-lesson" href={{ pathname: '/readaloud/[id]', query: { id: item.id, chunking: chunkingFilter, ...(searchText.trim() ? { search: searchText.trim() } : {}) } }} aria-label={'Mở bài luyện ' + (item.ID || item.id)}>Mở bài luyện<ArrowRight size={16} aria-hidden="true" /></Link></div>
               </article>
             ))}</div>
           )}

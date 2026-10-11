@@ -146,25 +146,36 @@ const RepeatSentence: React.FC = () => {
   }, [repeatSentences, filteredRepeatSentences.length]);
 
   return (
-    <AppShellBackground className="rs-page">
+    <AppShellBackground className="rs-page rs-library">
       <Head><title>Repeat Sentence | Thư viện luyện tập</title></Head>
       <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-6 px-4 pb-12 pt-24 sm:px-6 lg:pt-28">
         <Card strong className="rs-hero">
           <div className="min-w-0">
             <p className="rs-eyebrow"><BookOpen size={16} aria-hidden="true" /> PTE / SPEAKING LIBRARY</p>
+            <p className="rs-studio-label">YOUR DAILY SPEAKING STUDIO</p>
             <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">Repeat <span className="rs-accent">Sentence.</span></h1>
             <p className="mt-3 max-w-xl text-base leading-7 text-white/80">Nhớ theo cụm. Nói trọn câu.<br />Một không gian gọn gàng để đọc, ghi nhớ và luyện nói mỗi ngày.</p>
+            <a href="#rs-practice" className="rs-start-link accent-ring">Khám phá câu luyện tập <ArrowRight size={18} aria-hidden="true" /></a>
+            <div className="rs-library-stats" aria-label="Thống kê thư viện">
+              <div><strong>{isLoading || errorMessage ? '—' : stats.total}</strong><span>Tổng số câu</span></div>
+              <div><strong>{isLoading || errorMessage ? '—' : stats.withChunking}</strong><span>Có chia cụm</span></div>
+              <div><strong>{isLoading || errorMessage ? '—' : stats.withoutChunking}</strong><span>Không chia cụm</span></div>
+            </div>
           </div>
+          <div className="rs-hero-visual">
+            <div className="rs-rhythm-art" aria-hidden="true"><span>FIND YOUR RHYTHM</span><div className="rs-rhythm-bars">{Array.from({ length: 24 }, (_, index) => <i key={index} />)}</div><p>Remember the meaning.<br /><strong>Repeat with confidence.</strong></p><div className="rs-demo-chunks"><span>Listen closely</span><b>/</b><span>remember the idea</span></div></div>
           <div className="rs-hero-note">
             <span className="rs-eyebrow">MỖI CÂU, MỘT BƯỚC TIẾN</span>
             <div className="my-4 flex items-center gap-3 text-sm font-semibold"><span>Đọc</span><ArrowRight size={16} aria-hidden="true" /><span>Ghi nhớ</span><ArrowRight size={16} aria-hidden="true" /><span>Nói lại</span></div>
             <p className="text-sm leading-6 text-white/80">Dấu <span className="rs-accent font-bold">/</span> chia câu thành các cụm ý để bạn luyện từng phần dễ hơn.</p>
           </div>
+          </div>
         </Card>
 
-        <Card className="space-y-4">
+        <div id="rs-practice" className="rs-practice-anchor">
+        <Card className="space-y-4 rs-practice-tools">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold">Góc luyện tập</h2>
+            <div><p className="rs-eyebrow">CHỌN CÂU · LUYỆN THEO NHỊP CỦA BẠN</p><h2 className="mt-2 text-xl font-semibold">Góc luyện tập</h2></div>
             <span className="rs-badge">{isLoading ? 'Đang tải thư viện…' : errorMessage ? 'Chưa tải được thư viện' : stats.total + ' câu trong thư viện'}</span>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
@@ -174,7 +185,7 @@ const RepeatSentence: React.FC = () => {
             </div>
             <Button variant="secondary" disabled={isLoading} onClick={() => void fetchRepeatSentences()} className="rs-refresh"><RefreshCw size={16} aria-hidden="true" />{isLoading ? 'Đang tải…' : 'Tải lại'}</Button>
           </div>
-          <Tabs items={[{ key: 'with', label: 'Có chia cụm' }, { key: 'without', label: 'Không chia cụm' }]} activeKey={chunkingFilter} onChange={key => setChunkingFilter(key as ChunkingFilter)} />
+          <div className="rs-filter-row"><Tabs items={[{ key: 'with', label: 'Có chia cụm' }, { key: 'without', label: 'Không chia cụm' }]} activeKey={chunkingFilter} onChange={key => setChunkingFilter(key as ChunkingFilter)} /><p>{chunkingFilter === 'with' ? 'Chia nhỏ ý để ghi nhớ dễ hơn.' : 'Luyện ghi nhớ câu liền mạch.'}</p></div>
           <details className="rs-settings">
             <summary><span className="flex items-center gap-2"><Sliders size={16} aria-hidden="true" />Cài đặt hiển thị</span><span className="rs-chevron" aria-hidden="true">⌄</span></summary>
             <div className="space-y-3 border-t border-white/15 p-4">
@@ -183,6 +194,7 @@ const RepeatSentence: React.FC = () => {
             </div>
           </details>
         </Card>
+        </div>
 
         <section aria-labelledby="rs-results-heading" aria-busy={isLoading}>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2 px-1">
@@ -196,11 +208,12 @@ const RepeatSentence: React.FC = () => {
           ) : filteredRepeatSentences.length === 0 ? (
             <Card className="py-10 text-center"><Search size={28} className="mx-auto mb-4 rs-accent" aria-hidden="true" /><h3 className="text-lg font-semibold">Chưa tìm thấy câu phù hợp</h3><p className="mt-2 text-sm leading-6 text-white/80">Thử từ khóa khác hoặc chuyển nhóm chia cụm.</p>{searchText && <Button variant="secondary" className="mt-4" onClick={() => setSearchText('')}>Xóa tìm kiếm</Button>}</Card>
           ) : (
-            <div className="space-y-4">
+              <div className="space-y-4 rs-sentence-list">
               {filteredRepeatSentences.map((sentence, index) => (
                 <article key={sentence.id} className="rs-sentence">
                   <div className="rs-sentence-meta"><span className="rs-sentence-number">{String(index + 1).padStart(2, '0')}</span><span className="rs-badge">{sentence.ID || 'Repeat Sentence'}</span><span className="ml-auto text-xs text-white/80">{hasChunking(sentence.text) ? 'Có chia cụm' : 'Câu liền mạch'}</span></div>
                   <p className={largeText ? 'rs-sentence-text rs-text-large' : 'rs-sentence-text'} lang="en">{renderChunkedText(sentence.text)}</p>
+                  <div className="rs-sentence-footer"><span>{sentence.text.replace(/\//g, ' ').trim().split(/\s+/).filter(Boolean).length} từ</span><span>Đọc rõ · Nhớ ý · Nói trọn câu</span></div>
                   {sentence.vietnameseTranslation && <details className="rs-translation"><summary>Nghĩa tiếng Việt <span className="rs-chevron" aria-hidden="true">⌄</span></summary><p lang="vi" className="pb-4 text-base leading-7 text-white/80">{sentence.vietnameseTranslation}</p></details>}
                 </article>
               ))}

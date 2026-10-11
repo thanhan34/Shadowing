@@ -38,6 +38,10 @@ async function main() {
     return renderToStaticMarkup(React.createElement(Page));
   };
   const html = render();
+  assert.ok(html.includes('ra-library-stats'));
+  assert.ok(html.includes('Minh họa nhịp đọc'));
+  assert.ok(html.includes('Theo cụm ý'));
+  assert.ok(render('', 'without').includes('Tự xác định điểm ngắt'));
   assert.ok(html.includes('color:#ff4d4d'));
   highlight = false;
   assert.ok(!render().includes('color:#ff4d4d'));
@@ -64,6 +68,9 @@ async function main() {
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `Overflow at ${width}`);
       assert.equal(await page.$eval('.ra-open-lesson', el => getComputedStyle(el).color), 'rgb(255, 255, 255)');
       assert.ok(await page.$eval('.ra-open-lesson', el => el.getAttribute('href').includes('chunking=with')));
+      assert.ok(await page.$eval('.ra-library-link', el => el.getBoundingClientRect().height >= 44));
+      assert.equal(await page.$eval('.ra-library-link', el => el.getAttribute('href')), '#ra-library');
+      assert.equal(await page.$eval('#ra-library', el => getComputedStyle(el).scrollMarginTop), '104px');
       await page.click('.rs-settings summary'); await page.click('.rs-translation summary');
       await page.screenshot({ path: path.join(require('node:os').tmpdir(), `ra-ui-${width}.png`), fullPage: true });
     }
