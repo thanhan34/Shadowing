@@ -24,7 +24,7 @@ export const useWriteFromDictation = (reviewIds?: string[]) => {
   const [score, setScore] = useState(0);
   const [maxScore, setMaxScore] = useState(0);
   const [wordStatuses, setWordStatuses] = useState<Array<{ word: string; status: "correct" | "incorrect" | "missing" }>>([]);
-  const [selectedVoice, setSelectedVoice] = useState<string>("Brian");
+  const [selectedVoice, setSelectedVoice] = useState<string>("Ryan");
   const [sortingOption, setSortingOption] = useState<string>("occurrence");
   const [playbackRate, setPlaybackRate] = useState<number>(1);
   const [loading, setLoading] = useState(true);

@@ -373,12 +373,11 @@ const WriteFromDictation: React.FC = () => {
                   onChange={(event) => handleVoiceChange(event.target.value)}
                   className="w-full p-2 border border-gray-300 rounded-lg shadow-sm bg-white bg-opacity-10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                 >
-                  {sortedAudioSamples.length > 0 &&
-                    Object.keys(sortedAudioSamples[pageMode === 'flashcard' ? 0 : currentIndex]?.audio ?? {}).map((voice, index) => (
-                      <option key={index} value={voice}>
-                        {voice}
-                      </option>
-                    ))}
+                  {["Ryan", "Jenny", "Natasha"].map((voice) => (
+                    <option key={voice} value={voice}>
+                      {voice}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
