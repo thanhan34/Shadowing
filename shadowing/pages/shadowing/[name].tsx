@@ -12,8 +12,8 @@ export interface ShadowingData {
 
 const DynamicShadowingPage = ({ shadowingData }: { shadowingData: ShadowingData[] }) => {
   return (
-    <AppShellBackground>
-      <main className="mx-auto flex min-h-screen w-full flex-col items-center justify-between p-4 sm:p-6 md:p-8 lg:p-12 xl:p-24">
+    <AppShellBackground className="shadow-detail">
+      <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col items-center px-4 py-8 sm:px-6 sm:py-12">
         <ShadowingSentence shadowingData={shadowingData} />
       </main>
     </AppShellBackground>

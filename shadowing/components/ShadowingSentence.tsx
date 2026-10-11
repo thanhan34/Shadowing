@@ -4,7 +4,8 @@ import Sentence from "./Sentence";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { db } from "../firebase";
 import { ShadowingData } from "@/pages/shadowing/[name]";
-import Image from "next/image";
+import { ArrowLeft, Headphones, ChevronLeft, ChevronRight, ExternalLink } from "react-feather";
+import Button from "./ui/Button";
 import Link from "next/link";
 import Head from "next/head";
 
@@ -101,7 +102,7 @@ const ShadowingSentence: React.FC<Props> = ({ shadowingData }) => {
   const activeSentence = arraySen[count];
  
   return (
-    <div className="z-10 items-center justify-between w-full max-w-5xl font-mono px-4 md:px-6 lg:px-8 py-4">
+    <div className="shadow-detail-content z-10 w-full max-w-5xl font-mono">
       <Head>
         <title>{cleanedName} - Shadowing</title>
         <meta
@@ -116,21 +117,74 @@ const ShadowingSentence: React.FC<Props> = ({ shadowingData }) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className="flex justify-center">
-        <Link href="/shadow" className="inline-flex rounded-full accent-ring">
-          <Image
-            src="/logo1.png"
-            alt="Logo"
-            width={150}
-            height={150}
-            className="w-24 h-24 md:w-36 md:h-36 lg:w-48 lg:h-48"
-          />
+        <Link href="/shadow" className="shadow-detail-back accent-ring">
+          <ArrowLeft size={18} aria-hidden="true" />Thư viện Shadowing
         </Link>
+      <div className="shadow-detail-header">
+        <div className="shadow-detail-heading">
+          <span className="shadow-detail-badge"><Headphones size={16} aria-hidden="true" /> SHADOWING STUDIO</span>
+          <h1 className="shadow-detail-title">{cleanedName}</h1>
+          <p className="shadow-detail-intro">Lắng nghe. Bắt nhịp. Nhại lại.</p>
+        </div>
+        <div className="shadow-detail-art" aria-hidden="true"><Headphones size={40} /><div>{Array.from({ length: 17 }, (_, index) => <i key={index} />)}</div><span>LISTEN · REPEAT · REFINE</span></div>
       </div>
 
-      <h1 className="mb-4 text-xl md:text-2xl lg:text-3xl font-bold text-center text-white">
-        Shadowing: {cleanedName}
-      </h1>
+      <section className="shadow-detail-workspace" aria-label="Không gian luyện Shadowing">
+      <div className="shadow-detail-modebar">
+        <span>{mode ? 'Toàn bộ đoạn văn' : 'Luyện từng câu'}</span>
+        <span className="shadow-detail-badge">{mode ? 'PARAGRAPH MODE' : `Câu ${count + 1} / ${arraySen.length}`}</span>
+      </div>
+
+      {mode ? (
+        <div className="shadow-detail-actions">
+          {arraySen.length === 0 && (
+            <p className="shadow-detail-notice">
+              Chức năng 1 Sentence Mode chưa thể sử dụng được cho câu này.
+            </p>
+          )}
+
+          <Button
+            onClick={handleModeChange}
+            disabled={arraySen.length === 0}
+          >
+            1 Sentence Mode
+          </Button>
+
+          {practice && (
+            <a
+              href={practice}
+              className="ui-button-secondary accent-ring shadow-detail-practice"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Practice <ExternalLink size={16} aria-hidden="true" />
+            </a>
+          )}
+        </div>
+      ) : (
+        <div className="shadow-detail-actions">
+          <Button variant="secondary"
+            onClick={handleModeChange}
+          >
+            Paragraph
+          </Button>
+          <Button variant="secondary"
+            onClick={handleBackClick}
+            disabled={count === 0}
+          >
+            <ChevronLeft size={18} aria-hidden="true" /> Back
+          </Button>
+          <Button
+            onClick={handleNextClick}
+            disabled={arraySen.length === 0 || count + 1 >= arraySen.length}
+          >
+            Next <ChevronRight size={18} aria-hidden="true" />
+          </Button>
+          <span className="shadow-detail-progress" role="status">
+            {arraySen.length > 0 ? `${count + 1}/${arraySen.length}` : "0/0"}
+          </span>
+        </div>
+      )}
 
       {mode ? (
         <Paragraph videoSource={videoSource} sentence={sentence} />
@@ -139,62 +193,7 @@ const ShadowingSentence: React.FC<Props> = ({ shadowingData }) => {
       ) : (
         <p className="text-sm text-white/70">Không có câu để hiển thị.</p>
       )}
-
-      {mode ? (
-        <div className="mt-4 flex flex-col space-y-2 md:flex-row md:space-x-4 md:space-y-0">
-          {arraySen.length === 0 && (
-            <p className="text-red-500">
-              Chức năng 1 Sentence Mode chưa thể sử dụng được cho câu này.
-            </p>
-          )}
-
-          <button
-            className="px-4 py-2 font-bold text-white bg-blue-500 rounded-full hover:bg-blue-700"
-            onClick={handleModeChange}
-            disabled={arraySen.length === 0}
-          >
-            1 Sentence Mode
-          </button>
-
-          {practice && (
-            <a
-              href={practice}
-              className="px-4 py-2 font-bold text-white bg-blue-500 rounded-full flex items-center justify-center hover:bg-blue-700"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Practice
-            </a>
-          )}
-        </div>
-      ) : (
-        <div className="mt-4 flex flex-col space-y-2 md:flex-row md:space-x-4 md:space-y-0">
-          <button
-            className="px-4 py-2 font-bold text-white bg-blue-500 rounded-full hover:bg-blue-700"
-            onClick={handleModeChange}
-          >
-            Paragraph
-          </button>
-          <button
-            className="px-4 py-2 font-bold text-white bg-blue-500 rounded-full hover:bg-blue-700"
-            onClick={handleBackClick}
-            disabled={count === 0}
-          >
-            Back
-          </button>
-          <button
-            className="px-4 py-2 font-bold text-white bg-blue-500 rounded-full hover:bg-blue-700"
-            onClick={handleNextClick}
-            disabled={arraySen.length === 0 || count + 1 >= arraySen.length}
-          >
-            Next
-          </button>
-          <button className="px-4 py-2 font-bold text-white bg-blue-500 rounded-full" disabled>
-            {arraySen.length > 0 ? `${count + 1}/${arraySen.length}` : "0/0"}
-          </button>
-        </div>
-      )}
-
+      </section>
     </div>
   );
 };
