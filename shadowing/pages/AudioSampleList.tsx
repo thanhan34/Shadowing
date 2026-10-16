@@ -18,7 +18,7 @@ import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import TaskAdminTabs from "../components/ui/TaskAdminTabs";
 
-type VoiceType = "Brian" | "Joanna" | "Olivia";
+type VoiceType = "Brian" | "Joanna" | "Olivia" | "Ryan" | "Natasha" | "Jenny";
 type MessageType = "success" | "error" | "info";
 type VisibilityFilter = "all" | "visible" | "hidden";
 
@@ -36,7 +36,7 @@ interface AppMessage {
   text: string;
 }
 
-const VOICES: VoiceType[] = ["Brian", "Joanna", "Olivia"];
+const VOICES: VoiceType[] = ["Brian", "Joanna", "Olivia", "Ryan", "Natasha", "Jenny"];
 
 const AudioSampleList: React.FC = () => {
   const router = useRouter();
@@ -84,6 +84,9 @@ const AudioSampleList: React.FC = () => {
                 Brian: data.audio?.Brian ?? "",
                 Joanna: data.audio?.Joanna ?? "",
                 Olivia: data.audio?.Olivia ?? "",
+                Ryan: data.audio?.Ryan ?? "",
+                Natasha: data.audio?.Natasha ?? "",
+                Jenny: data.audio?.Jenny ?? "",
               },
             } as AudioSample;
           })
@@ -154,6 +157,9 @@ const AudioSampleList: React.FC = () => {
           Brian: sample.audio.Brian ?? "",
           Joanna: sample.audio.Joanna ?? "",
           Olivia: sample.audio.Olivia ?? "",
+          Ryan: sample.audio.Ryan ?? "",
+          Natasha: sample.audio.Natasha ?? "",
+          Jenny: sample.audio.Jenny ?? "",
         },
       });
 
