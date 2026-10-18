@@ -33,9 +33,9 @@ const users = [
   { id: '3', name: 'Support', email: 'support@example.test', approved: false, admin: false, support: true },
   { id: '4', name: 'Admin', email: 'admin@example.test', approved: false, admin: true, support: false },
 ];
-function render({ list = users, busy = false, error = '', query = '', filter = 'all', admin = true } = {}) {
+function render({ list = users, busy = false, error = '', query = '', filter = 'all', admin = true, total = list.length, approvedCount = 3 } = {}) {
   cursor = 0;
-  states = [list, 0, list.length, busy, true, error, false, query, filter, '', admin];
+  states = [list, 0, total, busy, true, error, false, query, filter, '', admin, approvedCount];
   return renderToStaticMarkup(React.createElement(Students));
 }
 const all = render();
@@ -56,4 +56,8 @@ assert.ok(render({ busy: true }).includes('aria-busy="true"'));
 assert.ok(!render({ busy: true }).includes('<table'));
 assert.ok(render({ error: 'Test error' }).includes('Thử lại'));
 assert.ok(render({ error: 'Test error' }).includes('role="alert"'));
+const globalStats = render({ total: 205, approvedCount: 123, filter: 'pending', query: 'dang an' });
+assert.match(globalStats, /Có quyền truy cập<\/p>[\s\S]*?>123<\/p>/);
+assert.match(globalStats, /Chưa có quyền<\/p>[\s\S]*?>82<\/p>/);
+assert.equal((globalStats.match(/Trên toàn hệ thống/g) || []).length, 3);
 console.log('Admin students: rendering, Vietnamese search, filters, loading, errors, empty states and role controls passed.');

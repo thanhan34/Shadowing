@@ -8,9 +8,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const session = await requireAccess(req, res, true);
     if (!session) return;
     if (req.method === 'GET') {
-      const offset = Math.max(0, Number(req.query.offset) || 0);
-      const result = await session.client.users.getUserList({ limit: 20, offset, orderBy: '-created_at' });
-      return res.json({ canManageRoles: session.access.admin, total: result.totalCount, users: result.data.map(user => ({
+      const requestedOffset = Number(req.query.offset);
+      const offset = Number.isFinite(requestedOffset) ? Math.max(0, Math.floor(requestedOffset)) : 0;
+      // Access is stored in Clerk metadata. Count every batch, not just the visible page.
+      const users = [];
+      let total = 0;
+      let approvedCount = 0;
+      let scanned = 0;
+      do {
+        const result = await session.client.users.getUserList({ limit: 100, offset: scanned, orderBy: '-created_at' });
+        total = result.totalCount;
+        if (!result.data.length && scanned < total) throw new Error('Incomplete student list');
+        for (const user of result.data) {
+          if (getAccess(user.privateMetadata).approved) approvedCount++;
+          if (scanned >= offset && scanned < offset + 20) users.push(user);
+          scanned++;
+        }
+      } while (scanned < total);
+      return res.json({ canManageRoles: session.access.admin, total, approvedCount, users: users.map(user => ({
         id: user.id, name: [user.firstName, user.lastName].filter(Boolean).join(' '),
         email: user.emailAddresses.find(email => email.id === user.primaryEmailAddressId)?.emailAddress || '',
         admin: user.privateMetadata.role === 'admin',

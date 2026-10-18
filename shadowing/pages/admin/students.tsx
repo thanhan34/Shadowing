@@ -22,6 +22,7 @@ export default function Students() {
   const [filter, setFilter] = useState('all');
   const [message, setMessage] = useState('');
   const [canManageRoles, setCanManageRoles] = useState(false);
+  const [approvedCount, setApprovedCount] = useState(0);
   const load = useCallback(async (signal?: AbortSignal) => {
     const response = await fetch(`/api/admin/students?offset=${offset}`, { cache: 'no-store', signal });
     const data = await response.json();
@@ -29,6 +30,7 @@ export default function Students() {
     if (signal?.aborted) return;
     setUsers(data.users); setTotal(data.total); setLoaded(true); setLoadError('');
     setCanManageRoles(data.canManageRoles === true);
+    setApprovedCount(data.approvedCount);
   }, [offset]);
   useEffect(() => {
     const controller = new AbortController();
@@ -64,13 +66,12 @@ export default function Students() {
     } catch (err) { setMessage((err as Error).message); setIsError(true); }
     finally { setBusy(false); }
   }
-  const approvedCount = users.filter(hasAccess).length;
   const visibleUsers = users.filter(student => normalize(`${student.name} ${student.email}`).includes(normalize(query)) && (filter === 'all' || (filter === 'approved' ? hasAccess(student) : !hasAccess(student))));
   const page = Math.floor(offset / 20) + 1;
   const stats = [
     { label: 'Tổng tài khoản', value: loaded ? total.toLocaleString('vi-VN') : '—', hint: 'Trên toàn hệ thống', icon: Users },
-    { label: 'Có quyền truy cập', value: busy || loadError ? '—' : approvedCount, hint: 'Trong trang hiện tại', icon: CheckCircle },
-    { label: 'Chưa có quyền', value: busy || loadError ? '—' : users.length - approvedCount, hint: 'Trong trang hiện tại', icon: Clock },
+    { label: 'Có quyền truy cập', value: busy || loadError ? '—' : approvedCount.toLocaleString('vi-VN'), hint: 'Trên toàn hệ thống', icon: CheckCircle },
+    { label: 'Chưa có quyền', value: busy || loadError ? '—' : (total - approvedCount).toLocaleString('vi-VN'), hint: 'Trên toàn hệ thống', icon: Clock },
   ];
   return <AppShellBackground>
     <Head><title>Quản lý học viên | Quản trị</title></Head>
