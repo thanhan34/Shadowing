@@ -7,6 +7,7 @@ import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import Tabs from "../components/ui/Tabs";
+import RepeatSentenceActions from "../components/RepeatSentenceActions";
 import { BookOpen, Search, RefreshCw, Sliders, ArrowRight } from "react-feather";
 
 interface RepeatSentenceItem {
@@ -19,6 +20,8 @@ interface RepeatSentenceItem {
   questionType?: string;
   vietnameseTranslation?: string;
   displayOrder?: number;
+  audio?: Record<string, string>;
+  practiceUrl?: string;
 }
 
 const TARGET_COLLECTION = "repeatsentence";
@@ -214,6 +217,7 @@ const RepeatSentence: React.FC = () => {
                   <div className="rs-sentence-meta"><span className="rs-sentence-number">{String(index + 1).padStart(2, '0')}</span><span className="rs-badge">{sentence.ID || 'Repeat Sentence'}</span><span className="ml-auto text-xs text-white/80">{hasChunking(sentence.text) ? 'Có chia cụm' : 'Câu liền mạch'}</span></div>
                   <p className={largeText ? 'rs-sentence-text rs-text-large' : 'rs-sentence-text'} lang="en">{renderChunkedText(sentence.text)}</p>
                   <div className="rs-sentence-footer"><span>{sentence.text.replace(/\//g, ' ').trim().split(/\s+/).filter(Boolean).length} từ</span><span>Đọc rõ · Nhớ ý · Nói trọn câu</span></div>
+                  <RepeatSentenceActions key={`${sentence.id}-${sentence.audio?.Ryan ?? ''}`} sentenceId={sentence.ID} audio={sentence.audio?.Ryan} practiceUrl={sentence.practiceUrl} />
                   {sentence.vietnameseTranslation && <details className="rs-translation"><summary>Nghĩa tiếng Việt <span className="rs-chevron" aria-hidden="true">⌄</span></summary><p lang="vi" className="pb-4 text-base leading-7 text-white/80">{sentence.vietnameseTranslation}</p></details>}
                 </article>
               ))}

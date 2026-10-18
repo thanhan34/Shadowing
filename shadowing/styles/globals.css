@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* RS admin upload extends the shared glass and accent tokens. */
+.rs-upload-input { display: block; width: 100%; min-height: 44px; border-radius: var(--radius-button); color: var(--text-glass-secondary); font-size: 14px; }
+.rs-upload-input::file-selector-button { min-height: 44px; margin-right: 16px; padding: 8px 16px; border: 1px solid var(--glass-border); border-radius: var(--radius-button); background: var(--accent); color: var(--text-glass-primary); font-weight: 600; cursor: pointer; transition: transform .15s, box-shadow .15s, background .15s; }
+.rs-upload-input:not(:disabled):hover::file-selector-button { transform: translateY(-2px); background: var(--accent-hover); @apply shadow-accentGlow; }
+.rs-upload-input:not(:disabled):active::file-selector-button { transform: translateY(2px); box-shadow: none; }
+.rs-upload-input:disabled { opacity: .5; }
+.rs-upload-input:disabled::file-selector-button { cursor: not-allowed; box-shadow: none; }
+.rs-upload-progress { display: block; width: 100%; height: 12px; overflow: hidden; appearance: none; border: 0; border-radius: 999px; background: var(--glass-bg); }
+.rs-upload-progress::-webkit-progress-bar { background: var(--glass-bg); border-radius: 999px; }
+.rs-upload-progress::-webkit-progress-value { background: var(--accent); border-radius: 999px; }
+.rs-upload-progress::-moz-progress-bar { background: var(--accent); border-radius: 999px; }
+
 /* Home keeps the rotating photography and extends the app's glass system. */
 .home-page { --home-surface: rgba(11, 18, 32, .82); --home-surface-hover: rgba(20, 26, 43, .94); --home-border: rgba(255, 255, 255, .16); color: var(--text-glass-primary); }
 .home-photo-background { position: fixed; inset: 0; background-color: var(--bg-deep-2); background-size: cover; background-position: center; pointer-events: none; }
@@ -400,6 +412,33 @@
 .rs-translation { border-top: 1px solid var(--glass-border); }
 .rs-translation summary { padding-left: 0; padding-right: 0; justify-content: flex-start; }
 .rs-translation p { overflow-wrap: anywhere; }
+.rs-practice-actions { --rs-control-bg: rgba(7, 9, 16, .35); --rs-control-border: rgba(255, 255, 255, .1); display: grid; gap: 12px; padding: 16px 0; border-top: 1px solid var(--glass-border); }
+.rs-audio-block { display: grid; align-content: center; gap: 12px; min-width: 0; padding: 16px; border: 1px solid var(--rs-control-border); border-radius: var(--radius-button); background: var(--rs-control-bg); }
+.rs-audio-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.rs-audio-label { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: .1em; color: var(--text-glass-secondary); }
+.rs-audio-label svg { color: var(--accent-hover); }
+.rs-voice-badge { padding: 4px 8px; border: 1px solid var(--rs-control-border); border-radius: 999px; background: var(--glass-bg); color: var(--rs-muted); font-size: 11px; }
+.rs-sentence-audio { display: none; }
+.rs-audio-controls { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.rs-audio-play, .rs-audio-restart { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 44px; height: 44px; border-radius: 14px; border: 1px solid var(--rs-control-border); transition: transform .18s, background .18s, border-color .18s, box-shadow .18s; }
+.rs-audio-play { background: var(--accent); border-color: var(--accent); color: white; box-shadow: 0 8px 20px -12px var(--accent); }
+.rs-audio-play:hover { background: var(--accent-hover); border-color: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 8px 20px -8px var(--accent); }
+.rs-audio-restart { background: var(--glass-bg); color: var(--rs-muted); }
+.rs-audio-restart:hover:not(:disabled) { color: white; border-color: var(--text-glass-muted); transform: translateY(-2px); box-shadow: var(--glass-shadow); }
+.rs-audio-play:active, .rs-audio-restart:active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
+.rs-audio-restart:disabled { opacity: .4; cursor: not-allowed; box-shadow: none; }
+.rs-audio-timeline { flex: 1; min-width: 0; }
+.rs-audio-seek { display: block; width: 100%; height: 24px; margin: 0; border-radius: 8px; accent-color: var(--accent); cursor: pointer; }
+.rs-audio-seek:disabled { opacity: .45; cursor: not-allowed; }
+.rs-audio-time { display: flex; justify-content: space-between; gap: 8px; color: var(--text-glass-secondary); font-size: 11px; font-variant-numeric: tabular-nums; }
+.rs-practice-link { display: flex; align-items: center; justify-content: flex-start; gap: 12px; min-height: 72px; padding: 16px; border: 1px solid rgba(252, 93, 1, .22); border-radius: var(--radius-button); background: var(--rs-studio-accent, rgba(252, 93, 1, .1)); color: var(--rs-text); text-decoration: none; transition: transform .18s, border-color .18s, background .18s, box-shadow .18s; }
+.rs-practice-icon { display: grid; place-items: center; width: 40px; height: 40px; flex-shrink: 0; border: 1px solid rgba(252, 93, 1, .2); border-radius: 12px; background: rgba(252, 93, 1, .1); color: var(--accent-hover); }
+.rs-practice-copy { display: grid; gap: 4px; min-width: 0; }
+.rs-practice-copy strong { font-size: 13px; font-weight: 600; }
+.rs-practice-copy > span { font-size: 11px; color: var(--text-glass-secondary); }
+.rs-practice-link:hover { transform: translateY(-2px); border-color: var(--accent); background: rgba(252, 93, 1, .15); box-shadow: var(--glass-shadow); }
+.rs-practice-link:active { transform: translateY(2px); box-shadow: none; }
+@media (min-width: 768px) { .rs-practice-actions { grid-template-columns: minmax(0, 1fr) auto; align-items: stretch; } }
 @media (min-width: 640px) { .rs-sentence { padding: 24px; } .rs-sentence-text { font-size: 20px; } .rs-sentence-text.rs-text-large { font-size: 28px; } }
 @media (min-width: 1024px) { .rs-hero { grid-template-columns: 1.4fr 1fr; align-items: center; } }
 

@@ -7,7 +7,7 @@ const React = require('react');
 const ts = require('typescript');
 const { renderToStaticMarkup } = require('react-dom/server');
 const root = path.resolve(__dirname, '..');
-const samples = [{ id: 'a', ID: '#1', text: 'Students should / check the library opening hours.', vietnameseTranslation: 'Sinh viên nên kiểm tra giờ mở cửa của thư viện.' }, { id: 'b', text: 'A sentence without chunking.' }];
+const samples = [{ id: 'a', ID: '#1', text: 'Students should / check the library opening hours.', vietnameseTranslation: 'Sinh viên nên kiểm tra giờ mở cửa của thư viện.', audio: { Ryan: 'https://example.invalid/rs-1.mp3' }, practiceUrl: 'https://www.apeuni.com/practice/repeat_sentences/1' }, { id: 'b', text: 'A sentence without chunking.' }];
 let states;
 let cursor;
 function load(file) {
@@ -15,7 +15,7 @@ function load(file) {
   mod.filename = file;
   mod.paths = module.paths;
   mod.require = name => {
-    if (name === 'react') return { ...React, useState: () => [states[cursor++], () => {}] };
+    if (name === 'react') return { ...React, useState: initial => [cursor < states.length ? states[cursor++] : initial, () => {}] };
     if (name === 'next/head') return { __esModule: true, default: () => null };
     if (name === 'firebase/firestore' || name === '../firebase') return {};
     if (name.startsWith('.')) {
@@ -41,6 +41,23 @@ async function main() {
   assert.ok(html.includes('href="#rs-practice"'));
   assert.ok(html.includes('rs-sentence-footer'));
   assert.ok(html.includes('7 từ'));
+  assert.ok(html.includes('src="https://example.invalid/rs-1.mp3"'));
+  assert.ok(html.includes('preload="none"'));
+  assert.ok(html.includes('rs-audio-play'));
+  assert.ok(html.includes('rs-audio-seek'));
+  assert.ok(!html.includes('<audio controls'));
+  assert.ok(!html.includes('autoPlay'));
+  assert.ok(html.includes('href="https://www.apeuni.com/practice/repeat_sentences/1"'));
+  assert.ok(html.includes('target="_blank" rel="noopener noreferrer"'));
+  assert.ok(render('', 'without').includes('Câu này chưa có audio Ryan.'));
+  assert.ok(render('', 'without').includes('Chưa có link luyện tập cho câu này.'));
+  const { getRepeatSentencePracticeUrl: practiceLink } = load(path.join(root, 'components/RepeatSentenceActions.tsx'));
+  const expected = 'https://www.apeuni.com/practice/repeat_sentences/170';
+  assert.equal(practiceLink(undefined, '#170 RS'), expected);
+  assert.equal(practiceLink('javascript:alert(1)', '#170 RS'), expected);
+  assert.equal(practiceLink('https://www.apeuni.com/practice/repeat_sentences/171', '#170 RS'), 'https://www.apeuni.com/practice/repeat_sentences/171');
+  assert.equal(practiceLink('https://evil.example', undefined), null);
+  assert.equal(practiceLink(undefined, '#0 RS'), null);
   assert.ok(!html.includes('A sentence without chunking.'));
   assert.ok(render('', 'without').includes('A sentence without chunking.'));
   assert.ok(render('missing').includes('Chưa tìm thấy câu phù hợp'));
@@ -62,6 +79,13 @@ async function main() {
       assert.equal(await page.$$eval('details[open]', els => els.length), 2);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `Overflow at ${width}`);
       assert.ok(await page.$eval('.rs-start-link', node => node.getBoundingClientRect().height >= 44));
+      assert.ok(await page.$eval('.rs-practice-link', node => node.getBoundingClientRect().height >= 44));
+      assert.ok(await page.$eval('.rs-audio-play', node => node.getBoundingClientRect().height >= 44));
+      assert.ok(await page.$eval('.rs-audio-restart', node => node.disabled));
+      assert.equal(await page.$eval('.rs-sentence-audio', node => getComputedStyle(node).display), 'none');
+      const playColor = await page.$eval('.rs-audio-play', node => getComputedStyle(node).backgroundColor);
+      assert.equal(playColor, 'rgb(252, 93, 1)');
+      assert.equal(await page.$eval('.rs-sentence-audio', node => node.paused), true);
       assert.equal(await page.$$eval('.rs-rhythm-bars i', nodes => nodes.length), 24);
       const colors = await page.$eval('.ui-tab-active', el => ({ text: getComputedStyle(el).color, background: getComputedStyle(el).backgroundColor }));
       assert.deepEqual(colors, { text: 'rgb(255, 255, 255)', background: 'rgb(252, 93, 1)' });

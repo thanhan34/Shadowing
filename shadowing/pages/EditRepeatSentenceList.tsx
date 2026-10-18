@@ -1,22 +1,32 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import {
   collection,
   doc,
+  getDoc,
   getDocs,
   query,
   Timestamp,
   updateDoc,
   where,
 } from "firebase/firestore";
-import { db } from "../firebase";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import * as XLSX from "xlsx";
+import { db, storage } from "../firebase";
+import {
+  RS_AUDIO_VOICES,
+  buildMissingRepeatSentenceAudioRows,
+  RepeatSentenceUploadResult,
+  uploadRepeatSentenceAudioFiles,
+} from "../lib/repeatSentenceAudio";
 import AppShellBackground from "../components/ui/AppShellBackground";
 import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import Tabs from "../components/ui/Tabs";
 import TaskAdminTabs from "../components/ui/TaskAdminTabs";
+import RepeatSentenceResourceEditor from "../components/RepeatSentenceResourceEditor";
 
 type MessageType = "success" | "error" | "info";
 
@@ -27,6 +37,8 @@ interface AppMessage {
 
 interface RepeatSentenceItem {
   id: string;
+  audio?: Record<string, string>;
+  practiceUrl?: string;
   ID?: string;
   text: string;
   occurrence?: number;
@@ -93,6 +105,11 @@ const EditRepeatSentenceList: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [message, setMessage] = useState<AppMessage | null>(null);
+  const [isBulkUploading, setIsBulkUploading] = useState(false);
+  const [bulkUploadProgress, setBulkUploadProgress] = useState(0);
+  const [uploadResults, setUploadResults] = useState<RepeatSentenceUploadResult[]>([]);
+  const uploadLock = useRef(false);
+  const [resourceSavingId, setResourceSavingId] = useState<string | null>(null);
 
   const appendMessage = (text: string, type: MessageType = "info") => {
     setMessage({ text, type });
@@ -229,6 +246,76 @@ const EditRepeatSentenceList: React.FC = () => {
     }
   };
 
+  const missingAudioRows = useMemo(() => buildMissingRepeatSentenceAudioRows(items), [items]);
+
+  const exportMissingAudioToExcel = () => {
+    if (!missingAudioRows.length) {
+      appendMessage("Không có câu RS nào thiếu audio Ryan.", "info");
+      return;
+    }
+    try {
+      const worksheet = XLSX.utils.json_to_sheet(missingAudioRows);
+      worksheet["!cols"] = [{ wch: 15 }, { wch: 28 }, { wch: 80 }, { wch: 60 }, { wch: 18 }, { wch: 12 }, { wch: 10 }];
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Missing Ryan Audio");
+      const date = new Date().toISOString().split("T")[0];
+      XLSX.writeFile(workbook, `repeat_sentences_missing_ryan_audio_${date}.xlsx`);
+      appendMessage(`Đã export ${missingAudioRows.length} câu thiếu audio Ryan.`, "success");
+    } catch (error) {
+      appendMessage(`Không thể export Excel: ${error instanceof Error ? error.message : "Unknown error"}`, "error");
+    }
+  };
+
+  const handleBulkFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
+    event.target.value = "";
+    if (!files.length || uploadLock.current || isLoading || resourceSavingId) return;
+
+    uploadLock.current = true;
+    setIsBulkUploading(true);
+    setBulkUploadProgress(0);
+    setUploadResults([]);
+    try {
+      const results = await uploadRepeatSentenceAudioFiles(files, items, {
+        readAudio: async (id) => {
+          const snapshot = await getDoc(doc(db, TARGET_COLLECTION, id));
+          if (!snapshot.exists() || snapshot.data().isHidden !== false) {
+            throw new Error("Câu RS đã bị xóa hoặc ẩn. Hãy Refresh danh sách.");
+          }
+          return snapshot.data().audio ?? {};
+        },
+        upload: async (file, id, voice) => {
+          const storageRef = ref(storage, `audio/repeatsentence/${id}/${voice}/${file.name}`);
+          const snapshot = await uploadBytes(storageRef, file, {
+            contentType: "audio/mpeg",
+            cacheControl: "public, max-age=31536000",
+          });
+          return getDownloadURL(snapshot.ref);
+        },
+        save: async (id, voice, url) => {
+          // Update only this voice, preserving other audio and any chunking edits.
+          await updateDoc(doc(db, TARGET_COLLECTION, id), { [`audio.${voice}`]: url });
+          setItems((previous) => previous.map((item) => item.id === id
+            ? { ...item, audio: { ...item.audio, [voice]: url } }
+            : item));
+        },
+        onResult: (result, processed) => {
+          setUploadResults((previous) => [...previous, result]);
+          setBulkUploadProgress(Math.round((processed / files.length) * 100));
+        },
+      });
+      const successes = results.filter((result) => result.status === "success").length;
+      const skipped = results.filter((result) => result.status === "skipped").length;
+      const errors = results.filter((result) => result.status === "error").length;
+      appendMessage(`Upload hoàn tất: ${successes} thành công, ${skipped} bỏ qua, ${errors} lỗi.`, errors ? "error" : "success");
+    } catch (error) {
+      appendMessage(`Lỗi bulk upload: ${error instanceof Error ? error.message : "Unknown error"}`, "error");
+    } finally {
+      uploadLock.current = false;
+      setIsBulkUploading(false);
+    }
+  };
+
   return (
     <AppShellBackground>
       <Head>
@@ -243,7 +330,7 @@ const EditRepeatSentenceList: React.FC = () => {
                 Edit Repeat Sentence List
               </h1>
               <p className="mt-2 text-sm text-white/70 sm:text-base">
-                Chỉnh sửa nội dung Repeat Sentence và thêm dấu / thủ công để chunking.
+                Chỉnh sửa nội dung Repeat Sentence, thêm dấu / để chunking và bulk upload MP3.
               </p>
               <p className="mt-1 text-xs text-white/55 sm:text-[13px]">
                 Collection hiện tại: <span className="font-semibold text-[#ffac7b]">{TARGET_COLLECTION}</span>
@@ -284,7 +371,7 @@ const EditRepeatSentenceList: React.FC = () => {
               onClick={() => {
                 void fetchRepeatSentences();
               }}
-              disabled={isLoading}
+              disabled={isLoading || isBulkUploading || !!resourceSavingId}
               className="w-full sm:w-auto"
             >
               {isLoading ? "Refreshing..." : "Refresh"}
@@ -310,6 +397,65 @@ const EditRepeatSentenceList: React.FC = () => {
               <p className="mt-1 text-2xl font-bold text-violet-200">{stats.filtered}</p>
             </div>
           </div>
+        </Card>
+
+        <Card className="space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-base font-semibold text-white sm:text-lg">Bulk Audio Upload — Ryan</h2>
+            <Button
+              onClick={exportMissingAudioToExcel}
+              disabled={isLoading || isBulkUploading || missingAudioRows.length === 0}
+              className="w-full sm:w-auto"
+            >
+              Export to Excel — Missing Ryan Audio ({missingAudioRows.length})
+            </Button>
+          </div>
+          <p className="text-xs text-white/60">
+            Export toàn bộ câu RS Visible chưa có audio Ryan, không phụ thuộc bộ lọc.
+            Nội dung trong Excel được bỏ dấu / chunking để tạo audio.
+          </p>
+          <p id="rs-upload-help" className="text-sm text-white/70">
+            Chọn nhiều file MP3. Tên file: <span className="font-semibold text-[#ffac7b]">number_Ryan_Text.mp3</span>
+            {" "}(số thứ tự có thể bỏ qua). Chỉ hỗ trợ giọng Ryan.
+            Ví dụ: 1_Ryan_We should always review before speaking.mp3.
+          </p>
+          <p className="text-xs text-white/60">
+            Ghép theo nội dung đã lưu, bỏ qua dấu / chunking, dấu câu và chữ hoa/thường.
+            Áp dụng cho toàn bộ câu RS Visible, không phụ thuộc bộ lọc bên trên.
+            Chỉ bổ sung giọng còn thiếu; audio đã có được giữ nguyên. Câu trùng nội dung sẽ được bỏ qua.
+          </p>
+          <div className="space-y-2" role="status" aria-live="polite">
+            <p className="text-sm text-white/70">
+              {isBulkUploading ? "Đang upload..." : uploadResults.length ? "Đã xử lý xong" : "Sẵn sàng upload"}
+              {` — ${bulkUploadProgress}%`}
+            </p>
+            <progress aria-label="Tiến độ bulk upload MP3" value={bulkUploadProgress} max={100} className="rs-upload-progress" />
+          </div>
+          <div>
+            <label htmlFor="rs-bulk-audio" className="mb-2 block text-sm text-white/70">Chọn file MP3</label>
+            <input
+              id="rs-bulk-audio"
+              type="file"
+              accept=".mp3,audio/mpeg,audio/mp3"
+              multiple
+              onChange={handleBulkFileUpload}
+              disabled={isLoading || isBulkUploading || !!resourceSavingId || items.length === 0}
+              aria-describedby="rs-upload-help"
+              className="rs-upload-input accent-ring"
+            />
+          </div>
+          {uploadResults.length > 0 && (
+            <div className="max-h-60 space-y-2 overflow-y-auto rounded-2xl border border-white/10 bg-white/5 p-3">
+              <h3 className="text-sm font-semibold text-white/85">Kết quả từng file ({uploadResults.length})</h3>
+              {uploadResults.map((result, index) => (
+                <p key={`${index}-${result.name}`} className="break-words text-xs text-white/70">
+                  <span className={result.status === "success" ? "text-emerald-300" : result.status === "error" ? "text-rose-300" : "text-white/70"}>
+                    {result.status === "success" ? "Thành công" : result.status === "error" ? "Lỗi" : "Bỏ qua"}
+                  </span>{" "}— {result.name}: {result.message}
+                </p>
+              ))}
+            </div>
+          )}
         </Card>
 
         <Card className="space-y-4">
@@ -374,6 +520,29 @@ const EditRepeatSentenceList: React.FC = () => {
                         <span>Occurrence: {item.occurrence ?? 0}</span>
                         <span>Slash count: {(draftText.match(/\//g) ?? []).length}</span>
                       </div>
+
+                      <div className="flex flex-wrap gap-2" aria-label="Trạng thái audio">
+                        {RS_AUDIO_VOICES.map((voice) => (
+                          <span key={voice} className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-white/70">
+                            {voice}: {item.audio?.[voice]?.trim() ? "Đã có audio" : "Chưa có audio"}
+                          </span>
+                        ))}
+                      </div>
+
+                      <RepeatSentenceResourceEditor
+                        key={`${item.id}-${item.audio?.Ryan ?? ""}-${item.practiceUrl ?? ""}`}
+                        id={item.id}
+                        audioUrl={item.audio?.Ryan ?? ""}
+                        practiceUrl={item.practiceUrl ?? ""}
+                        disabled={isBulkUploading || !!resourceSavingId || !!savingId}
+                        onSavingChange={(saving) => setResourceSavingId(saving ? item.id : null)}
+                        onSaved={(audioUrl, practiceUrl) => {
+                          setItems((previous) => previous.map((current) => current.id === item.id
+                            ? { ...current, audio: { ...current.audio, Ryan: audioUrl }, practiceUrl }
+                            : current));
+                          appendMessage(`Đã lưu audio Ryan và practice link cho ${item.ID ?? item.id}.`, "success");
+                        }}
+                      />
 
                       <div className="flex flex-col gap-2 sm:flex-row">
                         <Button
