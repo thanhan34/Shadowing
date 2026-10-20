@@ -1,56 +1,32 @@
 import fs from 'fs';
 import path from 'path';
-export function loadAudioData() {
-    const retellLectureDir = path.join(process.cwd(), 'public/shadowingsource/retelllecture');
-    
-    // Check if directory exists
-    if (!fs.existsSync(retellLectureDir)) {
-      throw new Error('Audio directory not found');
-    }
 
-    // Read all files in the directory
-    const files = fs.readdirSync(retellLectureDir);
-    
-    // Filter only mp3 files
-    const mp3Files = files.filter(file => file.endsWith('.mp3'));
-    
-    // Parse files and group by sentence number
-    const sentencesMap = {};
-    
-    mp3Files.forEach(file => {
-      // Format: {number}_{voice}_{text}.mp3
-      const parts = file.split('_');
-      const number = parseInt(parts[0]);
-      const voice = parts[1].toLowerCase();
-      const textParts = parts.slice(2);
-      const text = textParts.join('_').replace('.mp3', '').replace(/_/g, ' ');
-      
-      if (!sentencesMap[number]) {
-        sentencesMap[number] = {
-          number: number,
-          text: text,
-          voices: {}
-        };
-      }
-      
-      // Store the file path for this voice
-      sentencesMap[number].voices[voice] = `/shadowingsource/retelllecture/${file}`;
+export function loadAudioData() {
+  const directory = path.join(process.cwd(), 'public/shadowingsource/rl');
+  const recordings = new Map();
+  for (const file of fs.readdirSync(directory)) {
+    const match = /^(\d+)_Ryan_(.+)\.mp3$/i.exec(file);
+    if (!match) continue;
+    const number = Number(match[1]);
+    if (number < 1 || !Number.isSafeInteger(number)) throw new Error(`Invalid Ryan sentence number: ${file}`);
+    if (recordings.has(number)) throw new Error(`Duplicate Ryan sentence ${number}`);
+    if (fs.statSync(path.join(directory, file)).size === 0) throw new Error(`Empty Ryan audio: ${file}`);
+    recordings.set(number, {
+      number,
+      text: match[2].replace(/_/g, ' ').trim(),
+      voices: { ryan: `/shadowingsource/rl/${encodeURIComponent(file)}` },
     });
-    
-    // Convert to array and sort by number
-    const sentences = Object.values(sentencesMap).sort((a, b) => a.number - b.number);
-    
-    // Generate full text by combining all sentences
-    const fullText = sentences.map(s => s.text).join(' ');
-    
-    // Return the structured data
-    const data = {
-      id: 'retell-lecture-1',
-      name: 'Retell Lecture Practice',
-      sentences: sentences,
-      fullText: fullText,
-      availableVoices: ['brian', 'joanna', 'olivia']
-    };
-    
-return data;
+  }
+  const sentences = [...recordings.values()].sort((a, b) => a.number - b.number);
+  if (!sentences.length) throw new Error('No Ryan audio found for Retell Lecture');
+  sentences.forEach((sentence, index) => {
+    if (sentence.number !== index + 1) throw new Error(`Missing Ryan sentence ${index + 1}`);
+  });
+  return {
+    id: 'retell-lecture-1',
+    name: 'Retell Lecture Practice',
+    sentences,
+    fullText: sentences.map(sentence => sentence.text).join(' '),
+    availableVoices: ['ryan'],
+  };
 }

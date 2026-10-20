@@ -3,17 +3,13 @@ import React, { useRef, useEffect, useState } from "react";
 interface Sentence {
   number: number;
   text: string;
-  voices: {
-    brian: string;
-    joanna: string;
-    olivia: string;
-  };
+  voices: Partial<Record<'brian' | 'joanna' | 'olivia' | 'ryan', string>>;
 }
 
 interface RetellParagraphProps {
   sentences: Sentence[];
   fullText: string;
-  selectedVoice: 'brian' | 'joanna' | 'olivia';
+  selectedVoice: 'brian' | 'joanna' | 'olivia' | 'ryan';
 }
 
 // Global state để lưu tốc độ phát
@@ -21,6 +17,10 @@ let globalPlaybackRate = 1.0;
 
 const RetellParagraph: React.FC<RetellParagraphProps> = ({ sentences, fullText, selectedVoice }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
+  useEffect(() => {
+    const audio = audioRef.current;
+    return () => { audio?.pause(); };
+  }, []);
   const [playbackRate, setPlaybackRate] = useState(globalPlaybackRate);
   const [currentTime, setCurrentTime] = useState(0);
   
@@ -180,11 +180,12 @@ const RetellParagraph: React.FC<RetellParagraphProps> = ({ sentences, fullText, 
 
   return (
     <div className="w-full">
-      <div className="bg-white bg-opacity-95 backdrop-blur-md rounded-2xl shadow-2xl p-6 md:p-8">
+      <div className="retell-panel bg-white bg-opacity-95 backdrop-blur-md rounded-2xl shadow-2xl p-6 md:p-8">
         {/* Audio Player */}
         <audio 
           ref={audioRef} 
           controls 
+          aria-label="Nghe toàn bộ bài shadowing"
           key={getAudioUrl()}
           onTimeUpdate={handleTimeUpdate}
           onEnded={handleAudioEnded}
@@ -194,12 +195,13 @@ const RetellParagraph: React.FC<RetellParagraphProps> = ({ sentences, fullText, 
         </audio>
         
         {/* Speed Control */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
+        <div className="retell-speed flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
           <span className="text-lg font-bold text-gray-800">⚡ Tốc độ:</span>
           <div className="flex gap-2">
             {speedOptions.map((speed) => (
               <button
                 key={speed}
+                aria-pressed={playbackRate === speed}
                 onClick={() => handleSpeedChange(speed)}
                 className={`px-5 py-2 text-base font-bold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 ${
                   playbackRate === speed
@@ -214,7 +216,7 @@ const RetellParagraph: React.FC<RetellParagraphProps> = ({ sentences, fullText, 
         </div>
 
         {/* Hide Mode Controls */}
-        <div className="mb-8 border-t-2 border-gray-200 pt-6">
+        <div className="retell-hide mb-8 border-t-2 border-gray-200 pt-6">
           <div className="flex flex-col items-center gap-4">
             <span className="text-lg font-bold text-gray-800">🎯 Chế độ luyện tập:</span>
             
@@ -222,6 +224,7 @@ const RetellParagraph: React.FC<RetellParagraphProps> = ({ sentences, fullText, 
             <div className="flex flex-wrap justify-center gap-2">
               <button
                 onClick={() => handleHideModeChange('none')}
+                aria-pressed={hideMode === 'none'}
                 className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 ${
                   hideMode === 'none'
                     ? 'bg-gradient-to-r from-[#fc5d01] to-[#fd7f33] text-white'
@@ -232,6 +235,7 @@ const RetellParagraph: React.FC<RetellParagraphProps> = ({ sentences, fullText, 
               </button>
               <button
                 onClick={() => handleHideModeChange('random30')}
+                aria-pressed={hideMode === 'random30'}
                 className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 ${
                   hideMode === 'random30'
                     ? 'bg-gradient-to-r from-[#fc5d01] to-[#fd7f33] text-white'
@@ -242,6 +246,7 @@ const RetellParagraph: React.FC<RetellParagraphProps> = ({ sentences, fullText, 
               </button>
               <button
                 onClick={() => handleHideModeChange('random50')}
+                aria-pressed={hideMode === 'random50'}
                 className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 ${
                   hideMode === 'random50'
                     ? 'bg-gradient-to-r from-[#fc5d01] to-[#fd7f33] text-white'
@@ -252,6 +257,7 @@ const RetellParagraph: React.FC<RetellParagraphProps> = ({ sentences, fullText, 
               </button>
               <button
                 onClick={() => handleHideModeChange('random70')}
+                aria-pressed={hideMode === 'random70'}
                 className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 ${
                   hideMode === 'random70'
                     ? 'bg-gradient-to-r from-[#fc5d01] to-[#fd7f33] text-white'
@@ -262,6 +268,7 @@ const RetellParagraph: React.FC<RetellParagraphProps> = ({ sentences, fullText, 
               </button>
               <button
                 onClick={() => handleHideModeChange('firstLetter')}
+                aria-pressed={hideMode === 'firstLetter'}
                 className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 ${
                   hideMode === 'firstLetter'
                     ? 'bg-gradient-to-r from-[#fc5d01] to-[#fd7f33] text-white'
@@ -275,10 +282,12 @@ const RetellParagraph: React.FC<RetellParagraphProps> = ({ sentences, fullText, 
         </div>
 
         {/* Text Content */}
-        <div className="space-y-4">
+        <div className="retell-transcript space-y-4">
           {sentences.map((sentence, index) => (
             <div
               key={sentence.number}
+              data-active={index === currentSentenceIndex}
+              aria-current={index === currentSentenceIndex ? 'step' : undefined}
               className={`p-4 rounded-xl transition-all duration-300 ${
                 index === currentSentenceIndex
                   ? 'bg-gradient-to-r from-[#fedac2] to-[#ffac7b] shadow-lg transform scale-105'
@@ -294,6 +303,8 @@ const RetellParagraph: React.FC<RetellParagraphProps> = ({ sentences, fullText, 
                       : 'bg-white text-gray-700 hover:bg-gray-100 border-2 border-gray-300'
                   }`}
                   title={hiddenSentences[index] ? "Hiện câu" : "Ẩn câu"}
+                  aria-label={`${hiddenSentences[index] ? 'Hiện' : 'Ẩn'} câu ${index + 1}`}
+                  aria-pressed={!!hiddenSentences[index]}
                 >
                   {hiddenSentences[index] ? '👁️' : '🔒'}
                 </button>

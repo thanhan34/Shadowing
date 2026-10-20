@@ -3,16 +3,12 @@ import React, { useRef, useEffect, useState } from "react";
 interface Sentence {
   number: number;
   text: string;
-  voices: {
-    brian: string;
-    joanna: string;
-    olivia: string;
-  };
+  voices: Partial<Record<'brian' | 'joanna' | 'olivia' | 'ryan', string>>;
 }
 
 interface RetellSentenceProps {
   sentence: Sentence;
-  selectedVoice: 'brian' | 'joanna' | 'olivia';
+  selectedVoice: 'brian' | 'joanna' | 'olivia' | 'ryan';
 }
 
 // Global state để lưu tốc độ phát
@@ -20,6 +16,10 @@ let globalPlaybackRate = 1.0;
 
 const RetellSentence: React.FC<RetellSentenceProps> = ({ sentence, selectedVoice }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
+  useEffect(() => {
+    const audio = audioRef.current;
+    return () => { audio?.pause(); };
+  }, []);
   const [playbackRate, setPlaybackRate] = useState(globalPlaybackRate);
   const [hideMode, setHideMode] = useState<'none' | 'random30' | 'random50' | 'random70' | 'firstLetter'>('none');
   const [hiddenIndices, setHiddenIndices] = useState<number[]>([]);
@@ -135,11 +135,12 @@ const RetellSentence: React.FC<RetellSentenceProps> = ({ sentence, selectedVoice
 
   return (
     <div className="w-full">
-      <div className="bg-white bg-opacity-95 backdrop-blur-md rounded-2xl shadow-2xl p-6 md:p-8">
+      <div className="retell-panel bg-white bg-opacity-95 backdrop-blur-md rounded-2xl shadow-2xl p-6 md:p-8">
         {/* Audio Player */}
         <audio 
           ref={audioRef} 
           controls 
+          aria-label={`Nghe câu ${sentence.number}`}
           autoPlay 
           loop 
           key={getAudioUrl()}
@@ -149,12 +150,13 @@ const RetellSentence: React.FC<RetellSentenceProps> = ({ sentence, selectedVoice
         </audio>
         
         {/* Speed Control */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
+        <div className="retell-speed flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
           <span className="text-lg font-bold text-gray-800">⚡ Tốc độ:</span>
           <div className="flex gap-2">
             {speedOptions.map((speed) => (
               <button
                 key={speed}
+                aria-pressed={playbackRate === speed}
                 onClick={() => handleSpeedChange(speed)}
                 className={`px-5 py-2 text-base font-bold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 ${
                   playbackRate === speed
@@ -169,7 +171,7 @@ const RetellSentence: React.FC<RetellSentenceProps> = ({ sentence, selectedVoice
         </div>
 
         {/* Hide Mode Controls */}
-        <div className="mb-8 border-t-2 border-gray-200 pt-6">
+        <div className="retell-hide mb-8 border-t-2 border-gray-200 pt-6">
           <div className="flex flex-col items-center gap-4">
             <span className="text-lg font-bold text-gray-800">🎯 Chế độ luyện tập:</span>
             
@@ -177,6 +179,7 @@ const RetellSentence: React.FC<RetellSentenceProps> = ({ sentence, selectedVoice
             <div className="flex flex-wrap justify-center gap-2">
               <button
                 onClick={() => handleHideModeChange('none')}
+                aria-pressed={hideMode === 'none'}
                 className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 ${
                   hideMode === 'none'
                     ? 'bg-gradient-to-r from-[#fc5d01] to-[#fd7f33] text-white'
@@ -187,6 +190,7 @@ const RetellSentence: React.FC<RetellSentenceProps> = ({ sentence, selectedVoice
               </button>
               <button
                 onClick={() => handleHideModeChange('random30')}
+                aria-pressed={hideMode === 'random30'}
                 className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 ${
                   hideMode === 'random30'
                     ? 'bg-gradient-to-r from-[#fc5d01] to-[#fd7f33] text-white'
@@ -197,6 +201,7 @@ const RetellSentence: React.FC<RetellSentenceProps> = ({ sentence, selectedVoice
               </button>
               <button
                 onClick={() => handleHideModeChange('random50')}
+                aria-pressed={hideMode === 'random50'}
                 className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 ${
                   hideMode === 'random50'
                     ? 'bg-gradient-to-r from-[#fc5d01] to-[#fd7f33] text-white'
@@ -207,6 +212,7 @@ const RetellSentence: React.FC<RetellSentenceProps> = ({ sentence, selectedVoice
               </button>
               <button
                 onClick={() => handleHideModeChange('random70')}
+                aria-pressed={hideMode === 'random70'}
                 className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 ${
                   hideMode === 'random70'
                     ? 'bg-gradient-to-r from-[#fc5d01] to-[#fd7f33] text-white'
@@ -217,6 +223,7 @@ const RetellSentence: React.FC<RetellSentenceProps> = ({ sentence, selectedVoice
               </button>
               <button
                 onClick={() => handleHideModeChange('firstLetter')}
+                aria-pressed={hideMode === 'firstLetter'}
                 className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 ${
                   hideMode === 'firstLetter'
                     ? 'bg-gradient-to-r from-[#fc5d01] to-[#fd7f33] text-white'
@@ -230,7 +237,7 @@ const RetellSentence: React.FC<RetellSentenceProps> = ({ sentence, selectedVoice
         </div>
 
         {/* Sentence Text with highlight */}
-        <div className="bg-gradient-to-r from-[#fedac2] to-[#ffac7b] rounded-2xl shadow-xl p-6 md:p-8">
+        <div className="retell-single-text bg-gradient-to-r from-[#fedac2] to-[#ffac7b] rounded-2xl shadow-xl p-6 md:p-8">
           <div className="flex items-center justify-center mb-3">
             <span className="text-2xl">🔊</span>
           </div>
@@ -240,7 +247,7 @@ const RetellSentence: React.FC<RetellSentenceProps> = ({ sentence, selectedVoice
         </div>
 
         {/* Loop indicator */}
-        <div className="mt-6 text-center">
+        <div className="retell-loop mt-6 text-center">
           <p className="text-gray-600 font-medium">
             🔁 Audio đang loop - Luyện tập cho đến khi thành thạo!
           </p>

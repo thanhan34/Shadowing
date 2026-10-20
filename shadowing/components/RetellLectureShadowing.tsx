@@ -1,140 +1,69 @@
-import React, { useState, useEffect } from "react";
-import RetellParagraph from "./RetellParagraph";
-import RetellSentence from "./RetellSentence";
-import { RetellLectureData } from "@/pages/retell-lecture/[name]";
-import Image from "next/image";
+import React, { useState } from "react";
 import Link from "next/link";
 import Head from "next/head";
+import { ArrowLeft, ArrowRight, BookOpen, ChevronLeft, ChevronRight, Headphones, Info, Mic, Repeat } from "react-feather";
+import RetellParagraph from "./RetellParagraph";
+import RetellSentence from "./RetellSentence";
+import type { RetellLectureData } from "@/pages/retell-lecture/[name]";
+import Card from "./ui/Card";
+import Button from "./ui/Button";
 
-interface Props {
-  retellData: RetellLectureData;
-}
-
-const RetellLectureShadowing: React.FC<Props> = ({ retellData }) => {
-  const [mode, setMode] = useState(true); // true = paragraph mode, false = sentence mode
+export default function RetellLectureShadowing({ retellData }: { retellData: RetellLectureData }) {
+  const [mode, setMode] = useState<"paragraph" | "sentence">("paragraph");
   const [count, setCount] = useState(0);
-  const [selectedVoice, setSelectedVoice] = useState<'brian' | 'joanna' | 'olivia'>('brian');
-
-  const handleModeChange = () => {
-    setMode(!mode);
-    setCount(0);
-  };
-
-  const handleBackClick = () => {
-    if (count > 0) {
-      setCount(count - 1);
-    }
-  };
-
-  const handleNextClick = () => {
-    if (count + 1 < retellData.sentences.length) {
-      setCount(count + 1);
-    }
-  };
-
-  const handleVoiceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedVoice(event.target.value as 'brian' | 'joanna' | 'olivia');
-  };
 
   return (
-    <div className="z-10 items-center justify-between w-full max-w-6xl px-4 md:px-6 lg:px-8 py-6">
+    <main className="di-main">
       <Head>
         <title>{retellData.name} - Retell Lecture Shadowing</title>
-        <meta
-          name="description"
-          content="Luyện tập Retell Lecture với công cụ shadowing. Chọn giọng đọc và luyện tập từng câu hoặc cả đoạn."
-        />
-        <meta
-          name="keywords"
-          content="retell lecture, PTE, shadowing, luyện tập PTE, speaking PTE"
-        />
-        <meta name="author" content="PTE Intensive" />
-        <link rel="icon" href="/favicon.ico" />
+        <meta name="description" content="Luyện Retell Lecture với giọng Ryan. Nghe cả đoạn, lặp từng câu, điều chỉnh tốc độ và ẩn từ để ghi nhớ template." />
       </Head>
-      
-      <div className="flex justify-center mb-4">
-        <Link href="/retell-lecture">
-          <Image
-            src="/logo1.png"
-            alt="Logo"
-            width={150}
-            height={150}
-            className="w-24 h-24 md:w-36 md:h-36 lg:w-48 lg:h-48"
-          />
-        </Link>
+      <Link href="/retell-lecture" className="di-back"><ArrowLeft size={16} aria-hidden="true" /> Thư viện Retell Lecture</Link>
+      <header className="di-header">
+        <div>
+          <p className="di-eyebrow"><Headphones size={16} aria-hidden="true" /> SPEAKING PRACTICE</p>
+          <h1>Retell Lecture <span>Shadowing</span></h1>
+          <p className="di-intro">Nghe mẫu, nói theo và làm chủ khung bài kể lại bài giảng. Một template chung, một giọng đọc Ryan xuyên suốt.</p>
+        </div>
+        <div className="di-meta" aria-label="Thông tin bài luyện"><span><Mic size={16} aria-hidden="true" /> Giọng Ryan</span><span><Repeat size={16} aria-hidden="true" /> {retellData.sentences.length} câu luyện tập</span></div>
+      </header>
+
+      <div className="di-layout">
+        <aside className="di-sidebar" aria-label="Hướng dẫn luyện Retell Lecture">
+          <Card>
+            <div className="di-section-title"><span className="di-step">01</span><div><h2>Template Retell Lecture</h2><p>Nghe và ghi nhớ cùng giọng Ryan</p></div></div>
+            <div className="di-opening"><span>CÂU MỞ ĐẦU</span><p>{retellData.sentences[0].text}</p></div>
+            <div className="rl-template-summary"><BookOpen size={18} aria-hidden="true" /><p>{retellData.sentences.length} câu nối tiếp: giới thiệu chủ đề, triển khai các ý chính và kết luận.</p></div>
+            <div className="rl-keywords"><span>CHỖ ĐIỀN THÔNG TIN</span><p>A · B · C · D · E · F · G · H</p><small>Thay các chữ cái bằng chủ đề và ý chính bạn nghe được trong bài giảng.</small></div>
+          </Card>
+          <Card className="di-guide">
+            <h2><Headphones size={18} aria-hidden="true" /> Luyện tập hiệu quả</h2>
+            <ol><li><span>1</span>Nghe cả đoạn để nắm nhịp và cách nối ý.</li><li><span>2</span>Lặp từng câu, chú ý phát âm và ngắt nghỉ.</li><li><span>3</span>Ẩn dần từ, tập kể lại bằng thông tin thực tế.</li></ol>
+            <details><summary>Lưu ý khi áp dụng template</summary><p>Audio đọc các chữ cái A–H như chỗ điền. Khi tự nói, thay chúng bằng thông tin có trong bài giảng; không thêm ý không nghe được.</p><p>Đây là audio luyện template, không phải bản ghi bài giảng để làm bài thi thử.</p></details>
+          </Card>
+        </aside>
+
+        <section className="di-workspace" aria-labelledby="rl-practice-title">
+          <div className="di-workspace-heading"><div className="di-section-title"><span className="di-step">02</span><div><h2 id="rl-practice-title">Nghe & nói theo</h2><p>Chọn cách luyện phù hợp với bạn</p></div></div><span className="di-current-type"><Mic size={16} aria-hidden="true" /> Ryan</span></div>
+          <div className="di-modebar">
+            <div className="di-modes" role="group" aria-label="Chế độ luyện tập">
+              <Button variant="tab" active={mode === "paragraph"} aria-pressed={mode === "paragraph"} onClick={() => { setMode("paragraph"); setCount(0); }}><Headphones size={16} aria-hidden="true" />Cả đoạn</Button>
+              <Button variant="tab" active={mode === "sentence"} aria-pressed={mode === "sentence"} onClick={() => { setMode("sentence"); setCount(0); }}><Repeat size={16} aria-hidden="true" />Từng câu</Button>
+            </div>
+            <span className="di-mode-note">{mode === "paragraph" ? "Phát nối tiếp toàn bộ bài" : "Lặp lại một câu để luyện kỹ"}</span>
+          </div>
+          {mode === "sentence" && <nav className="di-sentence-nav" aria-label="Chuyển câu">
+            <Button variant="secondary" disabled={count === 0} onClick={() => setCount(value => Math.max(0, value - 1))}><ChevronLeft size={18} aria-hidden="true" /><span>Câu trước</span></Button>
+            <span role="status">Câu <strong>{count + 1}</strong> / {retellData.sentences.length}</span>
+            <Button variant="secondary" disabled={count === retellData.sentences.length - 1} onClick={() => setCount(value => Math.min(retellData.sentences.length - 1, value + 1))}><span>Câu tiếp</span><ChevronRight size={18} aria-hidden="true" /></Button>
+          </nav>}
+          <div className="di-player">
+            {mode === "paragraph" ? <RetellParagraph key={`${retellData.id}-paragraph`} sentences={retellData.sentences} fullText={retellData.fullText} selectedVoice="ryan" /> : <RetellSentence key={`${retellData.id}-${count}`} sentence={retellData.sentences[count]} selectedVoice="ryan" />}
+          </div>
+          <p className="di-footnote"><Info size={16} aria-hidden="true" /> Cả đoạn phát nối tiếp; từng câu lặp lại để bạn luyện đến khi thành thạo.</p>
+          {mode === "paragraph" && <Button variant="secondary" className="di-start-sentence" onClick={() => { setMode("sentence"); setCount(0); }}>Muốn luyện chậm hơn? Thử từng câu <ArrowRight size={16} aria-hidden="true" /></Button>}
+        </section>
       </div>
-
-      <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-6 text-white drop-shadow-lg">
-        Retell Lecture Shadowing
-      </h1>
-
-      {/* Voice Selector Card */}
-      <div className="bg-white bg-opacity-95 backdrop-blur-md rounded-2xl shadow-2xl p-6 mb-6">
-        <div className="flex flex-col md:flex-row items-center justify-center gap-4">
-          <label className="text-xl font-bold text-gray-800">Chọn giọng đọc:</label>
-          <select
-            value={selectedVoice}
-            onChange={handleVoiceChange}
-            className="px-6 py-3 text-xl font-bold border-3 border-[#fc5d01] rounded-xl focus:outline-none focus:ring-4 focus:ring-[#fd7f33] bg-white text-gray-800 shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
-          >
-            <option value="brian">🎙️ Brian</option>
-            <option value="joanna">🎙️ Joanna</option>
-            <option value="olivia">🎙️ Olivia</option>
-          </select>
-        </div>
-      </div>
-
-      {mode ? (
-        <RetellParagraph 
-          sentences={retellData.sentences}
-          fullText={retellData.fullText}
-          selectedVoice={selectedVoice}
-        />
-      ) : (
-        <RetellSentence
-          sentence={retellData.sentences[count]}
-          selectedVoice={selectedVoice}
-        />
-      )}
-
-      {mode ? (
-        <div className="flex flex-col md:flex-row justify-center mt-6 space-y-3 md:space-y-0 md:space-x-4">
-          <button
-            className="px-8 py-4 text-lg font-bold text-white bg-gradient-to-r from-[#fc5d01] to-[#fd7f33] rounded-2xl hover:shadow-2xl hover:scale-105 transform transition-all duration-200"
-            onClick={handleModeChange}
-          >
-            🎯 1 Sentence Mode
-          </button>
-        </div>
-      ) : (
-        <div className="flex flex-col md:flex-row justify-center mt-6 space-y-3 md:space-y-0 md:space-x-4">
-          <button
-            className="px-8 py-4 text-lg font-bold text-white bg-gradient-to-r from-[#fc5d01] to-[#fd7f33] rounded-2xl hover:shadow-2xl hover:scale-105 transform transition-all duration-200"
-            onClick={handleModeChange}
-          >
-            📝 Paragraph Mode
-          </button>
-          <button
-            className="px-8 py-4 text-lg font-bold text-white bg-gradient-to-r from-[#fc5d01] to-[#fd7f33] rounded-2xl hover:shadow-2xl hover:scale-105 transform transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-            onClick={handleBackClick}
-            disabled={count === 0}
-          >
-            ⬅️ Back
-          </button>
-          <button
-            className="px-8 py-4 text-lg font-bold text-white bg-gradient-to-r from-[#fc5d01] to-[#fd7f33] rounded-2xl hover:shadow-2xl hover:scale-105 transform transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-            onClick={handleNextClick}
-            disabled={count + 1 >= retellData.sentences.length}
-          >
-            Next ➡️
-          </button>
-          <button className="px-8 py-4 text-lg font-bold text-white bg-gray-600 rounded-2xl cursor-default" disabled>
-            {count + 1}/{retellData.sentences.length}
-          </button>
-        </div>
-      )}
-    </div>
+    </main>
   );
-};
-
-export default RetellLectureShadowing;
+}

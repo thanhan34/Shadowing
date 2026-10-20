@@ -1,6 +1,5 @@
 import { loadAudioData } from '../../lib/retell-lecture';
-import { useRouter } from 'next/router';
-import { useState, useEffect } from 'react';
+import AppShellBackground from '../../components/ui/AppShellBackground';
 import RetellLectureShadowing from '../../components/RetellLectureShadowing';
 
 export interface RetellLectureData {
@@ -10,9 +9,7 @@ export interface RetellLectureData {
     number: number;
     text: string;
     voices: {
-      brian: string;
-      joanna: string;
-      olivia: string;
+      ryan: string;
     };
   }[];
   fullText: string;
@@ -20,24 +17,14 @@ export interface RetellLectureData {
 }
 
 const DynamicRetellLecturePage = ({ retellData }: { retellData: RetellLectureData }) => {
-  const router = useRouter();
-  const { name } = router.query;
-  const [backgroundImage, setBackgroundImage] = useState("");
-
   return (
-    <div 
-      className="bg-cover bg-center flex mx-auto min-h-screen flex-col items-center justify-between p-4 sm:p-6 md:p-8 lg:p-12 xl:p-24" 
-      style={{ backgroundImage: `url(${backgroundImage})` }}
-    >          
+    <AppShellBackground className="di-practice rl-practice">
       <RetellLectureShadowing retellData={retellData} />
-    </div>
+    </AppShellBackground>
   );
 };
 
-export async function getServerSideProps(context: { params: { name: string } }) {
-  const { params } = context;
-  const { name } = params;
-
+export async function getServerSideProps() {
   try {
   const retellData = loadAudioData();
 

@@ -1,43 +1,29 @@
 import { loadAudioData } from '../../lib/describe-image-shadowing';
-import { useRouter } from 'next/router';
-import { useState, useEffect } from 'react';
+import AppShellBackground from '../../components/ui/AppShellBackground';
 import DescribeImageShadowingComponent from '../../components/DescribeImageShadowingComponent';
+import type { DescribeImageType } from '../../lib/describe-image-template';
 
-export interface DescribeImageData {
+interface PracticeContent {
+  sentences: { number: number; text: string; voices: { ryan: string } }[];
+  fullText: string;
+}
+
+export interface DescribeImageData extends PracticeContent {
   id: string;
   name: string;
-  sentences: {
-    number: number;
-    text: string;
-    voices: {
-      brian: string;
-      joanna: string;
-      olivia: string;
-    };
-  }[];
-  fullText: string;
+  variants: Record<DescribeImageType, PracticeContent>;
   availableVoices: string[];
 }
 
 const DynamicDescribeImagePage = ({ describeImageData }: { describeImageData: DescribeImageData }) => {
-  const router = useRouter();
-  const { name } = router.query;
-  const [backgroundImage, setBackgroundImage] = useState("");
-
   return (
-    <div 
-      className="bg-cover bg-center flex mx-auto min-h-screen flex-col items-center justify-between p-4 sm:p-6 md:p-8 lg:p-12 xl:p-24" 
-      style={{ backgroundImage: `url(${backgroundImage})` }}
-    >          
+    <AppShellBackground className="di-practice">
       <DescribeImageShadowingComponent describeImageData={describeImageData} />
-    </div>
+    </AppShellBackground>
   );
 };
 
-export async function getServerSideProps(context: { params: { name: string } }) {
-  const { params } = context;
-  const { name } = params;
-
+export async function getServerSideProps() {
   try {
   const describeImageData = loadAudioData();
 
