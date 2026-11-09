@@ -1,16 +1,33 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Head from "next/head";
-import { ArrowLeft, ArrowRight, BookOpen, ChevronLeft, ChevronRight, Headphones, Info, Mic, Repeat } from "react-feather";
+import { ArrowLeft, ArrowRight, BookOpen, ChevronLeft, ChevronRight, Copy, Headphones, Info, Mic, Repeat } from "react-feather";
 import RetellParagraph from "./RetellParagraph";
 import RetellSentence from "./RetellSentence";
 import type { RetellLectureData } from "@/pages/retell-lecture/[name]";
 import Card from "./ui/Card";
 import Button from "./ui/Button";
+import { useStaffAccess } from "../hooks/useStaffAccess";
 
 export default function RetellLectureShadowing({ retellData }: { retellData: RetellLectureData }) {
   const [mode, setMode] = useState<"paragraph" | "sentence">("paragraph");
   const [count, setCount] = useState(0);
+  const [copyStatus, setCopyStatus] = useState("");
+  const isAdmin = useStaffAccess("admin");
+
+  const copyTemplate = async () => {
+    try {
+      const template = retellData.sentences
+        .map(sentence => sentence.text.trim())
+        .filter(Boolean)
+        .map(text => /[.!?]$/.test(text) ? text : `${text}.`)
+        .join(" ");
+      await navigator.clipboard.writeText(template);
+      setCopyStatus("Đã sao chép template.");
+    } catch {
+      setCopyStatus("Không thể sao chép. Vui lòng kiểm tra quyền truy cập clipboard.");
+    }
+  };
 
   return (
     <main className="di-main">
@@ -34,6 +51,7 @@ export default function RetellLectureShadowing({ retellData }: { retellData: Ret
             <div className="di-section-title"><span className="di-step">01</span><div><h2>Template Retell Lecture</h2><p>Nghe và ghi nhớ cùng giọng Ryan</p></div></div>
             <div className="di-opening"><span>CÂU MỞ ĐẦU</span><p>{retellData.sentences[0].text}</p></div>
             <div className="rl-template-summary"><BookOpen size={18} aria-hidden="true" /><p>{retellData.sentences.length} câu nối tiếp: giới thiệu chủ đề, triển khai các ý chính và kết luận.</p></div>
+            {isAdmin && <div className="rl-copy-template"><Button variant="secondary" onClick={copyTemplate}><Copy size={16} aria-hidden="true" /> Sao chép template</Button><p role="status">{copyStatus}</p></div>}
             <div className="rl-keywords"><span>CHỖ ĐIỀN THÔNG TIN</span><p>A · B · C · D · E · F · G · H</p><small>Thay các chữ cái bằng chủ đề và ý chính bạn nghe được trong bài giảng.</small></div>
           </Card>
           <Card className="di-guide">

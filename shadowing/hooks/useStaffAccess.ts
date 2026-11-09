@@ -2,7 +2,7 @@ import { useAuth } from '@clerk/nextjs';
 import { useEffect, useState } from 'react';
 
 /** Fail closed and bind the server-verified role to the current signed-in user. */
-export function useStaffAccess() {
+export function useStaffAccess(role: 'staff' | 'admin' = 'staff') {
   const { userId, isLoaded } = useAuth();
   const [allowedFor, setAllowedFor] = useState('');
   useEffect(() => {
@@ -18,7 +18,7 @@ export function useStaffAccess() {
       try {
         const response = await fetch('/api/access', { cache: 'no-store', signal: controller.signal });
         const data = response.ok ? await response.json() : null;
-        if (!disposed && !controller.signal.aborted) setAllowedFor(data?.staff === true ? userId! : '');
+        if (!disposed && !controller.signal.aborted) setAllowedFor(data?.[role] === true ? userId! : '');
       } catch {
         if (!disposed && !controller.signal.aborted) setAllowedFor('');
       }
@@ -26,6 +26,6 @@ export function useStaffAccess() {
     void refresh();
     window.addEventListener('focus', refresh);
     return () => { disposed = true; current?.abort(); window.removeEventListener('focus', refresh); };
-  }, [isLoaded, userId]);
+  }, [isLoaded, userId, role]);
   return !!(isLoaded && userId && allowedFor === userId);
 }

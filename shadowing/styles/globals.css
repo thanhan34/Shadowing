@@ -77,6 +77,9 @@
 /* Describe Image practice extends shared tokens; all player overrides are scoped. */
 .rl-template-summary { display: flex; gap: 12px; margin-top: 24px; color: var(--text-glass-secondary); font-size: 13px; line-height: 1.8; }
 .rl-template-summary svg { flex-shrink: 0; color: var(--accent-hover); margin-top: 4px; }
+.rl-copy-template { margin-top: 16px; }
+.rl-copy-template button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; }
+.rl-copy-template p:not(:empty) { margin-top: 8px; color: var(--text-glass-secondary); font-size: 12px; line-height: 1.6; }
 .rl-keywords { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--glass-border); }
 .rl-keywords > span { font-size: 10px; letter-spacing: .12em; color: var(--text-glass-muted); }
 .rl-keywords p { margin-top: 8px; color: var(--accent-hover); font-size: 16px; line-height: 1.8; }
@@ -148,6 +151,10 @@
 .di-player .retell-transcript { display: grid; gap: 12px; counter-reset: di-sentence; }
 .di-player .retell-transcript > div { margin: 0; padding: 16px; border: 1px solid var(--glass-border); background: var(--glass-bg); background-image: none; border-radius: 16px; box-shadow: none; transform: none; counter-increment: di-sentence; }
 .di-player .retell-transcript > div[data-active="true"] { background: var(--di-accent-soft); border-color: rgba(252, 93, 1, .35); box-shadow: inset 3px 0 0 var(--accent); }
+.di-practice .retell-transcript { gap: 0; overflow: hidden; border: 1px solid var(--glass-border); border-radius: 16px; background: var(--glass-bg); }
+.di-practice .retell-transcript > div { padding: 8px 16px; border: 0; border-radius: 0; background: transparent; }
+.di-practice .retell-transcript.space-y-4 > div + div { margin-top: 0; border-top: 1px solid var(--glass-border); }
+.di-practice .retell-transcript > div[data-active="true"] { background: var(--di-accent-soft); }
 .di-player .retell-transcript > div > div { gap: 12px; }
 .di-player .retell-transcript p { min-width: 0; font-size: 15px; line-height: 1.9; font-weight: 400; color: var(--text-glass-primary); overflow-wrap: anywhere; }
 .di-player .retell-transcript p::before { content: counter(di-sentence, decimal-leading-zero); display: block; color: var(--text-glass-muted); font-size: 10px; line-height: 1.5; margin-bottom: 4px; letter-spacing: .08em; }
