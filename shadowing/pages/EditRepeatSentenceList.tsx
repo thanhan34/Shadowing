@@ -27,6 +27,7 @@ import Input from "../components/ui/Input";
 import Tabs from "../components/ui/Tabs";
 import TaskAdminTabs from "../components/ui/TaskAdminTabs";
 import RepeatSentenceResourceEditor from "../components/RepeatSentenceResourceEditor";
+import RepeatSentenceTranslationImport from "../components/RepeatSentenceTranslationImport";
 
 type MessageType = "success" | "error" | "info";
 
@@ -136,8 +137,8 @@ const EditRepeatSentenceList: React.FC = () => {
         .map((docSnapshot) => {
           const data = docSnapshot.data() as Omit<RepeatSentenceItem, "id">;
           return {
-            id: docSnapshot.id,
             ...data,
+            id: docSnapshot.id,
           };
         })
         .sort(sortRepeatSentences);
@@ -399,6 +400,8 @@ const EditRepeatSentenceList: React.FC = () => {
           </div>
         </Card>
 
+        <RepeatSentenceTranslationImport items={items} loading={isLoading} onSaved={updates => setItems(prev => prev.map(item => updates.has(item.id) ? { ...item, vietnameseTranslation: updates.get(item.id) } : item))} />
+
         <Card className="space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="text-base font-semibold text-white sm:text-lg">Bulk Audio Upload — Ryan</h2>
@@ -513,6 +516,7 @@ const EditRepeatSentenceList: React.FC = () => {
                         <p className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/90 whitespace-pre-wrap break-words">
                           {renderChunkedText(draftText)}
                         </p>
+                        {item.vietnameseTranslation && <p lang="vi" className="mt-2 text-sm text-textGlass-secondary">Nghĩa tiếng Việt: {item.vietnameseTranslation}</p>}
                       </div>
 
                       <div className="flex flex-wrap gap-3 text-xs text-white/65">

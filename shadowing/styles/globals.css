@@ -618,6 +618,7 @@
 .rs-translation { border-top: 1px solid var(--glass-border); }
 .rs-translation summary { padding-left: 0; padding-right: 0; justify-content: flex-start; }
 .rs-translation p { overflow-wrap: anywhere; }
+.rs-library .rs-inline-translation { margin: 8px 0 16px; padding-left: 12px; border-left: 2px solid var(--accent); color: var(--text-glass-secondary); line-height: 1.75; overflow-wrap: anywhere; }
 .rs-practice-actions { --rs-control-bg: rgba(7, 9, 16, .35); --rs-control-border: rgba(255, 255, 255, .1); display: grid; gap: 12px; padding: 16px 0; border-top: 1px solid var(--glass-border); }
 .rs-audio-block { display: grid; align-content: center; gap: 12px; min-width: 0; padding: 16px; border: 1px solid var(--rs-control-border); border-radius: var(--radius-button); background: var(--rs-control-bg); }
 .rs-audio-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }

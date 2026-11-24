@@ -77,6 +77,7 @@ const RepeatSentence: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [largeText, setLargeText] = useState(false);
+  const [showVietnamese, setShowVietnamese] = useState(false);
 
   const fetchRepeatSentences = useCallback(async () => {
     setIsLoading(true);
@@ -193,7 +194,7 @@ const RepeatSentence: React.FC = () => {
             <summary><span className="flex items-center gap-2"><Sliders size={16} aria-hidden="true" />Cài đặt hiển thị</span><span className="rs-chevron" aria-hidden="true">⌄</span></summary>
             <div className="space-y-3 border-t border-white/15 p-4">
               <label className="flex min-h-11 cursor-pointer items-center gap-3 text-sm"><input type="checkbox" checked={largeText} onChange={e => setLargeText(e.target.checked)} className="h-5 w-5 accent-[#fc5d01]" />Chữ lớn để luyện đọc</label>
-              <p className="text-sm leading-6 text-white/80">{stats.withChunking} câu có chia cụm · {stats.withoutChunking} câu không chia cụm. Mở “Nghĩa tiếng Việt” ở từng câu khi cần gợi ý.</p>
+              <p className="text-sm leading-6 text-white/80">{stats.withChunking} câu có chia cụm · {stats.withoutChunking} câu không chia cụm.</p>
             </div>
           </details>
         </Card>
@@ -202,6 +203,7 @@ const RepeatSentence: React.FC = () => {
         <section aria-labelledby="rs-results-heading" aria-busy={isLoading}>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2 px-1">
             <h2 id="rs-results-heading" className="text-lg font-semibold">Danh sách câu <span className="ml-2 text-sm font-normal text-white/80">/ {chunkingFilter === 'with' ? 'Có chia cụm' : 'Không chia cụm'}</span></h2>
+            <Button role="switch" aria-checked={showVietnamese} variant={showVietnamese ? 'primary' : 'secondary'} className="min-h-[44px] text-sm" onClick={() => setShowVietnamese(value => !value)}><span aria-hidden="true">{showVietnamese ? '✓ ' : ''}</span>Hiện nghĩa tiếng Việt</Button>
             <p role="status" className="text-sm text-white/80">{isLoading ? 'Đang tải…' : errorMessage ? 'Tải dữ liệu thất bại' : stats.filtered + ' kết quả'}</p>
           </div>
           {isLoading ? (
@@ -216,9 +218,10 @@ const RepeatSentence: React.FC = () => {
                 <article key={sentence.id} className="rs-sentence">
                   <div className="rs-sentence-meta"><span className="rs-sentence-number">{String(index + 1).padStart(2, '0')}</span><span className="rs-badge">{sentence.ID || 'Repeat Sentence'}</span><span className="ml-auto text-xs text-white/80">{hasChunking(sentence.text) ? 'Có chia cụm' : 'Câu liền mạch'}</span></div>
                   <p className={largeText ? 'rs-sentence-text rs-text-large' : 'rs-sentence-text'} lang="en">{renderChunkedText(sentence.text)}</p>
+                  {showVietnamese && <p lang="vi" className="rs-inline-translation">{sentence.vietnameseTranslation?.trim() || 'Câu này chưa có bản dịch tiếng Việt.'}</p>}
                   <div className="rs-sentence-footer"><span>{sentence.text.replace(/\//g, ' ').trim().split(/\s+/).filter(Boolean).length} từ</span><span>Đọc rõ · Nhớ ý · Nói trọn câu</span></div>
                   <RepeatSentenceActions key={`${sentence.id}-${sentence.audio?.Ryan ?? ''}`} sentenceId={sentence.ID} audio={sentence.audio?.Ryan} practiceUrl={sentence.practiceUrl} />
-                  {sentence.vietnameseTranslation && <details className="rs-translation"><summary>Nghĩa tiếng Việt <span className="rs-chevron" aria-hidden="true">⌄</span></summary><p lang="vi" className="pb-4 text-base leading-7 text-white/80">{sentence.vietnameseTranslation}</p></details>}
+                  {!showVietnamese && sentence.vietnameseTranslation?.trim() && <details className="rs-translation"><summary>Nghĩa tiếng Việt <span className="rs-chevron" aria-hidden="true">⌄</span></summary><p lang="vi" className="pb-4 text-base leading-7 text-white/80">{sentence.vietnameseTranslation}</p></details>}
                 </article>
               ))}
             </div>

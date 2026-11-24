@@ -29,12 +29,18 @@ function load(file) {
 }
 async function main() {
   const Page = load(path.join(root, 'pages/RepeatSentence.tsx')).default;
-  const render = (query = '', filter = 'with', loading = false, error = '', large = false) => {
+  const render = (query = '', filter = 'with', loading = false, error = '', large = false, bilingual = false) => {
     cursor = 0;
-    states = [samples, query, filter, loading, error, large];
+    states = [samples, query, filter, loading, error, large, bilingual];
     return renderToStaticMarkup(React.createElement(Page));
   };
   const html = render();
+  assert.ok(!html.includes('rs-inline-translation'));
+  const bilingual = render('', 'with', false, '', false, true);
+  assert.ok(bilingual.includes('aria-checked="true"'));
+  assert.match(bilingual, /<\/p><p lang="vi" class="rs-inline-translation">Sinh viên nên kiểm tra/);
+  assert.ok(!bilingual.includes('<details class="rs-translation"'));
+  assert.ok(render('', 'without', false, '', false, true).includes('Câu này chưa có bản dịch tiếng Việt.'));
   assert.ok(html.includes('Students should'));
   assert.ok(html.includes('rs-rhythm-art'));
   assert.ok(html.includes('rs-library-stats'));
