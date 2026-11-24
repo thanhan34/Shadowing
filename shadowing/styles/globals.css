@@ -2,6 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
+.vocabulary .ui-card { padding: clamp(16px, 4vw, 32px); }
+.vocabulary :is(button, select, input, .ui-button-primary) { min-height: 44px; }
+.vocabulary [aria-pressed="true"] { border-color: var(--accent); }
+.vocabulary select { color-scheme: dark; }
+.vocabulary select option { background: var(--bg-deep-2); }
+.vocabulary-photo { width: 100%; max-height: 240px; object-fit: contain; border-radius: var(--radius-button); }
+.vocab-game-prompt, .vocab-game-feedback { padding: clamp(16px, 3vw, 24px); border: 1px solid var(--glass-border); border-radius: var(--radius-card); background: linear-gradient(115deg, rgba(252,93,1,.09), transparent), var(--glass-bg); overflow-wrap: anywhere; }
+.vocab-game-face { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; overflow-wrap: anywhere; }
+.vocab-game-art { display: block; width: min(100%, 200px); height: 120px; object-fit: contain; color: var(--accent-hover); }
+.vocab-game-feedback { border-left: 4px solid var(--accent); }
+.vocab-game-feedback > * + * { margin-top: 8px; }
+.vocab-xp { border-radius: 999px; background: var(--glass-bg); color: var(--accent-hover); padding: 4px 12px; }
+.vocabulary .vocab-memory-tile { min-height: 112px; min-width: 0; overflow-wrap: anywhere; }
+.vocabulary .vocab-memory-tile[data-open="true"] { opacity: 1; border-color: var(--accent-hover); }
+.vocab-memory-tile .vocab-game-face { flex-direction: column; justify-content: center; gap: 4px; }
+.vocab-memory-tile .vocab-game-art { width: 100%; height: 56px; }
+.vocab-definition { padding: 16px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-card); }
+.vocabulary dialog.vocab-reader { --ink: #303538; --muted: #60686c; --reader-accent-ink: color-mix(in srgb, var(--accent) 70%, black); margin: auto; width: min(96vw, 1280px); height: min(90dvh, 800px); max-height: 96dvh; padding: clamp(16px, 3vw, 40px); border: 0; border-radius: var(--radius-card); color-scheme: light; background: white; color: var(--ink); box-shadow: var(--glass-shadow); line-height: 1.65; overscroll-behavior: contain; }
+.vocab-reader[open] { display: flex; flex-direction: column; }
+.vocab-reader::backdrop { background: rgba(7,9,16,.78); }
+.vocab-reader header { position: relative; border-bottom: 1px solid #ddd; padding-bottom: 16px; }
+.vocab-reader h2 { padding-right: 48px; color: var(--accent); font-size: clamp(28px, 4vw, 52px); font-weight: 600; overflow-wrap: anywhere; }
+.vocab-reader-close { position: absolute; right: 0; top: 0; width: 44px; height: 44px; color: var(--muted); font-size: 30px; line-height: 1; }
+.vocab-reader-ipa { display: flex; flex-wrap: wrap; gap: 4px 32px; align-items: center; }
+.vocab-reader a { display: inline-flex; align-items: center; min-height: 44px; color: var(--reader-accent-ink); font-size: 14px; text-decoration: underline; }
+.vocab-reader :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.vocab-reader-columns { display: grid; gap: 24px; padding-top: 24px; }
+.vocab-reader-columns section { min-width: 0; }
+.vocab-reader-columns h3 { color: var(--muted); margin-bottom: 16px; font-size: 20px; font-weight: 600; }
+.vocab-reader-columns small, .vocab-translation { color: var(--muted); }
+.vocab-reader-columns ol { list-style: decimal; padding-left: 32px; margin: 16px 0; }
+.vocab-reader-columns mark { color: var(--reader-accent-ink); background: transparent; font-weight: 600; }
+.vocab-reader figure, .vocab-reader-form { padding: 16px; border-radius: 12px; background: #f5f6f7; }
+.vocab-reader figure { text-align: center; color: var(--accent); }
+.vocab-reader figcaption { color: var(--muted); font-size: 14px; }
+@media (min-width: 768px) { .vocab-reader-columns { grid-template-columns: repeat(2,minmax(0,1fr)); min-height: 0; } .vocab-reader-columns section { overflow-y: auto; padding: 0 8px 8px 0; } }
+
 /* Describe Image library shares the practice page's dark glass visual language. */
 .di-library { --di-library-surface: rgba(16, 23, 36, .82); --di-library-accent-soft: rgba(252, 93, 1, .1); color: var(--text-glass-primary); }
 .di-library-main { max-width: 1200px; margin: auto; padding: 112px 16px 48px; }

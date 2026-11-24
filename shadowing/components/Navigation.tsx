@@ -15,6 +15,7 @@ export const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
     { label: "Describe Image", href: "/describe-image-shadowing", icon: Image, description: "Luyện mô tả hình ảnh" },
   ] },
   { label: "Luyện viết & kiến thức", items: [
+    { label: "Từ vựng", href: "/vocabulary", icon: BookOpen, description: "Học từ theo chủ đề và ôn lại qua trò chơi" },
     { label: "Write From Dictation", href: "/writefromdictation", icon: Edit3, description: "Nghe và viết lại chính xác" },
     { label: "Essay Library", href: "/essays", icon: BookOpen, description: "Thư viện bài luận tham khảo" },
     { label: "Ngữ pháp", href: "/grammar", icon: BookOpen, description: "Củng cố kiến thức nền tảng" },

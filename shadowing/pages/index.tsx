@@ -55,7 +55,7 @@ const Home: React.FC = () => {
         </section>
 
         <section id="home-practice" aria-labelledby="home-practice-title" className="home-practice-section">
-          <div className="home-section-heading"><div><p className="home-eyebrow">YOUR PRACTICE SPACE</p><h2 id="home-practice-title">Hôm nay, bạn muốn luyện gì?</h2><p>Chọn một kỹ năng. Bắt đầu từ một bài luyện.</p></div><span className="home-badge">8 công cụ luyện tập</span></div>
+          <div className="home-section-heading"><div><p className="home-eyebrow">YOUR PRACTICE SPACE</p><h2 id="home-practice-title">Hôm nay, bạn muốn luyện gì?</h2><p>Chọn một kỹ năng. Bắt đầu từ một bài luyện.</p></div><span className="home-badge">{HOME_PRACTICE_ITEMS.length} công cụ luyện tập</span></div>
           <div className="home-practice-grid">{HOME_PRACTICE_ITEMS.map(item => <Link key={item.href} href={item.href} className={`home-practice-card accent-ring ${item.featured ? 'home-practice-featured' : ''}`}>
             <div className="home-card-top"><span className="home-card-icon"><item.icon size={22} aria-hidden="true" /></span><span className="home-card-category">{item.category}</span></div>
             <h3>{item.label}</h3><p>{item.description}</p><span className="home-card-link">Mở bài luyện <ArrowRight size={16} aria-hidden="true" /></span>

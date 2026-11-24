@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import { score } from '../lib/vocabulary.ts';
+
+const now = Date.now(), day = 86400000;
+const seen = score(undefined, 'flash', true, now);
+assert.equal(seen.xp, 0);
+const match = score(seen, 'match', true, now);
+assert.equal(match.recalls, 0);
+assert.equal(score(match, 'memory', true, now).xp, match.xp);
+const spelled = score(match, 'spell', true, now);
+assert.ok(spelled.xp > match.xp);
+const recalled = score(spelled, 'recall', true, now);
+assert.equal(recalled.due, now + day);
+assert.deepEqual(score(recalled, 'recall', true, now), recalled);
+const reviewed = score(JSON.parse(JSON.stringify(recalled)), 'recall', true, now + day);
+assert.equal(reviewed.due, now + 4 * day);
+const wrong = score(reviewed, 'recall', false, now + day);
+assert.equal(wrong.recalls, 0);
+assert.equal(wrong.due, now + day);
+assert.equal(wrong.xp, reviewed.xp);
+console.log('Vocabulary scoring, saved state round trip, review intervals and retry passed.');

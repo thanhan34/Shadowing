@@ -19,6 +19,7 @@ export const ADMIN_NAV_GROUPS = [
     { href: '/EditRepeatSentenceList', label: 'Chỉnh sửa Repeat Sentence' },
   ] },
   { label: 'Nội dung & công cụ', items: [
+    { href: '/admin/vocabulary', label: 'Quản lý từ vựng' },
     { href: '/essays-admin', label: 'Quản lý Essay' },
     { href: '/manage-questions', label: 'Quản lý câu hỏi' },
     { href: '/scraper', label: 'Công cụ lấy nội dung' },

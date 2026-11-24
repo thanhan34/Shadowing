@@ -27,8 +27,8 @@ async function main() {
   const Home = load(path.join(root, 'pages/index.tsx')).default;
   const html = renderToStaticMarkup(React.createElement(Home));
   const { HOME_PRACTICE_ITEMS, HOME_COMMUNITY_LINKS } = load(path.join(root, 'lib/homeNavigation.ts'));
-  assert.equal(HOME_PRACTICE_ITEMS.length, 8);
-  assert.equal(new Set(HOME_PRACTICE_ITEMS.map(item => item.href)).size, 8);
+  assert.ok(HOME_PRACTICE_ITEMS.some(item => item.href === '/vocabulary'));
+  assert.equal(new Set(HOME_PRACTICE_ITEMS.map(item => item.href)).size, 9);
   for (const item of HOME_PRACTICE_ITEMS) assert.ok(html.includes(`href="${item.href}"`));
   assert.equal(HOME_COMMUNITY_LINKS.length, 3);
   assert.equal((html.match(/rel="noopener noreferrer"/g) || []).length, 3);
@@ -46,7 +46,7 @@ async function main() {
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `Overflow at ${width}`);
       assert.equal(await page.$eval('.home-photo-background', el => getComputedStyle(el).position), 'fixed');
       assert.equal(await page.$eval('#home-title', el => el.getBoundingClientRect().top > 88), true);
-      assert.equal(await page.$$eval('.home-practice-card', elements => elements.length), 8);
+      assert.equal(await page.$$eval('.home-practice-card', elements => elements.length), HOME_PRACTICE_ITEMS.length);
       assert.equal(await page.$$eval('.home-cta, .home-practice-card, .home-community-link, .home-back-top', elements => elements.every(el => el.getBoundingClientRect().height >= 44)), true);
       await page.focus('.home-practice-card');
       assert.notEqual(await page.$eval('.home-practice-card', el => getComputedStyle(el).boxShadow), 'none');
@@ -58,6 +58,6 @@ async function main() {
     await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
     assert.equal(await page.$eval('.home-practice-card', el => getComputedStyle(el).transitionDuration), '0s');
   } finally { await browser.close(); }
-  console.log('Home UI passed: eight practice routes, community links, semantic headings, retained photo, anchor navigation, focus, 44px targets, reduced motion and responsive layouts at 320/390/768/1024/1440/1920px.');
+  console.log('Home UI passed: practice routes, community links, headings, anchor navigation, focus, tap targets and responsive layouts.');
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

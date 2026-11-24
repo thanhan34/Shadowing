@@ -20,14 +20,15 @@ mod.require = name => {
 };
 mod._compile(ts.transpileModule(fs.readFileSync(filename, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true } }).outputText, filename);
 const { default: Navigation, NavigationGroups, isNavigationActive, NAV_GROUPS } = mod.exports;
-assert.equal(NAV_GROUPS.flatMap(group => group.items).length, 8);
+assert.equal(NAV_GROUPS.flatMap(group => group.items).length, 9);
+assert.ok(NAV_GROUPS.some(group => group.items.some(item => item.href === '/vocabulary')));
 assert.ok(isNavigationActive('/shadowing/[id]', '/shadow'));
 assert.ok(isNavigationActive('/readaloud/[id]', '/readaloud'));
 assert.ok(!isNavigationActive('/shadowingsource', '/shadow'));
 assert.ok(!isNavigationActive('/grammar', '/'));
 const groups = renderToStaticMarkup(React.createElement(NavigationGroups, { pathname: '/shadowing/[id]', onNavigate() {} }));
 assert.equal((groups.match(/aria-current="page"/g) || []).length, 1);
-assert.equal((groups.match(/href=/g) || []).length, 8);
+assert.equal((groups.match(/href=/g) || []).length, 9);
 async function main() {
   const config = (await import(require('node:url').pathToFileURL(path.join(root, 'tailwind.config.js')))).default;
   const css = await require('postcss')([require('tailwindcss')(config)]).process(fs.readFileSync(path.join(root, 'styles/globals.css'), 'utf8'), { from: path.join(root, 'styles/globals.css') });

@@ -9,6 +9,7 @@ export const HOME_PRACTICE_ITEMS = [
   { label: 'Describe Image', href: '/describe-image-shadowing', icon: Image, category: 'QUAN SÁT & NÓI', description: 'Luyện cách tổ chức ý và mô tả thông tin trong hình ảnh.' },
   { label: 'Essay Library', href: '/essays', icon: BookOpen, category: 'ĐỌC & VIẾT', description: 'Khám phá bài luận tham khảo để học cách triển khai ý tưởng.' },
   { label: 'Ngữ pháp', href: '/grammar', icon: BookOpen, category: 'KIẾN THỨC NỀN', description: 'Củng cố cấu trúc câu và kiến thức nền tảng cho bài thi.' },
+  { label: 'Từ vựng', href: '/vocabulary', icon: BookOpen, category: 'KIẾN THỨC NỀN', description: 'Khám phá bộ từ, luyện chính tả và tự kiểm tra trí nhớ.' },
 ];
 
 export const HOME_COMMUNITY_LINKS = [
